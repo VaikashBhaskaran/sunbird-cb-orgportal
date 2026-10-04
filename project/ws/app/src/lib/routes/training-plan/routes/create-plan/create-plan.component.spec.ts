@@ -6,7 +6,10 @@ describe('CreatePlanComponent', () => {
     let component: CreatePlanComponent
 
     const route: Partial<ActivatedRoute> = {}
-    const tpdsSvc: Partial<TrainingPlanDataSharingService> = {}
+    const tpdsSvc: Partial<TrainingPlanDataSharingService> = {
+        // ngOnInit pushes each preselected content id onto the plan.
+        addContentToPlan: jest.fn(),
+    }
 
     beforeAll(() => {
         component = new CreatePlanComponent(
@@ -40,13 +43,22 @@ describe('CreatePlanComponent', () => {
         const route: any = { snapshot: { data: { contentData: mockContentData } } }
         const tpdsSvc: any = {
             trainingPlanStepperData: { contentList: [] },
-            filterToggle: { subscribe: jest.fn() }
+            filterToggle: { subscribe: jest.fn() },
+            // ngOnInit pushes each preselected content id onto the plan and mirrors it into
+            // the selection.
+            addContentToPlan: jest.fn((identifier: string, mandatory = false) => {
+                tpdsSvc.trainingPlanStepperData.contentList.push({ identifier, mandatory: !!mandatory })
+            }),
+            addSelectedContent: jest.fn()
         }
         const comp = new CreatePlanComponent(route, tpdsSvc)
         comp.ngOnInit()
         expect(tpdsSvc.trainingPlanTitle).toBe('Test Plan')
         expect(tpdsSvc.trainingPlanAssigneeData.data).toEqual(mockContentData.userDetails)
-        expect(tpdsSvc.trainingPlanContentData.data.content.length).toBe(2)
+        // ngOnInit no longer assigns trainingPlanContentData (that line is commented out in
+        // the component); it feeds each entry through addContentToPlan instead.
+        expect(tpdsSvc.addContentToPlan).toHaveBeenCalledTimes(2)
+        expect(tpdsSvc.trainingPlanStepperData.contentList.length).toBe(2)
         expect(tpdsSvc.trainingPlanStepperData.contentType).toBe('Course')
         expect(tpdsSvc.trainingPlanStepperData.isApar).toBe(true)
     })

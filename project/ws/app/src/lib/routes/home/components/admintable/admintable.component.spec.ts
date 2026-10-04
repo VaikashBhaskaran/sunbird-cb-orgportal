@@ -219,6 +219,11 @@ describe('AdmintableComponent', () => {
                 }
             }))
 
+            // usersData1 has no initialiser, and getUsers reads .length off it whenever the
+            // response is empty, so it has to be seeded or the subscriber throws before
+            // reaching the fallback. Recorded in product-bugs.md.
+            component.usersData1 = []
+
             const getAllUsersSpy = jest.spyOn(component, 'getAllUsers')
             component.getUsers('MDO_ADMIN')
 

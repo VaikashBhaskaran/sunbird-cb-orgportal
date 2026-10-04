@@ -1,7 +1,7 @@
 import { CategoryDropDownComponent } from './category-drop-down.component'
 import { MatDialog } from '@angular/material/dialog'
 import { TrainingPlanDataSharingService } from '../../services/training-plan-data-share.service'
-import { of } from 'rxjs'
+import { BehaviorSubject, Subject, of } from 'rxjs'
 
 // Create a mock for MatDialog
 const mockMatDialog = {
@@ -17,12 +17,20 @@ describe('CategoryDropDownComponent', () => {
     beforeEach(() => {
         // Mock instance of the service
         // mockTrainingPlanDataSharingService = {
-        //     trainingPlanCategoryChangeEvent: of({ event: 'Course' }), // Mock an event emission
-        //     trainingPlanStepperData: {},
-        //     trainingPlanContentData: { data: [] },
-        //     trainingPlanAssigneeData: { data: [] },
-        //     moderatedCourseSelectStatus: new Subject(), // Use Subject here to simulate the real behavior
-        // }
+        // trainingPlanCategoryChangeEvent is a Subject on the real service, and the test
+        // below subscribes to it after the component has, so seed it with a value.
+        const categoryChange = new BehaviorSubject<any>({ event: 'Course' })
+        mockTrainingPlanDataSharingService = {
+            trainingPlanCategoryChangeEvent: categoryChange,
+            // showDialogBox reads contentList.length off this without guarding; the dialog
+            // is what it opens when the plan already holds content.
+            trainingPlanStepperData: { contentList: ['content-1'] },
+            trainingPlanContentData: { data: [] },
+            trainingPlanAssigneeData: { data: [] },
+            // A Subject, so the component's own emissions come back through it.
+            moderatedCourseSelectStatus: new Subject(),
+            // A partial double: the component only touches the members above.
+        } as any
 
         // Create the component instance
         component = new CategoryDropDownComponent(mockMatDialog as unknown as MatDialog, mockTrainingPlanDataSharingService)
@@ -85,7 +93,9 @@ describe('CategoryDropDownComponent', () => {
     })
 
     describe('showDialogBox', () => {
-        it('should open the dialog box for the given event', () => {
+        // The two branches are exclusive: with content on the plan the change is
+        // confirmed in a dialog, without it the category change goes straight through.
+        it('should open the dialog box when the plan already holds content', () => {
             const openSpy = jest.spyOn(mockMatDialog, 'open')
             const emitSpy = jest.spyOn(component.handleCategorySelection, 'emit')
 
@@ -100,9 +110,20 @@ describe('CategoryDropDownComponent', () => {
                 }),
                 autoFocus: false,
             })
+            expect(emitSpy).not.toHaveBeenCalled()
+        })
 
-            // Check if the event was emitted if contentList is empty
+        it('should emit the category straight away when the plan is empty', () => {
+            mockTrainingPlanDataSharingService.trainingPlanStepperData.contentList = []
+            // mockMatDialog is shared across tests, so its call history has to be cleared.
+            const openSpy = jest.spyOn(mockMatDialog, 'open')
+            openSpy.mockClear()
+            const emitSpy = jest.spyOn(component.handleCategorySelection, 'emit')
+
+            component.showDialogBox('Course')
+
             expect(emitSpy).toHaveBeenCalledWith('Course')
+            expect(openSpy).not.toHaveBeenCalled()
         })
 
         it('should call openDialoagBox when contentList is not empty', () => {

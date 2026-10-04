@@ -68,8 +68,9 @@ describe('SocialComponent', () => {
         })
 
         it('should handle screen size changes', () => {
-            const mockIsLtMedium$ = of(true);
-            (mockValueService.isLtMedium$ as any) = mockIsLtMedium$
+            // The component captures isLtMedium$ in a field initializer at construction, so
+            // swapping it on the service afterwards has no effect - set it on the instance.
+            (component as any).isLtMedium$ = of(true)
 
             component.ngOnInit()
 
@@ -80,7 +81,11 @@ describe('SocialComponent', () => {
 
     describe('Search Results Fetching', () => {
         it('should fetch search results successfully', () => {
+            // ngOnInit already triggers a fetch via the query-param subscription, and
+            // getResults appends to searchResults.result rather than replacing it, so reset
+            // the accumulator to measure a single call.
             component.ngOnInit()
+            component.searchResults.result = []
             component.getResults()
 
             expect(mockSearchService.fetchSocialSearchUsers).toHaveBeenCalled()

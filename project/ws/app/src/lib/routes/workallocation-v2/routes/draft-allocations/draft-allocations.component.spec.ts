@@ -14,7 +14,7 @@ jest.mock('../../../../head/_services/telemetry.event.model')
 
 describe('DraftAllocationsComponent', () => {
     let component: DraftAllocationsComponent
-    let mockActivatedRoute
+    let mockActivatedRoute: any
     let mockRouter: any
     let mockUploadFileService: any
     let mockEventService: any
@@ -27,7 +27,13 @@ describe('DraftAllocationsComponent', () => {
         mockUploadFileService = { getDraftPDF: jest.fn() }
         mockEventService = { raiseInteractTelemetry: jest.fn() }
         mockDialog = { open: jest.fn() }
-        mockAllocationService = { getAllocatedUsers: jest.fn() }
+        // The constructor calls getAllocatedUsers straight away, so this has to emit a
+        // usable response or the subscriber throws while the component is being built.
+        mockAllocationService = {
+            getAllocatedUsers: jest.fn().mockReturnValue(
+                of({ result: { data: { name: 'Work Order', users: [] } } })
+            ),
+        }
 
         component = new DraftAllocationsComponent(
             mockActivatedRoute as any,
@@ -44,9 +50,20 @@ describe('DraftAllocationsComponent', () => {
     })
 
     it('should call getAllocatedUsers when workorderID is available in params', () => {
-        const spy = jest.spyOn(component, 'getAllocatedUsers')
-        component.ngOnInit()
+        // ngOnInit is empty - the params subscription that triggers the fetch is set up in
+        // the constructor, so the spy has to be on the prototype and a fresh instance built.
+        const spy = jest.spyOn(DraftAllocationsComponent.prototype, 'getAllocatedUsers')
+        const fresh = new DraftAllocationsComponent(
+            mockActivatedRoute as any,
+            mockRouter as any,
+            mockUploadFileService,
+            mockEventService,
+            mockDialog,
+            mockAllocationService,
+        )
+        expect(fresh.workorderID).toBe('123')
         expect(spy).toHaveBeenCalledWith('123')
+        spy.mockRestore()
     })
 
     it('should call printDraft and open the file URL when PDF is received', () => {
@@ -71,7 +88,11 @@ describe('DraftAllocationsComponent', () => {
         const dialogData = { data: 'workorderData' }
         component.workorderData = dialogData
         component.publishWorkOrder()
-        expect(mockDialog.open).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ data: dialogData }))
+        // publishWorkOrder wraps the work order under its own `data` key in the config.
+        expect(mockDialog.open).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({ data: { data: dialogData } })
+        )
         expect(mockEventService.raiseInteractTelemetry).toHaveBeenCalled()
     })
 

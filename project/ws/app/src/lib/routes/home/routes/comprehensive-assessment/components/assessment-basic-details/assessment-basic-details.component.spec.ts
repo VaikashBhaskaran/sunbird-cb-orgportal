@@ -70,6 +70,7 @@ describe('AssessmentBasicDetailsComponent', () => {
     component = new AssessmentBasicDetailsComponent(
       dialog as MatDialog,
       new DatePipe('en-IN'),
+      // The component no longer injects ComprehensiveAssessmentService.
     )
     component.assessmentDetails = form()
     component.userProfile = userProfile
@@ -429,4 +430,8 @@ describe('AssessmentBasicDetailsComponent', () => {
       expect(component.showValidationMsg('notAField', 'required')).toBe(false)
     })
   })
+
+  // The getPublicUrl tests that used to live here covered a method the component no
+  // longer has, along with its ComprehensiveAssessmentService dependency. The same helper
+  // still exists on ViewerUtilService and the events service, which have their own specs.
 })

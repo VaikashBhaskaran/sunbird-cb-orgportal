@@ -113,13 +113,15 @@ describe('HomeResolve', () => {
     }
     const stateMock = {} as any
 
-    const expectedResponse = { error: { message: 'error' }, data: null }
-    needApprServiceMock.fetchProfileDeatils.mockReturnValue(throwError(() => new Error('error')))
+    // catchError passes the thrown value straight through as `error`, so the resolved
+    // shape carries the Error itself rather than a plain object.
+    const thrown = new Error('error')
+    needApprServiceMock.fetchProfileDeatils.mockReturnValue(throwError(() => thrown))
 
     // Act
     homeResolve.resolve(routeMock as any, stateMock).subscribe((response) => {
       // Assert
-      expect(response).toEqual(expectedResponse)
+      expect(response).toEqual({ error: thrown, data: null })
       done()
     })
   })

@@ -45,6 +45,9 @@ describe('BudgetschemepopupComponent', () => {
 
   it('should call dialogRef.close when addsheme is called with form data', () => {
     const form = { value: { schemename: 'New Scheme', budgetutilized: 300000 } }
+    // The dialog data seeds formInputData, which switches addsheme to the edit branch.
+    // This test is the add branch, where the form's own value is what gets closed with.
+    component.formInputData = null
     component.addsheme(form)
     expect(dialogRefMock.close).toHaveBeenCalledWith({ data: form.value })
   })

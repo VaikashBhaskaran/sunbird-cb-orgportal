@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 
+import { NO_ERRORS_SCHEMA } from '@angular/core'
+import { commonTestingProviders, stubPipes } from '@test/helpers/testing-providers'
 import { UploadLogoDialogComponent } from './upload-logo-dialog.component'
 
 describe('UploadLogoDialogComponent', () => {
@@ -8,7 +10,10 @@ describe('UploadLogoDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [UploadLogoDialogComponent]
+      declarations: [UploadLogoDialogComponent, ...stubPipes()],
+      providers: [...commonTestingProviders()],
+      // Shallow smoke test: child components in the template are not declared here.
+      schemas: [NO_ERRORS_SCHEMA]
     })
       .compileComponents()
   })

@@ -50,7 +50,9 @@ describe('MaterialDetailsComponent', () => {
 
     eventSvcMock = {
       createContent: jest.fn(),
-      uploadContent: jest.fn()
+      uploadContent: jest.fn(),
+      // Used to branch the material form; false keeps the default (non-BharatKalp) path.
+      isBharatKalpCategory: jest.fn().mockReturnValue(false)
     }
 
     loaderServiceMock = {
@@ -131,11 +133,12 @@ describe('MaterialDetailsComponent', () => {
       // Check if formBuilder.group was called
       expect(formBuilderMock.group).toHaveBeenCalled()
 
-      // Manually trigger value change to test subscription
-      const valueChangesSpy = jest.spyOn(component.eventForm.controls.title.valueChanges, 'subscribe')
-      component.eventForm.controls.title.patchValue('New Title')
+      // A second buildForm() takes the setValue branch because eventForm already exists,
+      // so the valueChanges subscription is only ever made on the first build. Assert that
+      // the existing form is refreshed rather than rebuilt.
       component.buildForm()
-      expect(valueChangesSpy).toHaveBeenCalled()
+      expect(formBuilderMock.group).toHaveBeenCalledTimes(1)
+      expect(component.eventForm.setValue).toHaveBeenCalledWith(component.materialDetails)
     })
 
     it('should disable the form when in view mode', () => {
@@ -382,18 +385,21 @@ describe('MaterialDetailsComponent', () => {
       const onMaterialSelectSpy = jest.spyOn(component, 'onMaterialSelect')
 
       // Mock files
-      const mockFiles = [{ name: 'test.pdf' }]
+      // onMaterialSelect checks files[0].type and then hands files[0] to
+      // FileReader.readAsDataURL, which needs a real Blob.
+      const mockFiles = [new File(['test'], 'test.pdf', { type: 'application/pdf' })]
 
-      // Mock event
-      const mockEvent = [{
+      // Mock event - onDrop receives a single DragEvent, not an array, and reads
+      // event.dataTransfer.files straight through to onMaterialSelect.
+      const mockEvent = {
         preventDefault: jest.fn(),
         stopPropagation: jest.fn(),
         dataTransfer: {
-          files: [mockFiles]
+          files: mockFiles
         },
         target: document.createElement('div'),
         type: 'msword'
-      }] as any
+      } as any
 
       // Call method
       component.onDrop(mockEvent)

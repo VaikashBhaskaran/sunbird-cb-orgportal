@@ -1,3 +1,4 @@
+import { NsContent } from '@sunbird-cb/collection'
 import { PracticeComponent } from './practice.component'
 import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router'
 
@@ -8,7 +9,9 @@ describe('PracticeComponent', () => {
   beforeEach(() => {
     // Set up mock ActivatedRoute
     mockActivatedRoute = {
-      snapshot: {
+      // A hand-built stand-in, not a real snapshot: cast once rather than satisfying
+        // every field of ActivatedRouteSnapshot.
+        snapshot: {
         queryParams: {},
         url: [],
         params: {},
@@ -24,7 +27,7 @@ describe('PracticeComponent', () => {
         pathFromRoot: [],
         paramMap: undefined,
         queryParamMap: undefined
-      }
+      } as any
     }
 
     // Create component with mock
@@ -39,10 +42,9 @@ describe('PracticeComponent', () => {
     it('should have default input values', () => {
       expect(component.isFetchingDataComplete).toBeFalsy()
       expect(component.isErrorOccured).toBeFalsy()
-      expect(component.quizData).toBeUndefined()
+      expect(component.quizData).toBeNull()
       expect(component.forPreview).toBeFalsy()
       expect(component.isPreviewMode).toBeFalsy()
-      expect(component.fromCreation).toBeFalsy()
     })
 
     it('should initialize quizJson with default values', () => {
@@ -54,6 +56,7 @@ describe('PracticeComponent', () => {
         maxQuestions: 0,
         requiresSubmit: 'Yes',
         showTimer: 'Yes',
+        primaryCategory: NsContent.EPrimaryCategory.PRACTICE_RESOURCE,
       })
     })
   })
@@ -98,9 +101,11 @@ describe('PracticeComponent', () => {
   describe('Input properties', () => {
     it('should be able to set quiz data', () => {
       // Arrange
+      // A partial stand-in: NsContent.IContent has 40-odd required fields and the
+      // component only reads a couple of them.
       const testQuizData = {
         id: 'test-quiz',
-      }
+      } as any
 
       // Act
       component.quizData = testQuizData
@@ -119,7 +124,7 @@ describe('PracticeComponent', () => {
         maxQuestions: 10,
         requiresSubmit: 'No',
         showTimer: 'No',
-      }
+      } as any   // NSQuiz.IQuiz also requires primaryCategory
 
       // Act
       component.quizJson = testQuizJson

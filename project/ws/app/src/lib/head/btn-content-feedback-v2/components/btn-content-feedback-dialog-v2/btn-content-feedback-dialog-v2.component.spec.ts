@@ -38,8 +38,13 @@ describe('BtnContentFeedbackDialogV2Component', () => {
     })
 
     it('should fetch feedback config on ngOnInit', () => {
-        const mockConfig = { feedbackEnabled: true }
-        // mockFeedbackService.getFeedbackConfig.mockReturnValue(of(mockConfig))
+        // Only the fields the assertions below care about; IFeedbackConfig asks for more.
+        const mockConfig = {
+            feedbackEnabled: true,
+            feedbackCategories: [],
+            feedbackSentimentMode: '',
+        } as any
+        mockFeedbackService.getFeedbackConfig.mockReturnValue(of(mockConfig))
 
         component.ngOnInit()
 

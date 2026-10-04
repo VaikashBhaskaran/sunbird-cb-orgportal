@@ -18,6 +18,8 @@ describe('NominateUsersDialogComponent', () => {
         component = new NominateUsersDialogComponent(
             dialogRef as MatDialogRef<NominateUsersDialogComponent>,
             usersService as UsersService,
+            // ConfigurationsService sits between UsersService and MatDialog.
+            { unMappedUser: { roles: [] } } as any,
             dialogue as MatDialog,
             data as any,
             bpService as BlendedApporvalService,

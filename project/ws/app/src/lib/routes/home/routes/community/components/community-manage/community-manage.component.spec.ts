@@ -66,7 +66,9 @@ describe('CommunityManageComponent', () => {
       mockMatDialog,
       mockCommunityService,
       mockActivatedRoute,
-      mockSnackBar
+      mockSnackBar,
+      // Added since this spec was written.
+      { navigate: jest.fn() } as any
     )
   })
 
@@ -182,7 +184,7 @@ describe('CommunityManageComponent', () => {
         expect.objectContaining({
           width: '500px',
           data: expect.objectContaining({
-            body: expect.stringContaining('show this post')
+            body: expect.stringContaining('show this on the platform')
           })
         })
       )
@@ -196,7 +198,7 @@ describe('CommunityManageComponent', () => {
         expect.objectContaining({
           width: '500px',
           data: expect.objectContaining({
-            body: expect.stringContaining('hide this post')
+            body: expect.stringContaining('keep this hidden from the platform')
           })
         })
       )

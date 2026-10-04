@@ -79,13 +79,14 @@ describe('AudioNativeComponent', () => {
             // Mock window.location.href
             const originalLocation = window.location
             delete (window as any).location
-            window.location = { ...originalLocation, href: 'http://example.com/author/preview' } as any
+            ;(window as any).location = { ...originalLocation, href: 'http://example.com/author/preview' }
 
             component.ngOnInit()
             expect(component.audioData?.artifactUrl).toBe('http://example.com/audio.mp3')
 
-            // Restore original location
-            window.location = originalLocation
+            // Restore original location. window.location is typed `string & Location`
+            // under the DOM lib, hence the cast on the way back too.
+            ;(window as any).location = originalLocation
         })
 
         it('should set appIcon as default thumbnail if available', () => {

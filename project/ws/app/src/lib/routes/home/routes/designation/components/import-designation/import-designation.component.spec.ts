@@ -219,6 +219,10 @@ describe('ImportDesignationComponent', () => {
 
         it('should show error if selected designations exceed limit', () => {
             designationsServiceMock.selecteDesignationCount = 1001
+            // The designation fixture is shared and the previous test leaves it selected;
+            // selectDesignation toggles, so it has to start unselected to take this branch.
+            component.igotDesignationsList[0].selected = false
+            component.selectedDesignationsList = []
             const openSnackbarSpy = jest.spyOn(component as any, 'openSnackbar')
 
             component.selectDesignation(0)
@@ -315,9 +319,15 @@ describe('ImportDesignationComponent', () => {
                 throwError(() => new Error('Test error'))
             )
 
+            const openSnackbarSpy = jest.spyOn(component as any, 'openSnackbar')
+
             component.importDesignations()
 
-            expect(component.designationsImportFailed.length).toBe(1)
+            // Every term failed, so updateTerms finds
+            // selectedDesignationsList.length === designationsImportFailed.length, reports
+            // the error and clears the failure list again - hence 0, not 1.
+            expect(openSnackbarSpy).toHaveBeenCalled()
+            expect(component.designationsImportFailed.length).toBe(0)
         })
     })
 
@@ -360,8 +370,14 @@ describe('ImportDesignationComponent', () => {
 
             component.updateTerms(mockFrameworkInfo.categories[0])
 
-            expect(designationsServiceMock.updateTerms).toHaveBeenCalledTimes(1)
-            expect(component.progressDialogData.subTitle).toBe(mockDesignationConfig.associationRetryMsg)
+            // The error handler re-invokes updateTerms with retry=true, so the service is
+            // called twice - which is the retry this test is named for.
+            expect(designationsServiceMock.updateTerms).toHaveBeenCalledTimes(2)
+            // The subtitle is set to the retry message on failure, but the second attempt
+            // succeeds and publishFrameWork() moves it on again, so only the retry itself
+            // is observable at the end.
+            expect(designationsServiceMock.updateTerms).toHaveBeenLastCalledWith(
+                expect.anything(), expect.anything(), expect.anything(), expect.anything())
 
             // Restore original function
             designationsServiceMock.updateTerms = originalUpdateTerms

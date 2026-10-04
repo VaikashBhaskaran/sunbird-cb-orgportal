@@ -1,3 +1,4 @@
+import { environment } from '../../../../../../../../../src/environments/environment'
 import { of, throwError } from 'rxjs'
 import { HttpErrorResponse } from '@angular/common/http'
 import { ReportsSectionComponent } from './reports-section.component'
@@ -12,7 +13,6 @@ describe('ReportsSectionComponent', () => {
 	let mockSnackBar: any
 	let mockSanitizer: any
 	let mockChangeDetector: any
-	let mockLoaderService: any
 
 	beforeEach(() => {
 		// Mock dependencies
@@ -36,15 +36,18 @@ describe('ReportsSectionComponent', () => {
 			}
 		}
 
+		// Every one of these is subscribed to, so each needs to return an observable by
+		// default; individual tests override the ones they care about.
 		mockDownloadService = {
-			getReportInfo: jest.fn(),
-			getAdminsList: jest.fn(),
-			getAccessDetails: jest.fn(),
-			updateAccessToReports: jest.fn(),
-			getDepartmentType: jest.fn(),
-			searchOrgs: jest.fn(),
-			getOrgsOfDepartment: jest.fn(),
-			downloadReportsForEachOrgId: jest.fn()
+			getReportInfo: jest.fn().mockReturnValue(of(null)),
+			getAdminsList: jest.fn().mockReturnValue(of({ result: { response: { content: [] } } })),
+			getAccessDetails: jest.fn().mockReturnValue(of({})),
+			updateAccessToReports: jest.fn().mockReturnValue(of({})),
+			getDepartmentType: jest.fn().mockReturnValue(of({})),
+			searchOrgs: jest.fn().mockReturnValue(of({})),
+			getOrgsOfDepartment: jest.fn().mockReturnValue(of({})),
+			downloadReportsForEachOrgId: jest.fn().mockReturnValue(of({})),
+			getFormReadForOrgSearch: jest.fn().mockReturnValue(of({}))
 		}
 
 		mockDatePipe = {
@@ -58,7 +61,8 @@ describe('ReportsSectionComponent', () => {
 		}
 
 		mockDialog = {
-			open: jest.fn()
+			// Callers subscribe to afterClosed() on whatever open() returns.
+			open: jest.fn().mockReturnValue({ afterClosed: () => of(undefined) })
 		}
 
 		mockEvents = {
@@ -77,9 +81,6 @@ describe('ReportsSectionComponent', () => {
 			detectChanges: jest.fn()
 		}
 
-		mockLoaderService = {
-			changeLoaderState: jest.fn()
-		}
 
 		// Create component with mocked dependencies
 		component = new ReportsSectionComponent(
@@ -90,15 +91,14 @@ describe('ReportsSectionComponent', () => {
 			mockEvents,
 			mockSnackBar,
 			mockSanitizer,
-			mockChangeDetector,
-			mockLoaderService
+			mockChangeDetector
+			// The component does not take a LoaderService.
 		);
 
-		// Mock environment
-		(global as any).environment = {
-			teamsUrl: 'https://teams.example.com',
-			karmYogiPath: '/path'
-		}
+		// The component reads the imported environment module, not a global, so set the
+		// fields it uses on the module that setup-jest mocks.
+		environment.teamsUrl = 'https://teams.example.com'
+		environment.karmYogiPath = '/path'
 
 		// Mock document methods
 		document.createElement = jest.fn(() => ({
@@ -122,7 +122,7 @@ describe('ReportsSectionComponent', () => {
 	})
 
 	describe('ngOnInit', () => {
-		it('should call initialization methods', () => {
+		it('should call initialization methods', async () => {
 			// Spy on the methods
 			jest.spyOn(component, 'getReportInfo')
 			jest.spyOn(component, 'setTableHeaders')
@@ -131,13 +131,17 @@ describe('ReportsSectionComponent', () => {
 
 			// Call ngOnInit
 			component.ngOnInit()
+			// filterOrgsSearch runs inside a .then() on getFormReadForOrgSearch, so let the
+			// promise settle before asserting on it.
+			await Promise.resolve()
 
 			// Verify methods were called
 			expect(component.getReportInfo).toHaveBeenCalled()
 			expect(component.setTableHeaders).toHaveBeenCalled()
 			expect(component.getAdminTableData).toHaveBeenCalledWith(true)
 			expect(component.filterOrgsSearch).toHaveBeenCalled()
-			expect(component.noteLoaded).toBe(false)
+			// Flipped true when the admins list lands, which the mock does synchronously.
+			expect(component.noteLoaded).toBe(true)
 		})
 	})
 
@@ -221,7 +225,9 @@ describe('ReportsSectionComponent', () => {
 			component.getAdminTableData(true)
 
 			expect(component.showAdminsTable).toBe(true)
-			expect(component.showLoaderOnTable).toBe(true)
+			// The mocked response arrives synchronously, so the loader flag is already back
+			// down by the time the call returns.
+			expect(component.showLoaderOnTable).toBe(false)
 			expect(mockDownloadService.getAdminsList).toHaveBeenCalled()
 			expect(mockDownloadService.getAccessDetails).toHaveBeenCalled()
 
@@ -326,7 +332,8 @@ describe('ReportsSectionComponent', () => {
 
 			component.updateAccess(rowData)
 
-			expect(component.showLoaderOnTable).toBe(true)
+			// Cleared again by the synchronous response.
+			expect(component.showLoaderOnTable).toBe(false)
 			expect(mockDownloadService.updateAccessToReports).toHaveBeenCalledWith({
 				request: {
 					userId: 'admin123',
@@ -380,38 +387,37 @@ describe('ReportsSectionComponent', () => {
 	})
 
 	describe('downloadReportsForEach', () => {
-		it('should download reports for selected organizations', () => {
+		it('should open the download dialog for the selected organizations', () => {
 			const mockEvent = { stopPropagation: jest.fn() } as any
+			const org = { sbOrgId: 'org123', orgName: 'Test Org' }
+			component.selection.select(org as any)
 
-			///		component.selection.select({ sbOrgId: 'org123', orgName: 'Test Org' })
+			// The download itself now runs inside InfoModalComponent; this method's job is to
+			// open that dialog with the selected rows and the org id.
+			component.downloadReportsForEach(mockEvent)
 
-			// const mockResponse = [
-			// 	new HttpResponse({
-			// 		body: new Blob(['test'], { type: 'application/zip' }),
-			// 		headers: {
-			// 			getAll: (name: string) => name === 'Password' ? ['pass123'] : [],
-			// 			get: (name: string) => name === 'Content-Type' ? 'application/zip' : null
-			// 		},
-			// 		status: 200
-			// 	})
-			// ]
+			expect(mockEvent.stopPropagation).toHaveBeenCalled()
+			expect(mockDialog.open).toHaveBeenCalledWith(
+				expect.anything(),
+				expect.objectContaining({
+					panelClass: 'info-dialog-download',
+					disableClose: true,
+					data: expect.objectContaining({
+						type: 'download-file-with-progress',
+						items: [org],
+					}),
+				})
+			)
+		})
 
-			// mockDownloadService.downloadReportsForEachOrgId.mockReturnValue(of(mockResponse))
-			jest.spyOn(component, 'raiseTelemetry')
+		it('should do nothing when nothing is selected', () => {
+			const mockEvent = { stopPropagation: jest.fn() } as any
+			component.selection.clear()
 
 			component.downloadReportsForEach(mockEvent)
 
 			expect(mockEvent.stopPropagation).toHaveBeenCalled()
-			expect(mockLoaderService.changeLoaderState).toHaveBeenCalledWith(true)
-			expect(mockDownloadService.downloadReportsForEachOrgId).toHaveBeenCalled()
-
-			setTimeout(() => {
-				expect(component.customReportPwd).toBe('pass123')
-				expect(window.URL.createObjectURL).toHaveBeenCalled()
-				expect(component.raiseTelemetry).toHaveBeenCalled()
-				expect(mockLoaderService.changeLoaderState).toHaveBeenCalledWith(false)
-				expect(mockChangeDetector.detectChanges).toHaveBeenCalled()
-			}, 0)
+			expect(mockDialog.open).not.toHaveBeenCalled()
 		})
 	})
 

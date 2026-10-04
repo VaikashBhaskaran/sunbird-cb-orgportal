@@ -176,13 +176,14 @@ describe('ProfileAvatarComponent', () => {
     })
 
 
-    it('should log initials when generated from first and last name', () => {
-      const consoleSpy = jest.spyOn(console, 'log')
+    it('should generate initials from first and last name', () => {
+      // This used to assert on a console.log that createInititals no longer makes; the
+      // observable outcome is the initials themselves.
       component.name = 'John Doe';
 
       (component as any).createInititals()
 
-      expect(consoleSpy).toHaveBeenCalledWith('JD')
+      expect(component.initials).toBe('JD')
     })
 
     it('should handle fallback case for unusual name formats', () => {

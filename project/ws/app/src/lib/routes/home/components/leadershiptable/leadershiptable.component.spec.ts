@@ -30,14 +30,20 @@ describe('LeadershiptableComponent', () => {
 
     beforeEach(() => {
         mockMdoInfoService = {
-            getAllUsers: jest.fn(),
-            getTeamUsers: jest.fn(),
-            assignTeamRole: jest.fn(),
+            // Each of these is subscribed to by the component.
+            getAllUsers: jest.fn().mockReturnValue(of({ result: { response: { content: [], count: 0 } } })),
+            getTeamUsers: jest.fn().mockReturnValue(of({ result: { response: { content: [], count: 0 } } })),
+            assignTeamRole: jest.fn().mockReturnValue(of({})),
         } as unknown as MdoInfoService
         mockConfigService = { userProfile: { rootOrgId: '123' } } as unknown as ConfigurationsService
-        mockProfileUtilService = {} as unknown as ProfileV2UtillService
+        // getUsers() runs each row's email through emailTransform; without it the error
+        // escapes the subscription and leaves data empty.
+        mockProfileUtilService = {
+            emailTransform: jest.fn((email: string) => email)
+        } as unknown as ProfileV2UtillService
         mockSnackBar = { open: jest.fn() } as unknown as MatSnackBar
-        mockDialog = { open: jest.fn() } as unknown as MatDialog
+        // The component calls dialogRef.afterClosed() on the result of open().
+        mockDialog = { open: jest.fn().mockReturnValue({ afterClosed: () => of(undefined) }) } as unknown as MatDialog
         mockRouter = new Router()
 
         component = new LeadershiptableComponent(
@@ -62,6 +68,9 @@ describe('LeadershiptableComponent', () => {
     })
 
     it('should handle data on ngOnChanges', () => {
+        // ngOnChanges calls this.paginator.firstPage(); the ViewChild is not wired up when
+        // the component is constructed directly.
+        component.paginator = { firstPage: jest.fn() } as any
         const mockData = [{ id: '1', fullname: 'John Doe' }]
         component.ngOnChanges({
             data: {
@@ -78,15 +87,23 @@ describe('LeadershiptableComponent', () => {
     })
 
     it('should open dialog and add user', () => {
-        //  const openDialogSpy = jest.spyOn(mockDialog, 'open').mockReturnValue({ afterClosed: () => of({ data: [{ id: '1' }] }) })
-        const assignRoleSpy = jest.spyOn(component, 'assignRole')
+        // adduser() only reaches assignRole when the dialog closes with data whose ids match
+        // an entry in usersData.
+        const openDialogSpy = jest.spyOn(mockDialog, 'open')
+            .mockReturnValue({ afterClosed: () => of({ data: [{ id: '1' }] }) } as any)
+        component.usersData = [{ id: '1', organisations: [{ roles: [] }] }]
+        const assignRoleSpy = jest.spyOn(component, 'assignRole').mockImplementation(() => undefined)
+
         component.adduser()
-        //expect(openDialogSpy).toHaveBeenCalled()
+
+        expect(openDialogSpy).toHaveBeenCalled()
         expect(assignRoleSpy).toHaveBeenCalled()
     })
 
     it('should assign role when assignRole is called', () => {
         const mockUser = { id: '1', organisations: [{ roles: [] }] }
+        // organisationId on the request comes from component.deptID.
+        component.deptID = '123'
         const assignTeamRoleSpy = jest.spyOn(mockMdoInfoService, 'assignTeamRole').mockReturnValue(of({}))
         component.assignRole(mockUser)
         expect(assignTeamRoleSpy).toHaveBeenCalledWith({

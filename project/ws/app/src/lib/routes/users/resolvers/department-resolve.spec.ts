@@ -50,11 +50,16 @@ describe('DepartmentResolve', () => {
     // Arrange: Mock the service method to throw an error
     usersServiceMock.getMyDepartment.mockReturnValue(throwError('Error'))
 
-    // Act: Call the resolve method
-    departmentResolve.resolve({} as any, {} as any).subscribe((result: IResolveResponse<NSProfileDataV2.IProfile>) => {
-      // Assert: Verify that the result is EMPTY (no data, no error)
-      expect(result).toBeUndefined()
-      done()
+    // Act: Call the resolve method. catchError swallows the failure into EMPTY, so the
+    // stream completes without ever emitting - there is no value to assert on, only the
+    // absence of one.
+    let emitted = false
+    departmentResolve.resolve({} as any, {} as any).subscribe({
+      next: () => { emitted = true },
+      complete: () => {
+        expect(emitted).toBe(false)
+        done()
+      },
     })
   })
 })

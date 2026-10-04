@@ -86,9 +86,11 @@ describe('AppSetupHomeComponent', () => {
         })
 
         it('should not reset userUrl if dialog result is truthy', () => {
-            // mockMatDialog.open = jest.fn(() => ({
-            //     afterClosed: jest.fn(() => of(true)),
-            // }))
+            // The shared mock closes with false, which is the reset case; this test is the
+            // other branch, so the dialog has to close with a truthy result.
+            mockMatDialog.open = jest.fn(() => ({
+                afterClosed: jest.fn(() => of(true)),
+            })) as any
 
             const template = {}
             component.applyChanges(template)

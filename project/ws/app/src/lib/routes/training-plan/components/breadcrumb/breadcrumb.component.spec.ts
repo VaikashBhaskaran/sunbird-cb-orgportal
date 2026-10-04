@@ -1,6 +1,6 @@
 import { BreadcrumbComponent } from './breadcrumb.component'
 import { TrainingPlanContent } from '../../models/training-plan.model'
-import { of } from 'rxjs'
+import { of, Subject } from 'rxjs'
 
 describe('BreadcrumbComponent', () => {
     let component: BreadcrumbComponent
@@ -38,6 +38,9 @@ describe('BreadcrumbComponent', () => {
 
         mockTpdsSvc = {
             trainingPlanTitle: 'Test Title',
+            // Leaving the access-settings step tells the step's own component to save
+            // through this Subject.
+            saveAccessControlAndContinue: new Subject<void>(),
             trainingPlanStepperData: {
                 name: '',
                 status: 'draft',
@@ -192,13 +195,17 @@ describe('BreadcrumbComponent', () => {
                 .toHaveBeenCalledWith(TrainingPlanContent.TTabLabelKey.ADD_ACCESS_SETTINGS)
         })
 
-        it('should emit ADD_ACCESS_SETTINGS to ADD_TIMELINE', () => {
+        it('should ask the access settings step to save before leaving it', () => {
             component.selectedTab = TrainingPlanContent.TTabLabelKey.ADD_ACCESS_SETTINGS
             component.changeToNextTab = { emit: jest.fn() } as any
+            const saveAndContinue = jest.spyOn(mockTpdsSvc.saveAccessControlAndContinue, 'next')
 
             component.nextStep()
 
-            expect(component.changeToNextTab.emit).toHaveBeenCalledWith(TrainingPlanContent.TTabLabelKey.ADD_TIMELINE)
+            // Leaving this step is not a direct tab change: the breadcrumb signals through
+            // the service and the access settings component saves, then advances.
+            expect(saveAndContinue).toHaveBeenCalled()
+            expect(component.changeToNextTab.emit).not.toHaveBeenCalled()
         })
 
         it('should call createPlanDraftView when on ADD_TIMELINE tab', () => {

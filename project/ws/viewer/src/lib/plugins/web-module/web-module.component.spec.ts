@@ -55,7 +55,7 @@ describe('WebModuleComponent', () => {
       mockEventService,
       mockDomSanitizer,
       mockValueService,
-      mockContentService,
+      mockContentService as any,   // a partial double
       mockViewerService,
       mockConfigService,
       mockActivatedRoute,

@@ -44,7 +44,9 @@ describe('EventCompetenciesComponent', () => {
     } as any
 
     mockEventsService = {
-      convertToTreeView: jest.fn().mockReturnValue(mockCompetenciesList)
+      convertToTreeView: jest.fn().mockReturnValue(mockCompetenciesList),
+      // The tabular view is the flattened counterpart of the tree view.
+      convertToTabularView: jest.fn().mockReturnValue([])
     } as any
 
     component = new EventCompetenciesComponent(
@@ -117,7 +119,7 @@ describe('EventCompetenciesComponent', () => {
       component.removeTheme(competency, themeToRemove)
 
       expect(component.competencies[0].themes).toEqual([])
-      expect(mockMatSnackBar.open).toHaveBeenCalledWith('Competency theme is removee successfully.')
+      expect(mockMatSnackBar.open).toHaveBeenCalledWith('Competency theme is removed successfully.')
     })
   })
 

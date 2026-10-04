@@ -103,9 +103,11 @@ describe('CompLocalService', () => {
       source: '',
       description: ''
     }
+    // ICompetencie.id is a string, and the lookup is _.findIndex on an exact id match,
+    // so numeric ids here would never match the competency being removed.
     currentCompsMock.value = [
-      { id: 1, name: 'Remove Competency' },
-      { id: 2, name: 'Another Competency' },
+      { id: '1', name: 'Remove Competency' },
+      { id: '2', name: 'Another Competency' },
     ]
 
     // Call removecurrentComps
@@ -113,7 +115,7 @@ describe('CompLocalService', () => {
 
     // Expect currentComps.next to have been called with the updated value
     expect(currentCompsMock.next).toHaveBeenCalledWith([
-      { id: 2, name: 'Another Competency' },
+      { id: '2', name: 'Another Competency' },
     ])
   })
 
@@ -126,8 +128,8 @@ describe('CompLocalService', () => {
       description: ''
     }
     desiredCompsMock.value = [
-      { id: 1, name: 'Desired Competency' },
-      { id: 2, name: 'Remove Desired Competency' },
+      { id: '1', name: 'Desired Competency' },
+      { id: '2', name: 'Remove Desired Competency' },
     ]
 
     // Call removeDesiredComps
@@ -135,7 +137,7 @@ describe('CompLocalService', () => {
 
     // Expect desiredComps.next to have been called with the updated value
     expect(desiredCompsMock.next).toHaveBeenCalledWith([
-      { id: 1, name: 'Desired Competency' },
+      { id: '1', name: 'Desired Competency' },
     ])
   })
 

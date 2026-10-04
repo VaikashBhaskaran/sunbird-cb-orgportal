@@ -12,7 +12,11 @@ describe('StepperComponent', () => {
     beforeAll(() => {
         component = new StepperComponent(
             route as ActivatedRoute,
-            tpdsSvc as TrainingPlanDataSharingService
+            tpdsSvc as TrainingPlanDataSharingService,
+            // Added since this spec was written. DestroyRef only has to satisfy
+            // takeUntilDestroyed, which registers a teardown callback on it.
+            { createUserGroup: jest.fn(), updateUserGroup: jest.fn() } as any,
+            { onDestroy: jest.fn() } as any
         )
     })
 

@@ -13,18 +13,19 @@ describe('AppPublicNavBarComponent', () => {
             bypassSecurityTrustResourceUrl: jest.fn().mockReturnValue('safeUrl'),
         }
 
-        // Mock the ConfigurationsService instanceConfig and primaryNavBar
+        // Mock the ConfigurationsService instanceConfig and primaryNavBar. ngOnInit does
+        // nothing at all without instanceConfig, so it has to be present.
         mockConfigSvc = {
-            // instanceConfig: {
-            //     logos: {
-            //         appTransparent: 'some-logo-url',
-            //     },
-            //     details: {
-            //         appName: 'Test App',
-            //     },
-            // },
-            // primaryNavBar: { background: 'blue' },
-        }
+            instanceConfig: {
+                logos: {
+                    appTransparent: 'some-logo-url',
+                },
+                details: {
+                    appName: 'Test App',
+                },
+            },
+            primaryNavBar: { background: 'blue' },
+        } as any
 
         // Create an instance of the component with the mocked services
         component = new AppPublicNavBarComponent(

@@ -1,3 +1,4 @@
+import { environment } from 'src/environments/environment'
 import { CreateRequestFormComponent } from './create-request-form.component'
 import { UntypedFormBuilder } from '@angular/forms'
 import { of, throwError } from 'rxjs'
@@ -61,10 +62,11 @@ describe('CreateRequestFormComponent', () => {
 
         initServiceMock = {
             configSvc: {
-                competency: {
-                    v5: {
-                        vKey: 'competencies_v5'
-                    }
+                // The component reads `compentency` (spelled that way in the source) indexed
+                // by environment.compentencyVersionKey, which setup-jest's environment mock
+                // leaves undefined - hence the computed key rather than a literal 'v5'.
+                compentency: {
+                    [environment.compentencyVersionKey]: { vKey: 'competencies_v5' }
                 }
             }
         }
@@ -79,6 +81,11 @@ describe('CreateRequestFormComponent', () => {
             dialogMock,
             initServiceMock
         )
+        // Methods under test read compentencyKey, which ngOnInit populates.
+        component.compentencyKey = { vKey: 'competencies_v5' } as any
+        // initFromGroup builds requestForm with a control named after compentencyKey.vKey,
+        // so it has to run after the key is set for tests that touch that control.
+        component.initFromGroup()
     })
 
     it('should create', () => {
@@ -109,7 +116,12 @@ describe('CreateRequestFormComponent', () => {
         })
 
         it('should get competency data with non-v5 key', () => {
-            component.compentencyKey = { vKey: 'competencies_v5', vCompetencyArea: '', vCompetencyAreaDescription: '', vCompetencyTheme: '', vCompetencySubTheme: '' }
+            // The v2 fetch is the branch taken for anything other than competencies_v5.
+            // ngOnInit re-reads compentencyKey off the init service, so setting it on the
+            // component here would be overwritten - the service's value is what counts.
+            initServiceMock.configSvc.compentency[environment.compentencyVersionKey] = {
+                vKey: 'competencies',
+            }
             const getFilterEntityV2Spy = jest.spyOn(component, 'getFilterEntityV2')
 
             component.ngOnInit()
@@ -275,8 +287,12 @@ describe('CreateRequestFormComponent', () => {
                 competencySubThemeId: 's1'
             }
             component.requestForm.controls['competencies_v5'].setValue([existingComp])
+            // Both addCompetency branches end in resetCompfields, which clears these.
+            const resetCompfieldsSpy = jest.spyOn(component, 'resetCompfields').mockImplementation(() => { })
 
             component.addCompetency()
+
+            expect(resetCompfieldsSpy).toHaveBeenCalled()
 
             expect(snackBarMock.open).toHaveBeenCalledWith('This competency is already added')
             expect(component.requestForm.controls['competencies_v5'].value.length).toBe(1)

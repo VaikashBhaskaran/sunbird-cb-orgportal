@@ -1,5 +1,5 @@
 import { SignupAutoComponent } from './signup-auto.component'
-import { of, throwError } from 'rxjs'
+import { of, Subject, throwError } from 'rxjs'
 
 // Mocking MatSnackBar, SignupAutoService, and ActivatedRoute
 const mockSnackBar = {
@@ -38,7 +38,9 @@ describe('SignupAutoComponent', () => {
     })
 
     it('should set fetching to true when calling signup', () => {
-        mockSignupAutoService.signup.mockReturnValue(of({ msg: '1005:success', email: 'test@example.com' }))
+        // A response that never arrives, so the flag is observed while the call is still
+        // in flight - of() would emit synchronously and the handler would clear it again.
+        mockSignupAutoService.signup.mockReturnValue(new Subject())
         component.signup('1234')
         expect(component.fetching).toBe(true)
     })
@@ -50,7 +52,10 @@ describe('SignupAutoComponent', () => {
         component.signup('1234')
 
         expect(component.fetching).toBe(false)
-        expect(component.msg).toBe('You have been registered successfully on the platform with email test@example.com. Please check your email')
+        // The message is a multi-line template literal in the component, so it carries the
+        // newline and the source indentation.
+        expect(component.msg).toBe(`You have been registered successfully on the platform with email test@example.com.
+          Please check your email`)
         expect(component.showResonse).toBe(true)
         expect(mockSnackBar.open).toHaveBeenCalledWith(component.msg, 'X', { duration: 5000 })
     })

@@ -278,7 +278,9 @@ describe('SearchServService', () => {
       expect(result.filtersRes[0].content[1].checked).toBe(false)
     })
 
-    it('should not include contentType filter when showContentType is false', () => {
+    // The flag reads as a "hide" switch despite the name: LearningComponent passes true on
+    // every route except learning, which is exactly where the contentType facet is dropped.
+    it('should not include contentType filter when showContentType is true', () => {
       const filters = [
         {
           type: 'contentType',
@@ -297,7 +299,7 @@ describe('SearchServService', () => {
       const selectedFilterSet: any = new Set()
       const selectedFilters = {}
 
-      const result = service.handleFilters(filters, selectedFilterSet, selectedFilters, false)
+      const result = service.handleFilters(filters, selectedFilterSet, selectedFilters, true)
 
       // Only status filter should be included
       expect(result.filtersRes.length).toBe(1)
@@ -313,11 +315,14 @@ describe('SearchServService', () => {
 
       service.raiseSearchEvent(query, filters, locale)
 
+      // These literals mirror the WsEvents enums the service uses: WsEventType.Telemetry,
+      // WsEventLogLevel.Warn and EnumTelemetrySubType.Interact, all of which are
+      // capitalised. Only `to`/`from` are plain strings in the service.
       expect(eventServiceMock.dispatchEvent).toHaveBeenCalledWith({
-        eventType: 'telemetry',
-        eventLogLevel: 'warn',
+        eventType: 'Telemetry',
+        eventLogLevel: 'Warn',
         data: {
-          eventSubType: 'interact',
+          eventSubType: 'Interact',
           object: {
             query,
             filters,

@@ -109,14 +109,18 @@ describe('SearchServService', () => {
   describe('searchAutoComplete', () => {
     it('should call API when language is specific', async () => {
       const params = { q: 'TEST', l: 'en' }
-      // mockSearchApiService.getSearchAutoCompleteResults.mockReturnValue(of([{
-      //   displayText: 'test result',
-      //   _source: {} // Add the required _source property
-      // }]));
+      // The shared mock returns an empty list; this test is about what comes back, so it
+      // needs a result to come back.
+      mockSearchApiService.getSearchAutoCompleteResults.mockReturnValue(of([{
+        displayText: 'test result',
+        _source: { searchTerm: 'test result' },   // required by ISearchAutoComplete
+      }]))
 
       const results = await service.searchAutoComplete(params)
 
-      expect(results).toEqual([{ displayText: 'test result' }])
+      expect(results).toEqual([
+        { displayText: 'test result', _source: { searchTerm: 'test result' } },
+      ])
       expect(mockSearchApiService.getSearchAutoCompleteResults).toHaveBeenCalledWith({ q: 'test', l: 'en' })
     })
 

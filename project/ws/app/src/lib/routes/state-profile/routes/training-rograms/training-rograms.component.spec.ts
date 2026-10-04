@@ -3,6 +3,7 @@ import { OrgProfileService } from '../../services/org-profile.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { MatDialog } from '@angular/material/dialog'
 import { UntypedFormGroup } from '@angular/forms'
+import { of } from 'rxjs'
 
 // Mock the dependencies
 jest.mock('../../services/org-profile.service')
@@ -17,7 +18,20 @@ describe('TrainingRogramsComponent', () => {
 
     beforeEach(() => {
         mockOrgProfileService = new OrgProfileService(null as any) as jest.Mocked<OrgProfileService>
-        mockConfigSvc = new ConfigurationsService() as jest.Mocked<ConfigurationsService>
+
+        // jest.mock auto-mocks the class's methods but not its instance fields, so
+        // formValues - which the component reads in ngOnInit - has to be restored by hand.
+        mockOrgProfileService.formValues = {
+            instituteProfile: {},
+            rolesAndFunctions: {},
+            infrastructure: {},
+            trainingPrograms: {},
+            research: {},
+            consultancy: {},
+            faculty: {},
+            platformWalkthrough: {},
+        }
+        mockConfigSvc = new ConfigurationsService(null as any) as jest.Mocked<ConfigurationsService>
         mockDialog = new MatDialog(null as any, null as any, null as any, null as any, null as any, null as any, null as any, null as any) as jest.Mocked<MatDialog>
 
         // Set up mock values
@@ -58,8 +72,13 @@ describe('TrainingRogramsComponent', () => {
         expect(component.selectedSubjects).toEqual(['Math', 'Science'])
     })
 
-    it('should update form value on value changes', () => {
+    it('should update form value on value changes', async () => {
+        // The form subscription is debounced by 500ms. Zone.js patches the timer globals
+        // that jest's fake clock would swap out, so this waits for real time instead.
+        // Spying on an already-mocked method also keeps the emission ngOnInit queued in
+        // the call history, hence the mockClear.
         const spy = jest.spyOn(mockOrgProfileService, 'updateLocalFormValue')
+        spy.mockClear()
 
         component.trainingProgramForm.setValue({
             subjectName: 'History',
@@ -73,6 +92,7 @@ describe('TrainingRogramsComponent', () => {
 
         // Trigger the form value change
         component.trainingProgramForm.updateValueAndValidity()
+        await new Promise(resolve => setTimeout(resolve, 600))
 
         expect(spy).toHaveBeenCalledWith('trainingPrograms', expect.objectContaining({ subjectName: 'History' }))
     })
@@ -101,7 +121,11 @@ describe('TrainingRogramsComponent', () => {
     })
 
     it('should open activity dialog on openActivityDialog()', () => {
-        const dialogSpy = jest.spyOn(mockDialog, 'open')
+        // open() is auto-mocked and returns undefined, so the component has nothing to call
+        // afterClosed() on.
+        const dialogSpy = jest.spyOn(mockDialog, 'open').mockReturnValue({
+            afterClosed: () => of(undefined),
+        } as any)
         component.openActivityDialog()
         expect(dialogSpy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ width: '550px' }))
     })

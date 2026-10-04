@@ -2,13 +2,16 @@ import { HttpClient } from '@angular/common/http'
 import { DatePipe } from '@angular/common'
 import { of } from 'rxjs'
 import { EventsService } from './events.service'
-import * as _ from 'lodash'
 
 // Mock implementations
 jest.mock('@angular/common/http')
 jest.mock('@angular/common')
-jest.mock('lodash')
+// Not lodash: the service relies on _.get's real behaviour (including its
+// default-value argument), and an automock makes every lookup undefined.
 
+// The endpoint constants in this service are relative ('apis/...'). They resolve to the
+// same absolute path at runtime because index.html sets <base href="/">, but the
+// assertions below have to match what the service actually passes to HttpClient.
 describe('EventsService', () => {
   let service: EventsService
   let httpClient: jest.Mocked<HttpClient>
@@ -28,28 +31,6 @@ describe('EventsService', () => {
     datePipe = {
       transform: jest.fn(),
     } as any;
-
-    // Mock lodash get function with proper implementation that uses all parameters
-    (_.get as jest.Mock) = jest.fn().mockImplementation((obj, path, defaultValue) => {
-      // Create a mock implementation that actually uses the obj parameter
-      if (!obj) return defaultValue
-
-      // Handle specific test cases
-      if (obj.result && path === 'result.Event') return obj.result.Event
-      if (obj.result && path === 'result.count') return obj.result.count
-      if (obj.request?.filters && path === 'request.filters.status') return obj.request.filters.status
-
-      // Use a simplified path resolution for other cases
-      const pathParts = path.split('.')
-      let value = obj
-
-      for (const part of pathParts) {
-        if (value === undefined || value === null) return defaultValue
-        value = value[part]
-      }
-
-      return value !== undefined ? value : defaultValue
-    })
 
     // Create service instance
     service = new EventsService(httpClient, datePipe)
@@ -95,7 +76,7 @@ describe('EventsService', () => {
       // Execute test
       service.getEvents(mockRequest, 'upcoming').subscribe(result => {
         // Verify http post was called with correct params
-        expect(httpClient.post).toHaveBeenCalledWith('/apis/proxies/v8/sunbirdigot/search', mockRequest)
+        expect(httpClient.post).toHaveBeenCalledWith('apis/proxies/v8/sunbirdigot/search', mockRequest)
 
         // Verify datePipe transformations
         expect(datePipe.transform).toHaveBeenCalledTimes(6)
@@ -194,7 +175,7 @@ describe('EventsService', () => {
       httpClient.post.mockReturnValue(of(mockResponse))
 
       service.createEvent(mockRequest).subscribe(response => {
-        expect(httpClient.post).toHaveBeenCalledWith('/apis/proxies/v8/event/v4/create', mockRequest)
+        expect(httpClient.post).toHaveBeenCalledWith('apis/proxies/v8/event/v4/create', mockRequest)
         expect(response).toEqual(mockResponse)
         done()
       })
@@ -208,7 +189,8 @@ describe('EventsService', () => {
 
       httpClient.get.mockReturnValue(of(mockResponse))
 
-      service.getEventDetailsByid(mockEventId).subscribe(response => {
+      // false picks the edit-mode read; true would hit the live EVENT_READ endpoint.
+      service.getEventDetailsByid(mockEventId, false).subscribe(response => {
         expect(httpClient.get).toHaveBeenCalledWith('apis/proxies/v8/event/v4/read/123?mode=edit')
         expect(response).toEqual(mockResponse)
         done()
@@ -485,7 +467,7 @@ describe('EventsService', () => {
       }
 
       service.searchUser(mockValue, mockRootOrgId).subscribe(response => {
-        expect(httpClient.post).toHaveBeenCalledWith('/apis/proxies/v8/user/v1/search', expectedRequest)
+        expect(httpClient.post).toHaveBeenCalledWith('apis/proxies/v8/user/v1/search', expectedRequest)
         expect(response).toEqual(mockResponse)
         done()
       })

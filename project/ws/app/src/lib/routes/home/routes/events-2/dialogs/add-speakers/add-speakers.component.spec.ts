@@ -110,7 +110,10 @@ describe('AddSpeakersComponent', () => {
         description: [mockSpeaker.description]
       })
 
-      // component.speakersList = [existingSpeaker]
+      // The duplicate check only runs on the add path (speakerDetails null) and needs a
+      // speaker already on the list carrying the same email.
+      component.speakerDetails = null
+      component.speakersList = [{ email: 'john@example.com', name: 'John', description: '' }]
       const openSnackBarSpy = jest.spyOn(matSnackBar, 'open')
 
       component.addSpeaker()

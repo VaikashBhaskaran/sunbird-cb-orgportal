@@ -3,7 +3,7 @@ import { ActivatedRoute, ActivatedRouteSnapshot, convertToParamMap } from '@angu
 import { EventService, LoggerService, WsEvents } from '@sunbird-cb/utils'
 import { ViewerUtilService } from '../../viewer-util.service'
 import { MatDialog } from '@angular/material/dialog'
-import { of } from 'rxjs'
+import { EMPTY, of } from 'rxjs'
 import { NsContent } from '@sunbird-cb/collection'
 import { ViewerPreviewPopupComponent } from '../../viewer-preview-popup/viewer-preview-popup.component'
 import { AccessControlService } from '@sunbird-cb/toc'
@@ -30,7 +30,9 @@ describe('PracticeTestComponent', () => {
   beforeEach(() => {
     // Setup mocks with proper param maps
     mockActivatedRoute = {
-      snapshot: {
+      // A hand-built stand-in, not a real snapshot: cast once rather than satisfying
+        // every field of ActivatedRouteSnapshot.
+        snapshot: {
         paramMap: convertToParamMap({ resourceId: 'test-resource' }),
         queryParamMap: convertToParamMap({
           preview: 'false',
@@ -49,7 +51,7 @@ describe('PracticeTestComponent', () => {
         firstChild: new ActivatedRouteSnapshot,
         children: [],
         pathFromRoot: []
-      },
+      } as any,
       data: of({ content: { data: mockTestData } }),
     }
 
@@ -82,7 +84,11 @@ describe('PracticeTestComponent', () => {
       mockAccessControlService,
       mockViewerUtilService,
       mockEventService,
-      mockLoggerService
+      // WidgetContentService sits between EventService and LoggerService, and Router was
+      // added after it; neither existed when this spec was written.
+      { fetchContent: jest.fn() } as any,
+      mockLoggerService,
+      { navigate: jest.fn(), events: EMPTY } as any
     )
 
     // Mock window.location for preview mode detection
@@ -146,7 +152,9 @@ describe('PracticeTestComponent', () => {
         mockAccessControlService,
         mockViewerUtilService,
         mockEventService,
-        mockLoggerService
+        { fetchContent: jest.fn() } as any,
+        mockLoggerService,
+        { navigate: jest.fn(), events: EMPTY } as any
       )
 
       component.ngOnInit()
@@ -178,7 +186,17 @@ describe('PracticeTestComponent', () => {
 
       jest.runAllTimers()
 
+      // The openPreviewPopup() call inside that timeout is commented out in the
+      // component, so init no longer opens the preview dialog.
       expect(component.isFetchingDataComplete).toBeTruthy()
+      expect(mockMatDialog.open).not.toHaveBeenCalled()
+    })
+
+    it('should open the preview popup when asked directly', () => {
+      component.testData = mockTestData
+
+      component.openPreviewPopup()
+
       expect(mockMatDialog.open).toHaveBeenCalledWith(
         ViewerPreviewPopupComponent,
         expect.any(Object)

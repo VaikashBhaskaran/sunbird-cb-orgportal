@@ -248,8 +248,15 @@ describe('AssistantMessageCardComponent', () => {
             expect(mockWatStoreService.setCurrentProgress).toHaveBeenCalledWith(71)
         })
 
-        it('should handle calculation errors and return 0', () => {
-            // Force a calculation error
+        it('should return 0 when there is nothing to measure', () => {
+            component.dataStructure = {}
+
+            expect(component.calculatePercentage()).toBe(0)
+        })
+
+        it('should not swallow errors thrown by the progress calculators', () => {
+            // The try/catch in calculatePercentage wraps only the final summation, not the
+            // calculate*Progress calls above it, so a failure in one of those escapes.
             jest.spyOn(component, 'calculateOfficerProgress').mockImplementation(() => {
                 throw new Error('Test error')
             })
@@ -258,9 +265,7 @@ describe('AssistantMessageCardComponent', () => {
                 officerFormData: {}
             }
 
-            const result = component.calculatePercentage()
-
-            expect(result).toBe(0)
+            expect(() => component.calculatePercentage()).toThrow('Test error')
         })
     })
 

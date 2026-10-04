@@ -9,7 +9,8 @@ describe('CompetencySummaryComponent', () => {
     beforeEach(() => {
         initServiceMock = {
             configSvc: {
-                competency: {
+                // The component reads `compentency` - spelled that way in the source.
+                compentency: {
                     [environment.compentencyVersionKey]: {
                         vKey: 'vKey',
                         vCompetencyArea: 'area',
@@ -34,7 +35,7 @@ describe('CompetencySummaryComponent', () => {
 
     it('should correctly set compentencyKey on ngOnInit', () => {
         component.ngOnInit()
-        expect(component.compentencyKey).toEqual(initServiceMock.configSvc.competency[environment.compentencyVersionKey])
+        expect(component.compentencyKey).toEqual(initServiceMock.configSvc.compentency[environment.compentencyVersionKey])
     })
 
     it('should update competencySummaryObj on ngOnChanges', () => {
@@ -89,7 +90,9 @@ describe('CompetencySummaryComponent', () => {
         component.contentData = mockContentData
         component.ngOnChanges()
 
-        // The count for 'behavioural' should be incremented
-        expect(component.competencySummaryObj[0].behavioural.count).toBe(2)
+        // The count tracks distinct themes: checkIfThemeNameExists gates the increment, so
+        // two items sharing 'theme1' are counted once.
+        expect(component.competencySummaryObj[0].behavioural.count).toBe(1)
+        expect(component.competencySummaryObj[0].behavioural.listData).toHaveLength(1)
     })
 })

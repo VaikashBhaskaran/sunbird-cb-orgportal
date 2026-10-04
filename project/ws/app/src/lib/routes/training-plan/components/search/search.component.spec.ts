@@ -7,6 +7,7 @@ jest.mock('@sunbird-cb/collection', () => ({
     WidgetContentService: jest.fn()
 }))
 
+import { environment } from '../../../../../../../../../src/environments/environment'
 import { SearchComponent } from './search.component'
 import { of, Subject } from 'rxjs'
 
@@ -45,6 +46,14 @@ describe('SearchComponent', () => {
     let mockTpdsSvc: any
     let mockLoadingService: any
     let mockInitService: any
+
+    // Typed loosely: ICompentencyKeys carries more fields than these tests exercise.
+    const compentencyKeys: any = {
+        vKey: 'competencies_v6',
+        vCompetencyArea: 'competencyArea',
+        vCompetencyTheme: 'competencyTheme',
+        vCompetencySubTheme: 'competencySubTheme'
+    }
 
     // Get lodash mock
     const _ = require('lodash')
@@ -122,20 +131,14 @@ describe('SearchComponent', () => {
 
         mockInitService = {
             configSvc: {
-                competency: {
-                    v6: {
-                        vKey: 'competencies_v6',
-                        vCompetencyArea: 'competencyArea',
-                        vCompetencyTheme: 'competencyTheme',
-                        vCompetencySubTheme: 'competencySubTheme'
-                    }
+                // The component reads `compentency` (spelled that way in the source) and
+                // indexes it with environment.compentencyVersionKey. setup-jest replaces the
+                // environment module wholesale, so that key is undefined here - hence the
+                // computed key rather than a literal 'v6'.
+                compentency: {
+                    [environment.compentencyVersionKey]: compentencyKeys
                 }
             }
-        };
-
-        // Set up environment
-        (global as any).environment = {
-            compentencyVersionKey: 'v6'
         }
 
         // Create component
@@ -146,6 +149,8 @@ describe('SearchComponent', () => {
             mockLoadingService,
             mockInitService
         )
+        // getContent() and friends read compentencyKey, which ngOnInit populates.
+        component.compentencyKey = compentencyKeys
 
         // Initialize component
         component.from = 'content'
@@ -162,7 +167,7 @@ describe('SearchComponent', () => {
             component.ngOnInit()
 
             // Assert
-            expect(component.compentencyKey).toBe(mockInitService.configSvc.competency.v6)
+            expect(component.compentencyKey).toBe(compentencyKeys)
 
             // Test content page change subscription
             const pageData = { pageIndex: 5, pageSize: 10 }
@@ -305,7 +310,7 @@ describe('SearchComponent', () => {
 
     describe('getContent', () => {
         beforeEach(() => {
-            component.compentencyKey = mockInitService.configSvc.competency.v6
+            component.compentencyKey = compentencyKeys
             jest.spyOn(mockTpdsSvc.moderatedCourseSelectStatus, 'next')
             jest.spyOn(mockTpdsSvc.clearFilter, 'next')
             jest.spyOn(component.handleApiData, 'emit')
@@ -321,7 +326,9 @@ describe('SearchComponent', () => {
                 request: expect.objectContaining({
                     secureSettings: false,
                     filters: expect.objectContaining({
-                        primaryCategory: ['Course']
+                        // primaryCategory is commented out in the component; it now sends
+                        // courseCategory built from the contentType argument.
+                        courseCategory: ['Course']
                     }),
                     offset: 0,
                     limit: 20,
@@ -340,7 +347,8 @@ describe('SearchComponent', () => {
                 request: expect.objectContaining({
                     secureSettings: true,
                     filters: expect.objectContaining({
-                        primaryCategory: ['Course']
+                        // 'Moderated Course' is passed through to courseCategory as-is.
+                        courseCategory: ['Moderated Course']
                     })
                 })
             }))
@@ -370,12 +378,10 @@ describe('SearchComponent', () => {
         it('should clear filters when searchText is present', () => {
             // Arrange
             component.searchText = 'search query'
-            const filterObj = {
-                providers: ['provider1']
-            }
 
-            // Act
-            component.getContent('Course', filterObj)
+            // Act - no filter object: getContent blanks searchText whenever one is passed
+            // with keys, so the searchText branch under test would never be reached.
+            component.getContent('Course')
 
             // Assert
             expect(mockTpdsSvc.clearFilter.next).toHaveBeenCalledWith({ from: 'content', status: true })
@@ -405,7 +411,9 @@ describe('SearchComponent', () => {
             component.getContent('Course')
 
             // Assert
-            expect(_.concat).toHaveBeenCalled()
+            // The component no longer concatenates already-selected content on top of the
+            // results - see the comment in getContent's subscribe block - so only uniqBy
+            // is involved now.
             expect(_.uniqBy).toHaveBeenCalled()
             expect(mockTpdsSvc.trainingPlanContentData).toEqual({
                 category: 'Course',
@@ -464,12 +472,10 @@ describe('SearchComponent', () => {
         it('should clear filters when searchText is present', () => {
             // Arrange
             component.searchText = 'search query'
-            const filterObj = {
-                designation: ['des1']
-            }
 
-            // Act
-            component.getCustomUsers('CustomUser', filterObj)
+            // Act - same as the content case: passing a non-empty filter object clears
+            // searchText before the branch this test covers.
+            component.getCustomUsers('CustomUser')
 
             // Assert
             expect(mockTpdsSvc.clearFilter.next).toHaveBeenCalledWith({ from: 'assignee', status: true })

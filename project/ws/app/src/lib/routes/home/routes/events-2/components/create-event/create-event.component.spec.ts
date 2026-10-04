@@ -3,13 +3,18 @@ import { EventsService } from '../../services/events.service'
 import { Router } from '@angular/router'
 import { FormBuilder } from '@angular/forms'
 import { MatSnackBar } from '@angular/material/snack-bar'
-import { DatePipe } from '@angular/common'
+import { DatePipe, Location } from '@angular/common'
+import { TestBed } from '@angular/core/testing'
 import { LoaderService } from '../../../../../../../../../../../src/app/services/loader.service'
 import { MatDialog } from '@angular/material/dialog'
 import { ChangeDetectorRef } from '@angular/core'
 import { StepperSelectionEvent } from '@angular/cdk/stepper'
 import { of, throwError } from 'rxjs'
 import * as _ from 'lodash'
+
+// The description control carries a minLength(250) validator, so the fixture needs a
+// value that long for eventDetailsForm to be valid.
+const EVENT_DESCRIPTION = 'Test Event Description. Test Event Description. Test Event Description. Test Event Description. Test Event Description. Test Event Description. Test Event Description. Test Event Description. Test Event Description. Test Event Description. Test Event Description. Test Event Description.'
 
 describe('CreateEventComponent', () => {
   let component: CreateEventComponent
@@ -22,11 +27,22 @@ describe('CreateEventComponent', () => {
   let mockLoaderService: jest.Mocked<LoaderService>
   let mockCdr: jest.Mocked<ChangeDetectorRef>
   let mockDialog: jest.Mocked<MatDialog>
+  let mockLocation: jest.Mocked<Location>
 
   beforeEach(() => {
+    // The component schedules work with setTimeout in several paths. Without fake timers
+    // those callbacks run after the test that triggered them has finished, and anything
+    // they throw escapes jest and takes the worker process down. Holding them under fake
+    // timers for the whole file keeps each test's async work inside that test.
+    jest.useFakeTimers()
+
     // Create mocks
     mockEventsService = {
-      updateEvent: jest.fn()
+      updateEvent: jest.fn().mockReturnValue(of({})),
+      publishEvent: jest.fn(),
+      isBharatKalpCategory: jest.fn().mockReturnValue(false),
+      setCourseDetails: jest.fn(),
+      getContentRead: jest.fn().mockReturnValue(of({}))
     } as unknown as jest.Mocked<EventsService>
 
     mockRouter = {
@@ -69,7 +85,7 @@ describe('CreateEventComponent', () => {
             data: {
               identifier: 'event123',
               name: 'Test Event',
-              description: 'Test Event Description',
+              description: EVENT_DESCRIPTION,
               resourceType: 'Webinar',
               startDate: '2025-02-27',
               startTime: '10:00:00+05:30',
@@ -88,8 +104,20 @@ describe('CreateEventComponent', () => {
       queryParams: of({ mode: 'edit', pathUrl: 'test-path' })
     }
 
+    mockLocation = {
+      back: jest.fn()
+    } as unknown as jest.Mocked<Location>
+
+    // CreateEventComponent resolves Location through a field initializer
+    // (`inject(Location)`), which only works inside an injection context. Plain
+    // `new CreateEventComponent(...)` therefore fails with NG0203, so the instance is
+    // built inside the TestBed's context with Location supplied.
+    TestBed.configureTestingModule({
+      providers: [{ provide: Location, useValue: mockLocation }]
+    })
+
     // Create component
-    component = new CreateEventComponent(
+    component = TestBed.runInInjectionContext(() => new CreateEventComponent(
       mockEventsService,
       mockActivatedRoute,
       mockFormBuilder,
@@ -99,7 +127,18 @@ describe('CreateEventComponent', () => {
       mockLoaderService,
       mockCdr,
       mockDialog
-    )
+    ))
+
+    // Run the real lifecycle hook: it builds the forms and then reads eventDetails from
+    // the resolver. Most methods under test dereference one or the other, and because
+    // patchEventDetails is async the resulting TypeError surfaces as an unhandled
+    // rejection that kills the worker rather than failing a single test. The specs that
+    // cover ngOnInit's own steps call them again, which is harmless.
+    component.ngOnInit()
+  })
+
+  afterEach(() => {
+    jest.useRealTimers()
   })
 
   describe('ngOnInit', () => {
@@ -183,9 +222,11 @@ describe('CreateEventComponent', () => {
 
       // Check if form values are patched
       expect(component.eventDetailsForm.get('eventName')?.value).toBe('Test Event')
-      expect(component.eventDetailsForm.get('description')?.value).toBe('Test Event Description')
+      expect(component.eventDetailsForm.get('description')?.value).toBe(EVENT_DESCRIPTION)
       expect(component.eventDetailsForm.get('eventCategory')?.value).toBe('Webinar')
-      expect(component.eventDetailsForm.get('registrationLink')?.value).toBe('https://example.com')
+      // A non-YouTube link is patched into recoredEventUrl; registrationLink is only used
+      // for YouTube URLs, which 'should handle YouTube links correctly' covers.
+      expect(component.eventDetailsForm.get('recoredEventUrl')?.value).toBe('https://example.com')
 
       // Check if arrays are populated
       expect(component.speakersList.length).toBe(1)
@@ -347,6 +388,20 @@ describe('CreateEventComponent', () => {
       // Set current index
       component.currentStepperIndex = 0
 
+      // moveToNextForm only advances while currentStepperIndex < steps.length - 1,
+      // so it needs a stepper to read.
+      component.stepper = {
+        steps: {
+          length: 4,
+          toArray: () => [
+            { label: 'Basic Details' },
+            { label: 'Add Speaker' },
+            { label: 'Add Material' },
+            { label: 'Preview' }
+          ]
+        }
+      } as any
+
       // Mock canMoveToNext getter
       Object.defineProperty(component, 'canMoveToNext', {
         get: jest.fn(() => true)
@@ -359,15 +414,32 @@ describe('CreateEventComponent', () => {
       expect(component.currentStepperIndex).toBe(1)
     })
 
-    it('should increment current stepper index in view mode regardless of validation', () => {
+    it('should increment current stepper index in view mode', () => {
       // Set current index and mode
       component.currentStepperIndex = 0
       component.openMode = 'view'
 
+      // moveToNextForm only advances while currentStepperIndex < steps.length - 1,
+      // so it needs a stepper to read.
+      component.stepper = {
+        steps: {
+          length: 4,
+          toArray: () => [
+            { label: 'Basic Details' },
+            { label: 'Add Speaker' },
+            { label: 'Add Material' },
+            { label: 'Preview' }
+          ]
+        }
+      } as any
+
       // Call method
       component.moveToNextForm()
 
-      // Check if index is incremented
+      // Note: moveToNextForm gates on canMoveToNext, which - unlike canMoveToStep, used
+      // by onSelectionChange - has no view-mode bypass. It advances here because
+      // selectedStepperLable defaults to 'Basic Details' and that form is valid, not
+      // because the mode is 'view'.
       expect(component.currentStepperIndex).toBe(1)
     })
   })
@@ -400,8 +472,9 @@ describe('CreateEventComponent', () => {
       // Wait for setTimeout
       jest.runAllTimers()
 
-      // Check if stepper index is updated
-      expect(component.currentStepperIndex).toBe(0)
+      // 'Preview' is the second step in the stub above, so foundIndex - and therefore
+      // currentStepperIndex - is 1.
+      expect(component.currentStepperIndex).toBe(1)
     })
   })
 
@@ -444,8 +517,8 @@ describe('CreateEventComponent', () => {
       // Set selected label
       component.selectedStepperLable = 'Basic Details'
 
-      // Mock form valid state
-      jest.spyOn(component.eventDetailsForm, 'valid', 'get').mockReturnValue(true)
+      // canMoveToNext branches on `invalid`, so that is the getter to control here.
+      jest.spyOn(component.eventDetailsForm, 'invalid', 'get').mockReturnValue(false)
 
       // Check result
       expect(component.canMoveToNext).toBe(true)
@@ -455,8 +528,8 @@ describe('CreateEventComponent', () => {
       // Set selected label
       component.selectedStepperLable = 'Basic Details'
 
-      // Mock form valid state
-      jest.spyOn(component.eventDetailsForm, 'valid', 'get').mockReturnValue(false)
+      // canMoveToNext branches on `invalid`, so that is the getter to control here.
+      jest.spyOn(component.eventDetailsForm, 'invalid', 'get').mockReturnValue(true)
 
       // Spy on openSnackBar
       jest.spyOn(component as any, 'openSnackBar')
@@ -537,6 +610,9 @@ describe('CreateEventComponent', () => {
       // Set valid states
       jest.spyOn(component.eventDetailsForm, 'invalid', 'get').mockReturnValue(false)
       jest.spyOn(component, 'isMaterialsValid', 'get').mockReturnValue(true)
+      // isValidTimeToStart measures the fixture's startDate against the real clock, so
+      // leaving it unstubbed makes this assertion depend on the date the suite runs.
+      jest.spyOn(component, 'isValidTimeToStart', 'get').mockReturnValue(true)
       component.competencies = [{ id: 'comp1', name: 'Competency 1' }]
 
       // Check result

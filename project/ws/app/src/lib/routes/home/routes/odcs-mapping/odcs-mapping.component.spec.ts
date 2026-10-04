@@ -22,7 +22,7 @@ const mockActivatedRoute = {
                     rootOrgId: 'test-org-id',
                     departmentName: 'Test Department'
                 },
-                orgReadData: null,
+                orgReadData: null as any,
                 updateOrgReadData: jest.fn()
             }
         }
@@ -60,8 +60,10 @@ describe('OdcsMappingComponent', () => {
     let mockEvent: Event
 
     beforeEach(() => {
-        // Reset mocks before each test
+        // Reset mocks before each test. mockActivatedRoute is module-level and shared, so
+        // orgReadData has to be put back by hand - clearAllMocks only resets jest.fn()s.
         jest.clearAllMocks()
+        mockActivatedRoute.snapshot.data.configService.orgReadData = null as any
 
         // Create component with mocked dependencies
         component = new OdcsMappingComponent(
@@ -83,10 +85,11 @@ describe('OdcsMappingComponent', () => {
 
     describe('ngOnInit', () => {
         it('should initialize with existing framework ID', () => {
-            // Setup
-            // mockActivatedRoute.snapshot.data.configService.orgReadData = {
-            //     frameworkid: 'existing-framework-id'
-            // }
+            // Setup. Without this the org has no framework yet and ngOnInit takes the
+            // "create one" branch instead of the branch under test.
+            mockActivatedRoute.snapshot.data.configService.orgReadData = {
+                frameworkid: 'existing-framework-id'
+            }
 
             // Act
             component.ngOnInit()
@@ -148,6 +151,10 @@ describe('OdcsMappingComponent', () => {
         })
 
         it('should call getOrgReadData after successful framework creation', () => {
+            // getOrgReadData runs behind a 5s setTimeout, so the clock has to be faked for
+            // runAllTimers below to reach it.
+            jest.useFakeTimers()
+
             // Setup
             const successResponse = { result: { framework: 'created-framework' } }
             mockDesignationsService.createFrameWork.mockReturnValue(of(successResponse))
@@ -164,6 +171,8 @@ describe('OdcsMappingComponent', () => {
                 'Test Department'
             )
             expect(getOrgReadDataSpy).toHaveBeenCalled()
+
+            jest.useRealTimers()
         })
 
         it('should show error message when framework creation fails', () => {

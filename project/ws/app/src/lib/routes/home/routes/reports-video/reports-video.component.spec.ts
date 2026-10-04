@@ -1,5 +1,4 @@
 import { MatDialogRef } from '@angular/material/dialog'
-import { DomSanitizer } from '@angular/platform-browser'
 import { ReportsVideoComponent } from './reports-video.component'
 
 describe('ReportsVideoComponent', () => {
@@ -7,13 +6,12 @@ describe('ReportsVideoComponent', () => {
 
     const dialogRef: Partial<MatDialogRef<ReportsVideoComponent>> = {}
     const dialogData: any = {}
-    const domSanitizer: Partial<DomSanitizer> = {}
 
     beforeAll(() => {
         component = new ReportsVideoComponent(
             dialogRef as MatDialogRef<ReportsVideoComponent>,
             dialogData as undefined,
-            domSanitizer as DomSanitizer
+            // The component's DomSanitizer dependency is commented out.
         )
     })
 

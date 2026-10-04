@@ -16,6 +16,25 @@ describe('UpdateWorkallocationComponent', () => {
     let mockElementRef: any
 
     beforeEach(() => {
+
+        // displayLoader() and toggleDisplay() reach for elements by id with a non-null
+
+        // assertion; jsdom has no such nodes unless the test creates them.
+
+        ;['loader', 'positions', 'roles', 'activities'].forEach(id => {
+
+            if (!document.getElementById(id)) {
+
+                const el = document.createElement('div')
+
+                el.id = id
+
+                document.body.appendChild(el)
+
+            }
+
+        })
+
         // Mock services
         mockExportAsService = {
             save: jest.fn().mockReturnValue(of({})),
@@ -126,6 +145,10 @@ describe('UpdateWorkallocationComponent', () => {
     })
 
     it('should fetch and set user details', () => {
+        // ngOnInit already ran one fetch, and getAllUsers appends rather than replaces, so
+        // start from a clean list to measure this call on its own.
+        component.data = []
+
         component.getAllUsers()
         expect(mockAllocationService.getUsers).toHaveBeenCalled()
         expect(component.selectedUser).toBeDefined()
@@ -150,6 +173,10 @@ describe('UpdateWorkallocationComponent', () => {
         expect(component.currentTab).toBe('roles')
         expect(spy).toHaveBeenCalledWith('roles')
         expect(mockEventService.raiseInteractTelemetry).toHaveBeenCalled()
+
+        // Restore immediately: leaving this spy in place makes every later test receive a
+        // stub element with no .style, which breaks displayLoader/toggleDisplay.
+        spy.mockRestore()
     })
 
     it('should set role in form array', () => {
@@ -212,7 +239,10 @@ describe('UpdateWorkallocationComponent', () => {
         component.selectRole(role)
 
         expect(component.selectedRole).toEqual(role)
-        expect(component.activitieslist).toEqual(role.childNodes)
+        // selectRole keeps the activity objects for the list but flattens the role's own
+        // childNodes down to names before patching it into the form, so these differ.
+        expect(component.activitieslist).toEqual([{ name: 'Activity 1' }])
+        expect(role.childNodes).toEqual(['Activity 1'])
         expect(component.similarRoles).toEqual([])
         expect(mockElementRef.nativeElement.value).toBe('')
     })

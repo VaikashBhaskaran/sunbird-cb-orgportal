@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { VideoComponent } from './video.component'
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core'
+import { commonTestingProviders, stubPipes, viewerRouteData } from '@test/helpers/testing-providers'
 
 describe('VideoComponent', () => {
   let component: VideoComponent
@@ -9,8 +10,9 @@ describe('VideoComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [VideoComponent],
-      imports: [CUSTOM_ELEMENTS_SCHEMA],
+      declarations: [VideoComponent, ...stubPipes()],
+      providers: [...commonTestingProviders({ routeData: viewerRouteData() })],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
     })
       .compileComponents()
   }))

@@ -26,7 +26,19 @@ describe('FeaturesComponent', () => {
         // Mocking all the service dependencies
         mockRouter = { navigate: jest.fn() } as any
         mockActivatedRoute = { snapshot: { queryParamMap: { get: jest.fn(() => 'test-query') } } } as any
-        mockConfigurationsService = { appsConfig: { groups: [], features: {} }, tourGuideNotifier: new Subject<boolean>() } as any
+        mockConfigurationsService = {
+            appsConfig: {
+                // The constructor expands each group's featureIds against this map.
+                features: {
+                    f1: { name: 'feature-query', keywords: ['feature-query'], description: 'a feature' }
+                },
+                groups: [{ featureIds: ['f1'] }]
+            },
+            // ngOnInit only flips isTourGuideAvailable when restrictedFeatures is present
+            // and does not restrict 'tourGuide'.
+            restrictedFeatures: new Set<string>(),
+            tourGuideNotifier: new Subject<boolean>()
+        } as any
         mockCustomTourService = { startTour: jest.fn() } as any
         mockSubapplicationRespondService = { unsubscribeResponse: jest.fn() } as any
         mockValueService = { isXSmall$: of(false) } as any
@@ -52,17 +64,20 @@ describe('FeaturesComponent', () => {
         const spyNavigate = jest.spyOn(mockRouter, 'navigate')
         const newQuery = 'new-query'
 
+        // The subscription debounces by 500ms before navigating.
+        jest.useFakeTimers()
         component.ngOnInit()
         component.queryControl.setValue(newQuery)
+        jest.advanceTimersByTime(500)
+        jest.useRealTimers()
 
         expect(spyNavigate).toHaveBeenCalledWith([], { queryParams: { q: newQuery } })
     })
 
     it('should filter features based on query', () => {
         const query = 'feature-query'
-        //const mockFeature = { name: 'Feature 1', keywords: ['keyword1'], description: 'feature description' }
-        // const mockGroup = { featureWidgets: [{ widgetData: { actionBtn: mockFeature } }] }
-        // component['featuresConfig'] = [mockGroup]
+        // featuresConfig is private and built in the constructor from appsConfig.groups,
+        // so the fixture supplies a matching feature there rather than assigning it.
 
         const filteredFeatures = component['filteredFeatures'](query)
 
@@ -76,9 +91,14 @@ describe('FeaturesComponent', () => {
     })
 
     it('should call startTour when startTour is invoked', () => {
+        // unsubscribeResponse only runs when a response subscription is open.
+        const unsubscribe = jest.fn()
+        component['responseSubscription'] = { unsubscribe } as any
+
         component.startTour()
         expect(mockCustomTourService.startTour).toHaveBeenCalled()
         expect(mockSubapplicationRespondService.unsubscribeResponse).toHaveBeenCalled()
+        expect(unsubscribe).toHaveBeenCalled()
     })
 
     it('should open the logout dialog when logout method is called', () => {

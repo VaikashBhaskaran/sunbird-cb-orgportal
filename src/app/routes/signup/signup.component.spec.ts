@@ -1,7 +1,7 @@
 import { SignupComponent } from './signup.component'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { SignupService } from './signup.service'
-// import { of, throwError } from 'rxjs'
+import { of, throwError } from 'rxjs'
 
 describe('SignupComponent', () => {
     let component: SignupComponent
@@ -29,7 +29,12 @@ describe('SignupComponent', () => {
                 email: 'john@example.com',
                 code: '12345',
             },
+            // onSubmit resets the form on success.
+            reset: jest.fn(),
         } as any
+
+        // The success message is read out of a template ref.
+        component.toastSuccess = { nativeElement: { value: 'Registered successfully' } } as any
     })
 
     it('should create the SignupComponent', () => {
@@ -38,7 +43,7 @@ describe('SignupComponent', () => {
 
     it('should call onSubmit and handle success', () => {
         // Mock the signup method to return a successful response
-        // mockSignupService.signup.mockReturnValue(of({}));
+        ;(mockSignupService.signup as jest.Mock).mockReturnValue(of({}))
 
         // Call the onSubmit method with the mock form
         component.onSubmit(component.signupForm)
@@ -58,8 +63,11 @@ describe('SignupComponent', () => {
     })
 
     it('should call onSubmit and handle error', () => {
-        // Mock the signup method to return an error
-        // mockSignupService.signup.mockReturnValue(throwError({ error: 'Error: Invalid data' }));
+        // Mock the signup method to return an error. onSubmit splits err.error on ':' and
+        // shows the second part, so the message has to carry that prefix.
+        ;(mockSignupService.signup as jest.Mock).mockReturnValue(
+            throwError(() => ({ error: 'Error: Invalid data' }))
+        )
 
         // Call the onSubmit method with the mock form
         component.onSubmit(component.signupForm)
@@ -68,8 +76,9 @@ describe('SignupComponent', () => {
         expect(mockSignupService.signup).toHaveBeenCalledWith(component.signupForm.value)
 
         // Ensure that snackbar was triggered with error message
+        // The split on ':' keeps the space that followed it.
         expect(mockSnackBar.open).toHaveBeenCalledWith(
-            'Invalid data',
+            ' Invalid data',
             'X',
             { duration: 5000 }
         )

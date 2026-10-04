@@ -59,8 +59,11 @@ describe('CustomSelfRegistrationComponent', () => {
       snackbar,
       clipboard,
       onboardingService,
-      null as any, // designationsService, we can leave it as any for now
-      null as any  // eventService, we can leave it as any for now
+      // ngOnInit reaches getFrameworkInfo on this one, so it needs a real stream.
+      { getFrameworkInfo: jest.fn().mockReturnValue(of({ result: { framework: {} } })) } as any,
+      { raiseInteractTelemetry: jest.fn() } as any,
+      // LoaderService, added since this spec was written.
+      { changeLoaderState: jest.fn(), changeLoad: { next: jest.fn() } } as any
     )
   })
 
@@ -76,6 +79,8 @@ describe('CustomSelfRegistrationComponent', () => {
   })
 
   it('should get the list of registration links', () => {
+    // selfRegistrationForm is built in ngOnInit, which these reach through.
+    component.ngOnInit()
     const mockResponse = {
       result: {
         qrCodeDataForOrg: [{ startDate: '2025-02-27', endDate: '2025-03-27', url: 'test.com' }]
@@ -103,6 +108,11 @@ describe('CustomSelfRegistrationComponent', () => {
   })
 
   it('should generate registration link and handle response successfully', () => {
+    // selfRegistrationForm is built in ngOnInit, which these reach through.
+    component.ngOnInit()
+    // generateRegistrationLink reads getTime() off both date controls.
+    component.selfRegistrationForm.controls['startDate'].setValue(new Date('2025-01-01'))
+    component.selfRegistrationForm.controls['endDate'].setValue(new Date('2025-02-01'))
     const mockResponse = {
       result: {
         registrationLink: 'generatedLink.com',
@@ -121,6 +131,11 @@ describe('CustomSelfRegistrationComponent', () => {
   })
 
   it('should handle error in generateRegistrationLink', () => {
+    // selfRegistrationForm is built in ngOnInit, which these reach through.
+    component.ngOnInit()
+    // generateRegistrationLink reads getTime() off both date controls.
+    component.selfRegistrationForm.controls['startDate'].setValue(new Date('2025-01-01'))
+    component.selfRegistrationForm.controls['endDate'].setValue(new Date('2025-02-01'))
     // const dialogRef = { close: jest.fn() }
     // dialog.open.mockReturnValue(dialogRef)
 
@@ -136,8 +151,21 @@ describe('CustomSelfRegistrationComponent', () => {
   })
 
   it('should check registration status', () => {
-    const status = component.checkRegistrationStatus('2025-03-01')
-    expect(status).toBe(true) // Assuming today's date is before 2025-03-01
+    // selfRegistrationForm is built in ngOnInit, which these reach through.
+    component.ngOnInit()
+    // Relative to now rather than a fixed date: the method compares the end date against
+    // today, so a hard-coded one silently starts failing once it passes.
+    const nextMonth = new Date()
+    nextMonth.setMonth(nextMonth.getMonth() + 1)
+    const status = component.checkRegistrationStatus(nextMonth.toISOString())
+    expect(status).toBe(true)
+  })
+
+  it('should report a registration whose end date has passed as closed', () => {
+    const lastMonth = new Date()
+    lastMonth.setMonth(lastMonth.getMonth() - 1)
+
+    expect(component.checkRegistrationStatus(lastMonth.toISOString())).toBe(false)
   })
 
   it('should handle check registration status with invalid date', () => {

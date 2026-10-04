@@ -23,6 +23,8 @@ describe('HandsOnComponent', () => {
                 },
             },
         }),
+        // A hand-built stand-in, not a real snapshot: cast once rather than satisfying
+        // every field of ActivatedRouteSnapshot.
         snapshot: {
             queryParams: {
                 collectionId: 'test-collection',
@@ -42,7 +44,7 @@ describe('HandsOnComponent', () => {
             pathFromRoot: [],
             paramMap: undefined,
             queryParamMap: undefined
-        },
+        } as any,
     }
 
     const mockContentSvc: Partial<WidgetContentService> = {

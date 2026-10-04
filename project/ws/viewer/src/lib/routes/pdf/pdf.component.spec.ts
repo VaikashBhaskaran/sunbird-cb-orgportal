@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
+import { NO_ERRORS_SCHEMA } from '@angular/core'
+import { commonTestingProviders, stubPipes, viewerRouteData } from '@test/helpers/testing-providers'
 import { PdfComponent } from './pdf.component'
 
 describe('PdfComponent', () => {
@@ -8,7 +10,10 @@ describe('PdfComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [PdfComponent],
+      declarations: [PdfComponent, ...stubPipes()],
+      providers: [...commonTestingProviders({ routeData: viewerRouteData() })],
+      // Shallow smoke test: child components in the template are not declared here.
+      schemas: [NO_ERRORS_SCHEMA],
     })
     .compileComponents()
   }))

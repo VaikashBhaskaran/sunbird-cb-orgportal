@@ -14,27 +14,27 @@ describe('LearningComponent', () => {
     let utilityServiceMock: Partial<UtilityService>
 
     const isLtMediumSubject = new Subject<boolean>()
-    //const prefChangeNotifierSubject = new Subject<any>()
+    const prefChangeNotifierSubject = new Subject<any>()
 
-    // const mockPageData = {
-    //     data: {
-    //         search: {
-    //             tabs: [
-    //                 {
-    //                     titleKey: 'learning',
-    //                     searchQuery: {
-    //                         filters: {
-    //                             contentType: ['Course']
-    //                         }
-    //                     },
-    //                     phraseSearch: true,
-    //                     isStandAlone: true,
-    //                     acrossPreferredLang: true
-    //                 }
-    //             ]
-    //         }
-    //     }
-    // }
+    const mockPageData = {
+        data: {
+            search: {
+                tabs: [
+                    {
+                        titleKey: 'learning',
+                        searchQuery: {
+                            filters: {
+                                contentType: ['Course']
+                            }
+                        },
+                        phraseSearch: true,
+                        isStandAlone: true,
+                        acrossPreferredLang: true
+                    }
+                ]
+            }
+        }
+    }
 
     const mockQueryParamMap = {
         has: jest.fn(),
@@ -47,19 +47,22 @@ describe('LearningComponent', () => {
 
         // Create mock services
         activatedRouteMock = {
-            // snapshot: {
-            //     data: {
-            //         pageroute: 'learning',
-            //         pageData: mockPageData
-            //     },
-            //     queryParamMap: mockQueryParamMap
-            // },
-            // queryParamMap: of(mockQueryParamMap),
+            // ngOnInit reads snapshot.data.pageData.data straight away, so the snapshot has
+            // to be present for any test in this file to get past it.
+            snapshot: {
+                data: {
+                    pageroute: 'learning',
+                    pageData: mockPageData
+                },
+                queryParamMap: mockQueryParamMap as any
+            } as any,
+            queryParamMap: of(mockQueryParamMap as any),
             parent: {} as any
         }
 
         routerMock = {
-            navigate: jest.fn()
+            // The component chains .then() onto navigate().
+            navigate: jest.fn().mockResolvedValue(true)
         }
 
         valueServiceMock = {
@@ -83,13 +86,14 @@ describe('LearningComponent', () => {
         }
 
         configServiceMock = {
-            // activeLocale: { locals: ['en'] },
+            activeLocale: { locals: ['en'] } as any,
             isIntranetAllowed: true,
-            // prefChangeNotifier: prefChangeNotifierSubject.asObservable(),
-            // userPreference: {
-            //     selectedLocale: 'en',
-            //     selectedLangGroup: 'en'
-            // }
+            // ngOnInit subscribes to this immediately.
+            prefChangeNotifier: prefChangeNotifierSubject.asObservable() as any,
+            userPreference: {
+                selectedLocale: 'en',
+                selectedLangGroup: 'en'
+            } as any
         }
 
         utilityServiceMock = {
@@ -131,7 +135,9 @@ describe('LearningComponent', () => {
             component.ngOnInit()
 
             expect(searchServMock.translateSearchFilters).toHaveBeenCalledWith('en')
-            expect(component.searchRequestObject.query).toBe('test query')
+            // The fixture enables phraseSearch, so a multi-word query is quoted - see
+            // 'should apply phrase search for multi-word queries'.
+            expect(component.searchRequestObject.query).toBe('"test query"')
             expect(component.searchRequestObject.filters).toHaveProperty('contentType')
             expect(searchServMock.getLearning).toHaveBeenCalled()
         })

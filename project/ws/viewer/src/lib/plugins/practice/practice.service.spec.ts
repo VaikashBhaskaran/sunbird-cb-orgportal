@@ -76,12 +76,14 @@ describe('PracticeService', () => {
 
       httpClientMock.get.mockReturnValue(of(mockResponse))
 
-      service.getSection(sectionId, false).subscribe(response => {
+      // The normal-mode read always appends the collection as parentContextId.
+      const collectionId = 'collection1'
+      service.getSection(sectionId, false, undefined, collectionId).subscribe(response => {
         expect(response).toEqual(mockResponse)
       })
 
       expect(httpClientMock.get).toHaveBeenCalledWith(
-        `/apis/proxies/v8/assessment/v5/read/${sectionId}`
+        `/apis/proxies/v8/assessment/v5/read/${sectionId}?parentContextId=${collectionId}`
       )
     })
   })

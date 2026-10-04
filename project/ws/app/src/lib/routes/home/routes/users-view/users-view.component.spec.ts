@@ -251,6 +251,12 @@ describe('UsersViewComponent', () => {
   })
 
   describe('data fetching methods', () => {
+    // These call the fetchers directly rather than through ngOnInit, which is where the
+    // component normally reads rootOrgId off the parent route's resolved config.
+    beforeEach(() => {
+      component.rootOrgId = 'test-root-org-id'
+    })
+
     it('getAllUsers should call usersService.getAllKongUsers with correct params', async () => {
       await component.getAllUsers('')
 

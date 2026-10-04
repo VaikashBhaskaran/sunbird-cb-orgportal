@@ -158,34 +158,35 @@ describe('CompetencyLabelsComponent', () => {
         })
 
         it('should add a new group with addNewGroup', () => {
-            // Spy on group list's push method
-            const pushSpy = jest.fn()
-            //  component.groupList = { push: pushSpy, value: [] } as any
+            // groupList is a getter over activityForm, so it cannot be stubbed - build the
+            // form the way ngOnInit does and assert the array actually grows.
+            component.ngOnInit()
             jest.spyOn(component, 'setGroupValues')
+            const before = component.groupList.length
 
             // Call addNewGroup
             component.addNewGroup()
 
             // Verify group was added
-            expect(pushSpy).toHaveBeenCalled()
+            expect(component.groupList.length).toBe(before + 1)
             expect(component.setGroupValues).toHaveBeenCalled()
         })
 
         it('should add a new group activity with addNewGroupActivity', () => {
-            // Setup
-            const mockGroupCompetencyList = {
-                push: jest.fn(),
-                value: []
-            }
-            jest.spyOn(component, 'groupcompetencyList', 'get').mockReturnValue(mockGroupCompetencyList as any)
-            jest.spyOn(component, 'setGroupActivityValues')
+            // groupcompetencyList reads through activityForm -> groupsArray -> the active
+            // group, so the form has to be built and hold a group first. Driving the real
+            // form rather than a stub also covers setGroupActivityValues, which patches it.
+            component.ngOnInit()
+            component.addNewGroup()
+            component.activeGroupIdx = 0
 
-            // Call addNewGroupActivity
+            // addNewGroup seeds one default competency row, so the new one lands after it.
+            const before = component.groupcompetencyList.length
+
             component.addNewGroupActivity(0)
 
-            // Verify activity was added
-            expect(mockGroupCompetencyList.push).toHaveBeenCalled()
-            expect(component.setGroupActivityValues).toHaveBeenCalled()
+            expect(component.groupcompetencyList.length).toBe(before + 1)
+            expect(component.groupcompetencyList.at(before).get('localId')!.value).toBe('mock-id')
         })
     })
 
@@ -235,16 +236,20 @@ describe('CompetencyLabelsComponent', () => {
 
     describe('Drag and Drop Functionality', () => {
         it('should handle dropping within the same container', () => {
+            // groupcompetencyList reads through activityForm -> groupsArray -> the active
+            // group, so the form has to be built and hold a group first.
+            component.ngOnInit()
+            component.addNewGroup()
             // Setup mock event
+            // dropgroup distinguishes the two cases by object identity, not by container
+            // id, so "same container" means literally the same object on both sides.
+            const sameContainer = {
+                id: 'compe_0',
+                data: [{ id: 1 }, { id: 2 }, { id: 3 }]
+            }
             const mockEvent = {
-                previousContainer: {
-                    id: 'compe_0',
-                    data: [{ id: 1 }, { id: 2 }, { id: 3 }]
-                },
-                container: {
-                    id: 'compe_0',
-                    data: [{ id: 1 }, { id: 2 }, { id: 3 }]
-                },
+                previousContainer: sameContainer,
+                container: sameContainer,
                 previousIndex: 1,
                 currentIndex: 2,
                 item: { data: { compName: 'Test' } }
@@ -274,6 +279,10 @@ describe('CompetencyLabelsComponent', () => {
 
     describe('Competency Selection and Updates', () => {
         it('should open dialog when competency is selected', () => {
+            // groupcompetencyList reads through activityForm -> groupsArray -> the active
+            // group, so the form has to be built and hold a group first.
+            component.ngOnInit()
+            component.addNewGroup()
             // Setup
             const mockEvent = {
                 option: {
@@ -313,7 +322,14 @@ describe('CompetencyLabelsComponent', () => {
         })
 
         it('should update form values when dialog is closed with OK', () => {
-            // Setup
+            // groupcompetencyList reads through activityForm -> groupsArray -> the active
+            // group, so the form has to be built and hold a group with one competency row.
+            component.ngOnInit()
+            component.addNewGroup()
+            component.activeGroupIdx = 0
+            component.addNewGroupActivity(0)
+            component.selectedCompIdx = 0
+
             const mockEvent = {
                 option: {
                     value: {
@@ -325,37 +341,20 @@ describe('CompetencyLabelsComponent', () => {
                 }
             }
 
-            // Mock form controls
-            const mockPatchValue = jest.fn()
-            // const mockFormControls = {
-            //     compId: { patchValue: mockPatchValue },
-            //     compDescription: { patchValue: mockPatchValue },
-            //     localId: { patchValue: mockPatchValue },
-            //     compName: { patchValue: mockPatchValue },
-            //     compSource: { patchValue: mockPatchValue },
-            //     compLevel: { patchValue: mockPatchValue },
-            //     compType: { patchValue: mockPatchValue },
-            //     compArea: { patchValue: mockPatchValue },
-            //     levelList: { patchValue: mockPatchValue }
-            // }
-
-            // Setup groupList
-            // component.groupList = {
-            //     at: jest.fn().mockReturnValue({
-            //         get: jest.fn().mockReturnValue({
-            //             at: jest.fn().mockReturnValue({
-            //                 get: (key: string) => mockFormControls[key]
-            //             }),
-            //             value: [{ localId: 'mock-id', compName: 'Test' }]
-            //         })
-            //     })
-            // } as any
-
-            // Call competencySelected
+            // Call competencySelected. mockDialogRef closes with { ok: true, data } straight
+            // away, so the patches below have already been applied when it returns.
             component.competencySelected(mockEvent, 0)
 
-            // Verify form values were updated
-            expect(mockPatchValue).toHaveBeenCalledTimes(9) // One for each form control
+            // Verify the competency row carries what the dialog returned.
+            const row = component.groupcompetencyList.at(0)
+            expect(row.get('compId')!.value).toBe('comp-1')
+            expect(row.get('compName')!.value).toBe('Competency 1')
+            expect(row.get('compDescription')!.value).toBe('Description')
+            expect(row.get('compLevel')!.value).toBe('Level 1')
+            expect(row.get('compType')!.value).toBe('Type 1')
+            expect(row.get('compArea')!.value).toBe('Area 1')
+            expect(row.get('compSource')!.value).toBe('Source 1')
+            expect(mockWatStore.setgetcompetencyGroup).toHaveBeenCalled()
         })
     })
 
@@ -393,25 +392,24 @@ describe('CompetencyLabelsComponent', () => {
         })
 
         it('should remove competency at specified index with deleteRowCompetency', () => {
-            // Setup mocks
-            const removeAtSpy = jest.fn()
-            // const mockCompetinciesArray = {
-            //     removeAt: removeAtSpy
-            // }
-
-            // const mockRoleGroup = {
-            //     get: jest.fn().mockReturnValue(mockCompetinciesArray)
-            // }
-
-            // component.groupList = {
-            //     at: jest.fn().mockReturnValue(mockRoleGroup)
-            // } as any
+            // groupcompetencyList reads through activityForm -> groupsArray -> the active
+            // group, so the form has to be built and hold a group with two rows to delete
+            // the second one.
+            component.ngOnInit()
+            component.addNewGroup()
+            component.activeGroupIdx = 0
+            // addNewGroup seeds one default row; this adds the second, which is the one
+            // deleteRowCompetency is asked to remove.
+            component.addNewGroupActivity(0)
+            component.groupcompetencyList.at(1).get('compName')!.patchValue('second')
+            expect(component.groupcompetencyList.length).toBe(2)
 
             // Call deleteRowCompetency
             component.deleteRowCompetency(0, 1)
 
-            // Verify competency was removed and store was updated
-            expect(removeAtSpy).toHaveBeenCalledWith(1)
+            // Verify the second competency was removed and the store was updated
+            expect(component.groupcompetencyList.length).toBe(1)
+            expect(component.groupcompetencyList.at(0).get('compName')!.value).toBe('')
             expect(mockWatStore.setgetcompetencyGroup).toHaveBeenCalled()
         })
     })

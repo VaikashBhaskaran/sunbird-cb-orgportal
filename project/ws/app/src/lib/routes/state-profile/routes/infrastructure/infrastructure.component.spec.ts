@@ -20,7 +20,20 @@ describe('InfrastructureComponent', () => {
     beforeEach(() => {
         // Initialize mocks
         orgProfileServiceMock = new OrgProfileService(null as any) as jest.Mocked<OrgProfileService>
-        configServiceMock = new ConfigurationsService() as jest.Mocked<ConfigurationsService>
+
+        // jest.mock auto-mocks the class's methods but not its instance fields, so
+        // formValues - which the component reads in ngOnInit - has to be restored by hand.
+        orgProfileServiceMock.formValues = {
+            instituteProfile: {},
+            rolesAndFunctions: {},
+            infrastructure: {},
+            trainingPrograms: {},
+            research: {},
+            consultancy: {},
+            faculty: {},
+            platformWalkthrough: {},
+        }
+        configServiceMock = new ConfigurationsService(null as any) as jest.Mocked<ConfigurationsService>
         dialogMock = new MatDialog(null as any, null as any, null as any, null as any, null as any, null as any, null as any, null as any) as jest.Mocked<MatDialog>
 
         // Mock any services or observable values
@@ -70,12 +83,18 @@ describe('InfrastructureComponent', () => {
         expect(component.infrastructureForm.get('latitudeLongitude')?.value).toBe('12.34, 56.78')
     })
 
-    it('should call orgSvc.updateLocalFormValue and orgSvc.updateFormStatus on form value change', () => {
+    it('should call orgSvc.updateLocalFormValue and orgSvc.updateFormStatus on form value change', async () => {
+        // The form subscription is debounced by 500ms, and spying on an already-mocked
+        // method keeps the emission from ngOnInit in the call history - hence mockClear and
+        // the real wait. Zone.js patches the timers jest's fake clock would replace.
         const updateLocalFormValueSpy = jest.spyOn(orgProfileServiceMock, 'updateLocalFormValue')
         const updateFormStatusSpy = jest.spyOn(orgProfileServiceMock, 'updateFormStatus')
+        updateLocalFormValueSpy.mockClear()
+        updateFormStatusSpy.mockClear()
 
         // Trigger form value change
         component.infrastructureForm.patchValue({ builtupArea: 2000 })
+        await new Promise(resolve => setTimeout(resolve, 600))
 
         expect(updateLocalFormValueSpy).toHaveBeenCalledWith('infrastructure', component.infrastructureForm.value)
         expect(updateFormStatusSpy).toHaveBeenCalledWith('infrastructure', component.infrastructureForm.valid)

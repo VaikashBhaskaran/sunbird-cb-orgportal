@@ -49,6 +49,14 @@ describe('ItemTileComponent', () => {
     })
 
     it('should throw an error when goToView encounters an exception', () => {
+        // The URL is built from this input before navigate is reached, so it has to be
+        // bound or the failure under test never gets a chance to happen.
+        component.data = {
+            category: 'cat1',
+            itemId: '123',
+            source: 'source1',
+        }
+
         // Force an error in the navigate method
         mockRouter.navigate.mockImplementationOnce(() => {
             throw new Error('Test error')

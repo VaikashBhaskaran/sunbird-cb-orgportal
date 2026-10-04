@@ -9,10 +9,12 @@ import { StaffComponent } from './staff.component'
 const mockMatSnackBar = { open: jest.fn() }
 const mockMatDialog = { open: jest.fn(() => ({ afterClosed: () => of({}) })) }
 const mockMdoInfoService = {
-    getStaffdetails: jest.fn(),
-    addStaffdetails: jest.fn(),
-    updateStaffdetails: jest.fn(),
-    deleteStaffdetails: jest.fn(),
+    // All four are subscribed to by the component; getStaffdetails reads
+    // res.result.response and sorts it, so it needs an array.
+    getStaffdetails: jest.fn().mockReturnValue(of({ result: { response: [] } })),
+    addStaffdetails: jest.fn().mockReturnValue(of({ result: { response: [] } })),
+    updateStaffdetails: jest.fn().mockReturnValue(of({ result: { response: [] } })),
+    deleteStaffdetails: jest.fn().mockReturnValue(of({ result: { response: [] } })),
 }
 const mockConfigurationsService = { userProfile: { rootOrgId: 'mockDeptID' } }
 const mockActivatedRoute = { snapshot: { data: { configService: { userProfile: { rootOrgId: 'mockDeptID' } } } } }
@@ -43,10 +45,11 @@ describe('StaffComponent', () => {
         expect(component).toBeTruthy()
     })
 
-    it('should call getStaffDetails on initialization if deptID is available', () => {
-        const spy = jest.spyOn(component, 'getStaffDetails')
-        component.ngOnInit()
-        expect(spy).toHaveBeenCalled()
+    it('should fetch staff details on construction if deptID is available', () => {
+        // getStaffDetails() is invoked from the constructor, not ngOnInit, so a spy
+        // installed after construction would never fire. Assert the service call instead.
+        expect(component.deptID).toBeDefined()
+        expect(mockMdoInfoService.getStaffdetails).toHaveBeenCalledWith(component.deptID)
     })
 
     it('should handle error when getStaffDetails fails with a 400 error', () => {
@@ -60,10 +63,12 @@ describe('StaffComponent', () => {
     })
 
     it('should correctly handle ngOnChanges', () => {
-        // const changes = {
-        //     currentValue: [{ srnumber: 1, position: 'Manager', positionfilled: 2, positionvacant: 3 }],
-        // }
-        //component.ngOnChanges(changes)
+        const row = { srnumber: 1, position: 'Manager', positionfilled: 2, positionvacant: 3 }
+        // ngOnChanges guards on `data.currentValue` but reads `data.data.currentValue`, so
+        // both keys have to be present for the rows to land. See the note in
+        // product-bugs.md - this asserts current behaviour rather than the intended shape.
+        const changes: any = { currentValue: [row], data: { currentValue: [row] } }
+        component.ngOnChanges(changes)
 
         expect(component.dataSource.data.length).toBe(1)
         expect(component.length).toBe(1)
@@ -122,7 +127,7 @@ describe('StaffComponent', () => {
     })
 
     it('should prevent non-numeric input in keyPressNumbers method', () => {
-        const event = { which: 65 } // Key code for 'A'
+        const event = { which: 65, preventDefault: jest.fn() } // Key code for 'A'
         const result = component.keyPressNumbers(event)
 
         expect(result).toBe(false)

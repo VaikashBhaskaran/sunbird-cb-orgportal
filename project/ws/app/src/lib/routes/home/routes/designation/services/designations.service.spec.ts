@@ -14,7 +14,7 @@ describe('DesignationsService', () => {
 
   beforeEach(() => {
     mockHttpClient = new HttpClient(null as any) // Mock HttpClient
-    mockConfigService = new ConfigurationsService() // Mock ConfigurationsService
+    mockConfigService = new ConfigurationsService(null as any) // Mock ConfigurationsService
     service = new DesignationsService(mockHttpClient, mockConfigService)
   })
 
@@ -81,10 +81,12 @@ describe('DesignationsService', () => {
 
   describe('getUuid', () => {
     it('should return a UUID', () => {
-      // Mocking uuidv4 function
-      // jest.spyOn(uuidv4, 'v4').mockReturnValue('mock-uuid')
+      // The getter delegates straight to uuid's v4, so assert the shape rather than
+      // pinning a value: two reads must also differ.
       const uuid = service.getUuid
-      expect(uuid).toBe('mock-uuid')
+
+      expect(uuid).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+      expect(service.getUuid).not.toBe(uuid)
     })
   })
 

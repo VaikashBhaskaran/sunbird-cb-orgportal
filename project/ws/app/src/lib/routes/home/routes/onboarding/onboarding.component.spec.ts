@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing'
 
+import { NO_ERRORS_SCHEMA } from '@angular/core'
+import { commonTestingProviders, pageRouteData, stubPipes } from '@test/helpers/testing-providers'
 import { OnboardingComponent } from './onboarding.component'
 
 describe('OnboardingComponent', () => {
@@ -8,7 +10,10 @@ describe('OnboardingComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [OnboardingComponent],
+      declarations: [OnboardingComponent, ...stubPipes()],
+      providers: [...commonTestingProviders({ routeData: pageRouteData() })],
+      // Shallow smoke test: child components in the template are not declared here.
+      schemas: [NO_ERRORS_SCHEMA],
     })
     .compileComponents()
   })

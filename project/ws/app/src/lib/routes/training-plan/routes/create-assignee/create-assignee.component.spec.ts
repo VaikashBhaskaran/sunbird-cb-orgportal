@@ -39,10 +39,13 @@ describe('CreateAssigneeComponent', () => {
     })
 
     it('should handleApiData with invalid data', () => {
+        // addAssigneeInvalid is a real EventEmitter, so spy on it the way the sibling
+        // tests do rather than asserting on the bare emit function.
+        const emitSpy = jest.spyOn(component.addAssigneeInvalid, 'emit')
         tpdsSvc.trainingPlanAssigneeData.category = 'AllUser'
         component.handleApiData(false)
 
-        expect(component.addAssigneeInvalid.emit).toHaveBeenCalledWith(false)
+        expect(emitSpy).toHaveBeenCalledWith(false)
     })
 
     it('should handleSelectedChips with selected items', () => {

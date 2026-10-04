@@ -4,7 +4,8 @@ import { HttpErrorResponse } from '@angular/common/http'
 
 // Mock services and dependencies
 const mockFileService = {
-    getBulkUploadDataV1: jest.fn(),
+    // ngOnInit pipes this straight into takeUntil, so it has to be an observable.
+    getBulkUploadDataV1: jest.fn().mockReturnValue(of({ result: { content: [] } })),
     validateFile: jest.fn(),
     upload: jest.fn(),
     download: jest.fn()
@@ -79,7 +80,10 @@ describe('BulkUploadComponent', () => {
             mockMatSnackBar as any,
             mockRouter as any,
             mockMatDialog as any,
-            mockUsersService as any
+            mockUsersService as any,
+            // LoaderService, added since this spec was written. getBulkStatusList pushes
+            // through changeLoad directly as well as calling changeLoaderState.
+            { changeLoaderState: jest.fn(), changeLoad: { next: jest.fn() } } as any
         )
     })
 
@@ -88,8 +92,12 @@ describe('BulkUploadComponent', () => {
         console.error = originalConsoleError
     })
 
-    describe('constructor', () => {
+    describe('initialisation', () => {
         it('should initialize component properties from route data', () => {
+            // rootOrgId and userProfile are read in ngOnInit; only the download paths come
+            // from the constructor's route subscription.
+            component.ngOnInit()
+
             expect(component.rootOrgId).toBe('test-org-id')
             expect(component.userProfile).toBeDefined()
             expect(component.downloadSampleFilePath).toBe('/test/path')
@@ -226,13 +234,15 @@ describe('BulkUploadComponent', () => {
             mockUsersService.sendOtp.mockReturnValue(of({ result: true }))
             const verifyOtpSpy = jest.spyOn(component, 'verifyOTP').mockImplementation()
 
-            component.generateAndVerifyOTP('email')
+            // The OTP is only sent on the resend path; without the flag the method just
+            // opens the verification dialog.
+            component.generateAndVerifyOTP('email', 'resend')
 
             expect(mockUsersService.sendOtp).toHaveBeenCalledWith('test@example.com', 'email')
             expect(mockMatSnackBar.open).toHaveBeenCalledWith(
                 'An OTP has been sent to your Email address, (Valid for 15 min\'s)'
             )
-            expect(verifyOtpSpy).toHaveBeenCalledWith('email')
+            expect(verifyOtpSpy).not.toHaveBeenCalled()
         })
 
         it('should send OTP to phone and show success message', () => {
@@ -240,13 +250,13 @@ describe('BulkUploadComponent', () => {
             mockUsersService.sendOtp.mockReturnValue(of({ result: true }))
             const verifyOtpSpy = jest.spyOn(component, 'verifyOTP').mockImplementation()
 
-            component.generateAndVerifyOTP('phone')
+            component.generateAndVerifyOTP('phone', 'resend')
 
             expect(mockUsersService.sendOtp).toHaveBeenCalledWith('1234567890', 'phone')
             expect(mockMatSnackBar.open).toHaveBeenCalledWith(
                 'An OTP has been sent to your Mobile number, (Valid for 15 min\'s)'
             )
-            expect(verifyOtpSpy).toHaveBeenCalledWith('phone')
+            expect(verifyOtpSpy).not.toHaveBeenCalled()
         })
 
         it('should not call verifyOTP if resendFlag is provided', () => {
@@ -267,7 +277,7 @@ describe('BulkUploadComponent', () => {
             })
             mockUsersService.sendOtp.mockReturnValue(throwError(errorResponse))
 
-            component.generateAndVerifyOTP('email')
+            component.generateAndVerifyOTP('email', 'resend')
 
             expect(mockMatSnackBar.open).toHaveBeenCalledWith('Custom error message')
         })
@@ -277,7 +287,7 @@ describe('BulkUploadComponent', () => {
             const errorResponse = new HttpErrorResponse({ status: 500 })
             mockUsersService.sendOtp.mockReturnValue(throwError(errorResponse))
 
-            component.generateAndVerifyOTP('email')
+            component.generateAndVerifyOTP('email', 'resend')
 
             expect(mockMatSnackBar.open).toHaveBeenCalledWith(
                 'Unable to send OTP to your email, please try again later!'
@@ -286,6 +296,12 @@ describe('BulkUploadComponent', () => {
     })
 
     describe('handleOnFileChange', () => {
+        beforeEach(() => {
+            // sendOTP and verifyOTP both read the signed-in user's contact details, which
+            // ngOnInit would normally have put here.
+            component.userProfile = { email: 'test@example.com', mobile: '1234567890' }
+        })
+
         it('should set fileName and fileSelected when valid file is selected', () => {
             mockFileService.validateFile.mockReturnValue(true)
             const verifyOtpSpy = jest.spyOn(component, 'verifyOTP').mockImplementation()
@@ -322,6 +338,12 @@ describe('BulkUploadComponent', () => {
     })
 
     describe('verifyOTP', () => {
+        beforeEach(() => {
+            // sendOTP and verifyOTP both read the signed-in user's contact details, which
+            // ngOnInit would normally have put here.
+            component.userProfile = { email: 'test@example.com', mobile: '1234567890' }
+        })
+
         it('should open OTP verification dialog and handle successful verification', () => {
             const mockDialogRef = {
                 componentInstance: {

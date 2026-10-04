@@ -27,7 +27,7 @@ describe('PublicLogoutComponent', () => {
 
     beforeEach(() => {
         // Create a new instance of the component
-        mockConfigSvc = new ConfigurationsService()
+        mockConfigSvc = new ConfigurationsService(null as any)
         mockActivatedRoute = new ActivatedRoute()
 
         component = new PublicLogoutComponent(mockConfigSvc, mockActivatedRoute)
@@ -57,20 +57,37 @@ describe('PublicLogoutComponent', () => {
     })
 
     it('should unsubscribe on ngOnDestroy', () => {
+        // subscriptionContact is null until ngOnInit subscribes to the route data.
+        component.ngOnInit()
         const unsubscribeSpy = jest.spyOn(component['subscriptionContact']!, 'unsubscribe')
-        component.ngOnInit() // Initialize the subscription
+        // No second ngOnInit here: it would replace subscriptionContact with a fresh
+        // subscription and ngOnDestroy would then unsubscribe that one instead.
         component.ngOnDestroy() // Destroy the subscription
         expect(unsubscribeSpy).toHaveBeenCalled()
     })
 
     it('should redirect to login page on login()', () => {
+        // window.location is typed `string & Location` under the DOM lib, so the stand-in
+        // needs an `any` cast. Capture the origin first: login() reads it off the real
+        // location, and the replacement below does not carry one.
         const originalLocation = global.window.location
-        // delete global.window.location
-        global.window.location = { href: '' } as Location
+        const origin = originalLocation.origin
+        // jsdom's window.location is a non-writable accessor, so a plain assignment is
+        // silently ignored - it has to be redefined. Capture the origin first: login()
+        // reads it off location, and the stand-in below supplies its own.
+        Object.defineProperty(global.window, 'location', {
+            value: { href: '', origin },
+            writable: true,
+            configurable: true,
+        })
 
         component.login()
-        expect(global.window.location.href).toBe(`${window.location.origin}/protected/v8/resource`)
+        expect(global.window.location.href).toBe(`${origin}/protected/v8/resource`)
 
-        global.window.location = originalLocation // Restore original location
+        Object.defineProperty(global.window, 'location', {
+            value: originalLocation,
+            writable: true,
+            configurable: true,
+        })
     })
 })

@@ -42,10 +42,12 @@ describe('AssistantContentCardComponent', () => {
     })
 
     it('should subscribe to afterClosed observable', () => {
-        const afterClosedMock = jest.fn().mockReturnValue(of(null)) // Return mock observable here
-        // const openSpy = jest.spyOn(dialogMock, 'open').mockReturnValue({
-        //     afterClosed: afterClosedMock,
-        // } as any) // Cast to 'any' to match expected return type
+        const afterClosedMock = jest.fn().mockReturnValue(of(null))
+        // open() is auto-mocked and returns undefined by default, so the dialog ref has to
+        // be supplied here or openDialog has nothing to call afterClosed on.
+        jest.spyOn(dialogMock, 'open').mockReturnValue({
+            afterClosed: afterClosedMock,
+        } as any)
 
         component.openDialog()
 

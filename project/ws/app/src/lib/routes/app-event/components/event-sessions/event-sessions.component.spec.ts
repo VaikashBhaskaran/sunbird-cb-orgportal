@@ -166,11 +166,9 @@ describe('EventSessionsComponent', () => {
             }
         ]
 
-        // Trigger the timer callback manually
-        // if (component.currentSubscription) {
-        //     // @ts-ignore: accessing private property for testing
-        //     component.currentSubscription.next()
-        // }
+        // ngOnInit subscribes to timer(0, 60000); under fake timers nothing has fired yet,
+        // so advance the clock to run exactly one tick over the fixtures set above.
+        jest.advanceTimersByTime(0)
 
         // Check that live speaker was identified
         expect(component.liveSpeaker.length).toBe(1)
@@ -183,17 +181,25 @@ describe('EventSessionsComponent', () => {
     })
 
     it('should unsubscribe from timer on destroy', () => {
-        // Setup a mock subscription
-        const mockUnsubscribe = jest.fn()
-        // component.currentSubscription = {
-        //     unsubscribe: mockUnsubscribe
-        // } as any
+        jest.useFakeTimers()
+
+        // Drive the real flow so the component holds a real timer subscription: it is
+        // created in ngOnInit once the parent route emits session data.
+        component.ngOnInit()
+        parentDataSubject.next({ eventdata: mockEventData })
+
+        // currentSubscription is private, hence the cast.
+        const subscription = (component as any).currentSubscription
+        expect(subscription).toBeTruthy()
+        const unsubscribeSpy = jest.spyOn(subscription, 'unsubscribe')
 
         // Call destroy
         component.ngOnDestroy()
 
         // Verify unsubscribe was called
-        expect(mockUnsubscribe).toHaveBeenCalled()
+        expect(unsubscribeSpy).toHaveBeenCalled()
+
+        jest.useRealTimers()
     })
 
     it('should not throw error when currentSubscription is null on destroy', () => {

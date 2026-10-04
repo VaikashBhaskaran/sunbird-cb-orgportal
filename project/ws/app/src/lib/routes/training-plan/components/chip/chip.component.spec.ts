@@ -25,7 +25,18 @@ describe('ChipComponent', () => {
             trainingPlanAssigneeData: {
                 category: '',
                 data: []
-            }
+            },
+            // Mirrors the real service: drop the identifier from the selection.
+            removeSelectedContent: jest.fn(),
+            // Mirrors the real service: drop the identifier from the plan's contentList.
+            removeContentFromPlan: jest.fn((identifier: string) => {
+                const list = mockTrainingPlanDataSharingService.trainingPlanStepperData['contentList'] || []
+                const index = list.findIndex((item: any) =>
+                    (typeof item === 'string' ? item : item && item.identifier) === identifier)
+                if (index > -1) {
+                    list.splice(index, 1)
+                }
+            })
         } as unknown as jest.Mocked<TrainingPlanDataSharingService>
 
         // Create mock for MatDialog
@@ -82,8 +93,9 @@ describe('ChipComponent', () => {
             component.ngOnChanges()
 
             // Assert
+            // The reorder only moves the picked chip to the front; nothing is dropped.
             expect(component.selectedAssigneeChips[0].id).toBe(2)
-            expect(component.selectedAssigneeChips.length).toBe(2)
+            expect(component.selectedAssigneeChips.length).toBe(3)
         })
     })
 

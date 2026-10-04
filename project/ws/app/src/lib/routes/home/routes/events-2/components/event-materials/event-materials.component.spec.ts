@@ -64,7 +64,9 @@ describe('EventMaterialsComponent', () => {
 
     mockEventsService = {
       createContent: jest.fn(),
-      uploadContent: jest.fn()
+      uploadContent: jest.fn(),
+      // Used to branch the material form; false keeps the default (non-BharatKalp) path.
+      isBharatKalpCategory: jest.fn().mockReturnValue(false)
     } as any
 
     mockSnapshot = {

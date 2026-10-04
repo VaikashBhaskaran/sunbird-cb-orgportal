@@ -9,6 +9,11 @@ describe('CreateTimelineComponent', () => {
     beforeEach(() => {
         // Mock the TrainingPlanDataSharingService
         tpdsSvcMock = {
+            // Mirrors the real service: the ids held on the plan, in plan order.
+            getContentIdentifiers: jest.fn(() =>
+                ((tpdsSvcMock.trainingPlanStepperData || {}).contentList || [])
+                    .map((item: any) => (typeof item === 'string' ? item : item && item.identifier))
+                    .filter((id: any) => !!id)),
             trainingPlanStepperData: {
                 status: 'live',
                 assignmentType: 'Designation',

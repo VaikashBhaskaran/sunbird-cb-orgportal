@@ -8,7 +8,8 @@ const mockDomSanitizer = {
 }
 
 const mockProfileV2Service = {
-    getRequestList: jest.fn(),
+    // Subscribed to during ngOnInit.
+    getRequestList: jest.fn().mockReturnValue(of({ result: { data: [], count: 0 } })),
     markAsInvalid: jest.fn()
 }
 
@@ -82,7 +83,8 @@ describe('RequestListComponent', () => {
 
     it('should initialize with default values', () => {
         expect(component.pageNo).toBe(0)
-        expect(component.pageSize).toBe(10)
+        // The component's default pageSize is 20.
+        expect(component.pageSize).toBe(20)
         expect(component.tabledata).toBeDefined()
         expect(component.displayedColumns.length).toBe(9)
     })

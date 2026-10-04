@@ -21,7 +21,9 @@ describe('PreviewPlanComponent', () => {
 
         mockTpdsSvc = {
             trainingPlanContentData: null,
-            trainingPlanAssigneeData: null
+            trainingPlanAssigneeData: null,
+            // Returns the identifiers already on the plan; the component iterates it.
+            getContentIdentifiers: jest.fn().mockReturnValue([])
         }
 
         // Create component with mocked dependencies
@@ -118,7 +120,8 @@ describe('PreviewPlanComponent', () => {
             expect(component.navUrl).toEqual({
                 url: ['app', 'home', 'training-plan-dashboard'],
                 queryParams: {
-                    type: 'live',
+                    // navUrl carries contentData.status through unchanged.
+                    type: 'LIVE',
                     tabSelected: 'Designation',
                 }
             })
@@ -201,16 +204,16 @@ describe('PreviewPlanComponent', () => {
     describe('ngOnInit with form input', () => {
         it('should initialize contentList from trainingPlanContentData when form is "content"', () => {
             // Arrange
+            // The content on the plan is the identifiers the service holds, resolved
+            // against the content it has cached - not the "selected" flags on a page of
+            // search results.
             component.form = 'content'
-            mockTpdsSvc.trainingPlanContentData = {
-                data: {
-                    content: [
-                        { id: 'content1', selected: true },
-                        { id: 'content2', selected: false },
-                        { id: 'content3', selected: true }
-                    ]
-                }
-            }
+            mockTpdsSvc.getContentIdentifiers = jest.fn().mockReturnValue(['content1', 'content3'])
+            mockTpdsSvc.trainingPlanSelectedContent = [
+                { identifier: 'content1', id: 'content1' },
+                { identifier: 'content2', id: 'content2' },
+                { identifier: 'content3', id: 'content3' }
+            ]
 
             // Act
             component.ngOnInit()
@@ -272,7 +275,8 @@ describe('PreviewPlanComponent', () => {
             component.navUrl = {
                 url: ['app', 'home', 'training-plan-dashboard'],
                 queryParams: {
-                    type: 'live',
+                    // navUrl carries contentData.status through unchanged.
+                    type: 'LIVE',
                     tabSelected: 'Designation'
                 }
             }
@@ -283,7 +287,7 @@ describe('PreviewPlanComponent', () => {
             // Assert
             expect(mockRouter.navigate).toHaveBeenCalledWith(
                 ['app', 'home', 'training-plan-dashboard'],
-                { queryParams: { type: 'live', tabSelected: 'Designation' } }
+                { queryParams: { type: 'LIVE', tabSelected: 'Designation' } }
             )
         })
     })

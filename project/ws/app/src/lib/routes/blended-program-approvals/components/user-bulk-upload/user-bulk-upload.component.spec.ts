@@ -1,5 +1,7 @@
 
-import { MyContentService } from '../../services/content-detail.service'
+// The component takes ContentBatchService; content-detail.service and its
+// MyContentService no longer exist.
+import { ContentBatchService } from '../../services/content-batch.service'
 import { MatDialog } from '@angular/material/dialog'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { UserBulkUploadComponent } from './user-bulk-upload.component'
@@ -7,13 +9,13 @@ import { UserBulkUploadComponent } from './user-bulk-upload.component'
 describe('UserBulkUploadComponent', () => {
     let component: UserBulkUploadComponent
 
-    const contentSvc: Partial<MyContentService> = {}
+    const contentSvc: Partial<ContentBatchService> = {}
     const dialog: Partial<MatDialog> = {}
     const snackBar: Partial<MatSnackBar> = {}
 
     beforeAll(() => {
         component = new UserBulkUploadComponent(
-            contentSvc as MyContentService,
+            contentSvc as ContentBatchService,
             dialog as MatDialog,
             snackBar as MatSnackBar
         )

@@ -2,8 +2,17 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "types": ["jest", "node"]
+    "types": ["jest", "node"],
+    // Redeclared in full because `paths` replaces the base map rather than merging with
+    // it. "@test/*" is spec-only and is deliberately absent from tsconfig.app.json.
+    "paths": {
+      "@ws/app": ["project/ws/app"],
+      "@ws/app/*": ["project/ws/app/*"],
+      "@ws/viewer": ["project/ws/viewer"],
+      "@ws/viewer/*": ["project/ws/viewer/*"],
+      "@test/*": ["test/*"]
+    }
   },
-  "files": ["src/test.ts", "src/polyfills.ts"],
+  "files": ["src/test.ts", "src/polyfills.ts", "test/types/stubs.d.ts"],
   "include": ["src/**/*.spec.ts", "src/**/*.d.ts"]
 }

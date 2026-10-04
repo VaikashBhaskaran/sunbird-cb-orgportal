@@ -81,7 +81,8 @@ describe('AllUsersComponent', () => {
         }
 
         mockUsersService = {
-            getAllKongUsers: jest.fn()
+            // The component subscribes and reads data.result.response.content.
+            getAllKongUsers: jest.fn().mockReturnValue(of({ result: { response: { content: [], count: 0 } } }))
         }
 
         component = new AllUsersComponent(
@@ -276,6 +277,10 @@ describe('AllUsersComponent', () => {
 
             mockUsersService.getAllKongUsers.mockReturnValue(of(mockUserResponse))
             component.rootOrgId = 'test-org-id'
+            // getUsers builds the request from its argument but files the response under
+            // this.currentFilter, so both have to say 'verified' for the result to land in
+            // verifiedUsersData. Recorded in product-bugs.md.
+            component.currentFilter = 'verified'
 
             component.getUsers('', 'verified')
 

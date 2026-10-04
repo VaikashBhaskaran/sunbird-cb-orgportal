@@ -19,7 +19,9 @@ describe('EventsListComponent', () => {
     // Setup EventService mock with default response
     mockEventService = {
       getEvents: jest.fn().mockReturnValue(of({ Event: [], count: 0 })),
-      updateEvent: jest.fn()
+      updateEvent: jest.fn().mockReturnValue(of({})),
+      // The component subscribes to the cancel call.
+      cancelEvent: jest.fn().mockReturnValue(of({}))
     } as any
 
     mockSnackBar = {
@@ -86,7 +88,8 @@ describe('EventsListComponent', () => {
 
       expect(component.tableData.columns).toHaveLength(4)
       expect(component.tableData.columns[0].displayName).toBe('Event Name')
-      expect(component.menuItems).toHaveLength(2)
+      // The upcoming tab offers View, Edit and Cancel.
+      expect(component.menuItems).toHaveLength(3)
       expect(component.pathUrl).toBe('upcoming')
     })
 
@@ -188,24 +191,27 @@ describe('EventsListComponent', () => {
         identifier: 'test-id',
         versionKey: 'v1'
       }
-      mockEventService.updateEvent.mockReturnValue(of({ success: true }))
+      mockEventService.cancelEvent.mockReturnValue(of({ success: true }))
 
       component.cancelEvent(mockEvent)
 
-      expect(mockEventService.updateEvent).toHaveBeenCalledWith(
+      // The component calls cancelEvent(identifier, requestBody) - not updateEvent, and the
+      // identifier comes first. cancelledOn is stamped from the clock, so it is matched
+      // loosely rather than pinned to a fixed timestamp.
+      expect(mockEventService.cancelEvent).toHaveBeenCalledWith(
+        mockEvent.identifier,
         {
           request: {
             event: {
-              cancelledBy: "",
-              cancelledByName: "",
-              cancelledOn: "2025-04-17T06:37:17.006+0000",
+              cancelledBy: '',
+              cancelledByName: '',
+              cancelledOn: expect.any(String),
               identifier: mockEvent.identifier,
               versionKey: mockEvent.versionKey,
               status: 'Cancelled'
             }
           }
-        },
-        mockEvent.identifier
+        }
       )
       expect(mockSnackBar.open).toHaveBeenCalledWith('event is cancelled successfully')
     })
@@ -220,7 +226,7 @@ describe('EventsListComponent', () => {
         status: 404
       })
 
-      mockEventService.updateEvent.mockReturnValue(throwError(() => errorResponse))
+      mockEventService.cancelEvent.mockReturnValue(throwError(() => errorResponse))
 
       component.cancelEvent(mockEvent)
 

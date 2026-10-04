@@ -283,7 +283,7 @@ describe('AddCompetencyComponent', () => {
   describe('canAddCompetencies', () => {
     it('should return false if no themes are selected', () => {
       component.selectedThemesList = []
-      expect(component.canAddCompetencies).toBe(true)
+      expect(component.canAddCompetencies).toBe(false)
     })
 
     it('should return false if any selected theme has no selected subthemes', () => {

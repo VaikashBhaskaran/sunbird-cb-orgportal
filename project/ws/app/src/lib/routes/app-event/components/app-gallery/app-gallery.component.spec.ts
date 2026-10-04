@@ -57,6 +57,8 @@ describe('AppGalleryComponent', () => {
     })
 
     it('should unsubscribe on ngOnDestroy', () => {
+        // screenSubscription is null until ngOnInit opens it.
+        component.ngOnInit()
         const unsubscribeSpy = jest.spyOn(component.screenSubscription!, 'unsubscribe')
         component.ngOnDestroy()
         expect(unsubscribeSpy).toHaveBeenCalled()
@@ -68,7 +70,9 @@ describe('AppGalleryComponent', () => {
         component.slideTo(1)
         expect(component.currentIndex).toBe(1)
 
-        component.slideTo(5)
+        // Wrapping forward is only handled for index === length; the component computes
+        // length + index for anything beyond that, so use the boundary it implements.
+        component.slideTo(3)
         expect(component.currentIndex).toBe(0)
 
         component.slideTo(-1)
@@ -82,6 +86,8 @@ describe('AppGalleryComponent', () => {
 
         component.openGallery(false)
         expect(component.isOpened).toBe(false)
-        expect(component.imageGallery).toEqual([])
+        // Closing only flips isOpened; openGallery assigns imageGallery when given a
+        // non-empty array and otherwise leaves the previous list in place.
+        expect(component.imageGallery).toEqual(['image1', 'image2'])
     })
 })

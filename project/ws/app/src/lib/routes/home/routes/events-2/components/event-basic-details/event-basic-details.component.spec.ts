@@ -28,7 +28,9 @@ describe('EventBasicDetailsComponent', () => {
     loaderService = new LoaderService()
     datePipe = new DatePipe('en-US')
 
-    component = new EventBasicDetailsComponent(matSnackBar, eventSvc, loaderService, datePipe)
+    // NgZone was added since this spec was written; run callbacks straight through.
+    const ngZone = { run: (fn: any) => fn(), runOutsideAngular: (fn: any) => fn() } as any
+    component = new EventBasicDetailsComponent(matSnackBar, eventSvc, loaderService, datePipe, ngZone)
     component.eventDetails = new FormGroup({
       startTime: new FormControl('12:00 am'),
       endTime: new FormControl('12:30 am'),
@@ -44,7 +46,13 @@ describe('EventBasicDetailsComponent', () => {
       const eventDetailsMock = {
         value: { startTime: '14:30+00:00', endTime: '16:00+00:00' }
       }
-      component.eventDetails.setValue(eventDetailsMock)
+      // patchValue, not setValue: the form has six controls and this only names two.
+      // The date has to be in the future: for an event starting today, ngOnChanges also
+      // runs the minimum-start-time check, which clears both times when the chosen one
+      // has already passed.
+      const tomorrow = new Date()
+      tomorrow.setDate(tomorrow.getDate() + 1)
+      component.eventDetails.patchValue({ ...eventDetailsMock.value, startDate: tomorrow })
 
       const spy = jest.spyOn(component, 'convertTo12HourFormat')
       component.ngOnChanges({
@@ -76,12 +84,16 @@ describe('EventBasicDetailsComponent', () => {
 
   describe('generatMinTimeToStart', () => {
     it('should generate minimum start time for today', () => {
-      const datePipeSpy = jest.spyOn(datePipe, 'transform').mockReturnValue('2025-02-27')
+      // minTimeToStart is whatever the pipe formats "now" as, so the stub has to return a
+      // time rather than a date.
+      const datePipeSpy = jest.spyOn(datePipe, 'transform').mockReturnValue('12:30 AM')
       component.eventDetails.controls.startTime.setValue('12:30 AM')
       component.generatMinTimeToStart()
 
       expect(component.minTimeToStart).toBe('12:30 AM')
-      expect(datePipeSpy).toHaveBeenCalledWith(new Date(), 'h:mm a')
+      // Not `new Date()`: that is a different instant from the one the component made,
+      // and the two only compare equal when both land in the same millisecond.
+      expect(datePipeSpy).toHaveBeenCalledWith(expect.any(Date), 'h:mm a')
     })
   })
 

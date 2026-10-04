@@ -5,7 +5,7 @@ import { MatSnackBar } from '@angular/material/snack-bar'
 import { EventService } from '@sunbird-cb/utils-v2'
 import { ActivatedRoute } from '@angular/router'
 import { TelemetryEvents } from '../../../../head/_services/telemetry.event.model'
-import { of } from 'rxjs'
+import { EMPTY, Subject, of } from 'rxjs'
 import * as _ from 'lodash'
 
 jest.mock('../../services/need-approvals.service')
@@ -29,14 +29,30 @@ describe('NeedsApprovalComponent', () => {
         events = new EventService(null as any, null as any)
         activatedRoute = { data: { subscribe: jest.fn() } } as any
 
+        // ngOnInit subscribes to router.events, so a null Router no longer works here.
+        const router: any = { events: EMPTY, navigate: jest.fn() }
+
         component = new NeedsApprovalComponent(
             needApprService,
             activatedRoute,
-            null as any, // Router can be null for the purpose of these tests
+            router,
             events,
             dialog,
             matSnackBar
         )
+
+        // The workflow request is built from userwfData.userInfo.wid.
+
+        component.userwfData = { userInfo: { wid: 'actor1' } } as any
+
+        // Default doubles; individual tests override them where they assert on the call.
+
+        jest.spyOn(dialog, 'open').mockReturnValue({ afterClosed: () => of(true), close: jest.fn() } as any)
+
+        jest.spyOn(needApprService, 'handleWorkflow')
+
+            .mockReturnValue(of({ result: { data: { status: 'APPROVED' } } }) as any)
+
 
         // Mocking the methods
         // jest.spyOn(activatedRoute.data, 'subscribe').mockImplementation((cb) =>
@@ -75,9 +91,15 @@ describe('NeedsApprovalComponent', () => {
     })
 
     it('should call onApproveOrRejectClick after dialog is closed with result', () => {
+        // afterClosed has to emit *after* onClickHandleWorkflow returns. The component
+        // declares `req` below the dialog block, so a synchronous of(true) would run the
+        // subscribe callback while `req` is still in the temporal dead zone - something
+        // that cannot happen with a real dialog, which closes on user interaction.
+        const closed = new Subject<any>()
         const openDialogSpy = jest.spyOn(dialog, 'open')
         const mockDialogRef = {
-            afterClosed: jest.fn().mockReturnValue(of(true)),
+            afterClosed: jest.fn().mockReturnValue(closed.asObservable()),
+            close: jest.fn(),
         }
         openDialogSpy.mockReturnValue(mockDialogRef as any)
 
@@ -87,6 +109,7 @@ describe('NeedsApprovalComponent', () => {
         const onApproveOrRejectClickSpy = jest.spyOn(component, 'onApproveOrRejectClick')
 
         component.onClickHandleWorkflow(field, action)
+        closed.next(true)
 
         expect(onApproveOrRejectClickSpy).toHaveBeenCalled()
     })
@@ -124,7 +147,9 @@ describe('NeedsApprovalComponent', () => {
             updateFieldValues: [],
         }
 
-        // const handleWorkflowSpy = jest.spyOn(needApprService, 'handleWorkflow').mockReturnValue(of({ result: { data: { status: 'REJECTED' } } }))
+        // The default double in beforeEach returns APPROVED; this test needs the reject path.
+        jest.spyOn(needApprService, 'handleWorkflow')
+            .mockReturnValue(of({ result: { data: { status: 'REJECTED' } } }) as any)
         const openSnackBarSpy = jest.spyOn(matSnackBar, 'open')
 
         component.onApproveOrRejectClick(req)

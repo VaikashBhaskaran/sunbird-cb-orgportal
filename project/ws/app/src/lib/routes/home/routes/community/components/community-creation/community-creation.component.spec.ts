@@ -2,6 +2,7 @@ import { of, throwError } from 'rxjs'
 import { CommunityCreationComponent } from './community-creation.component'
 import { FormBuilder } from '@angular/forms'
 import { HttpErrorResponse } from '@angular/common/http'
+import { environment } from 'src/environments/environment'
 
 // Mock services
 const mockActivatedRoute = {
@@ -379,21 +380,31 @@ describe('CommunityCreationComponent', () => {
     component.publishCommunityMethod()
 
     expect(mockCommunityService.publishCommunity).toHaveBeenCalled()
+    // The component prefers the server's error.message and only falls back to the generic
+    // text when it is absent - the fixture supplies 'Server error'.
     expect(mockMatSnackBar.open).toHaveBeenCalledWith(
-      'Something went wrong while publishing community, please try again',
+      'Server error',
       '',
       expect.any(Object)
     )
   })
 
   it('should get environment base URL', () => {
-    (component as any).environmentData = {
-      karmYogiPath: 'test-path',
-      dicussV2Bucket: 'test-bucket'
-    }
+    // getEnvironmentBaseUrl reassigns this.environmentData = environment on entry, so the
+    // values have to be on the environment module itself, not on the instance.
+    const env = environment as any
+    const originalPath = env.karmYogiPath
+    const originalBucket = env.dicussV2Bucket
+    env.karmYogiPath = 'test-path'
+    env.dicussV2Bucket = 'test-bucket'
 
-    const result = component.getEnvironmentBaseUrl()
-    expect(result).toBe('test-path/test-bucket')
+    try {
+      const result = component.getEnvironmentBaseUrl()
+      expect(result).toBe('test-path/test-bucket')
+    } finally {
+      env.karmYogiPath = originalPath
+      env.dicussV2Bucket = originalBucket
+    }
   })
 
   it('should correctly split URL', () => {

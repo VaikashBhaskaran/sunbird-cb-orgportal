@@ -45,7 +45,12 @@ describe('InstituteProfileComponent', () => {
         } as any
 
         configSvcMock = {
-            unMappedUser: { orgProfile: { profileDetails: { instituteProfile: {} } } },
+            // addOrg's edit branch is guarded by unMappedUser.profileDetails, which sits
+            // alongside orgProfile on the real user object rather than inside it.
+            unMappedUser: {
+                orgProfile: { profileDetails: { instituteProfile: {} } },
+                profileDetails: {},
+            },
             userProfile: {},
         } as any
 
@@ -87,10 +92,9 @@ describe('InstituteProfileComponent', () => {
 
         component.addOrg()
 
+        // The component calls open() with the message alone - no action and no config.
         expect(snackBarMock.open).toHaveBeenCalledWith(
-            'Attached training institute or center name is required',
-            undefined,
-            undefined
+            'Attached training institute or center name is required'
         )
     })
 

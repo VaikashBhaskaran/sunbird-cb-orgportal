@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
+import { NO_ERRORS_SCHEMA } from '@angular/core'
+import { commonTestingProviders, stubPipes, viewerRouteData } from '@test/helpers/testing-providers'
 import { ResourceCollectionComponent } from './resource-collection.component'
 
 describe('ResourceCollectionComponent', () => {
@@ -8,7 +10,10 @@ describe('ResourceCollectionComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ResourceCollectionComponent],
+      declarations: [ResourceCollectionComponent, ...stubPipes()],
+      providers: [...commonTestingProviders({ routeData: viewerRouteData() })],
+      // Shallow smoke test: child components in the template are not declared here.
+      schemas: [NO_ERRORS_SCHEMA],
     })
       .compileComponents()
   }))

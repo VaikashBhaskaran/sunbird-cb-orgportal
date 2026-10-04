@@ -24,7 +24,7 @@ describe('ResearchComponent', () => {
         orgProfileServiceMock = new OrgProfileService(null as any) as jest.Mocked<OrgProfileService>
         snackBarMock = new MatSnackBar(null as any, null as any, null as any, null as any, null as any, null as any) as jest.Mocked<MatSnackBar>
         dialogMock = new MatDialog(null as any, null as any, null as any, null as any, null as any, null as any, null as any) as jest.Mocked<MatDialog>
-        configServiceMock = new ConfigurationsService() as jest.Mocked<ConfigurationsService>
+        configServiceMock = new ConfigurationsService(null as any) as jest.Mocked<ConfigurationsService>
         routerMock = new Router() as jest.Mocked<Router>
 
         // Mocking OrgProfileService's formValues and rolesAndFunctions

@@ -8,18 +8,6 @@ import { ActivatedRoute } from '@angular/router'
 jest.mock('../../services/designations.service')
 jest.mock('@angular/material/dialog')
 jest.mock('@angular/material/snack-bar')
-jest.mock('@angular/router', () => ({
-    //     ActivatedRoute: jest.fn().mockImplementation(() => ({
-    //         snapshot: {
-    //             data: {
-    //                 pageData: {
-    //                     data: {},
-    //                 },
-    //             },
-    //         }),
-    //         data: of({}),
-    //   })),
-}))
 
 describe('DesignationsComponent', () => {
     let component: DesignationsComponent
@@ -33,9 +21,18 @@ describe('DesignationsComponent', () => {
         designationsService = new DesignationsService(null as any, null as any) as jest.Mocked<DesignationsService> // Force the type to mock
         dialog = new MatDialog(null as any, null as any, null as any, null as any, null as any, null as any, null as any, null as any) // Mock constructor for MatDialog
         snackBar = new MatSnackBar(null as any, null as any, null as any, null as any, null as any, null as any) // Mock constructor for MatSnackBar
-        activatedRoute = new ActivatedRoute()
+        // A plain stub: the module-level jest.mock of @angular/router left ActivatedRoute
+        // undefined, so it could not be constructed.
+        activatedRoute = {
+            snapshot: { data: { pageData: { data: {} } } },
+            data: of({})
+        } as unknown as ActivatedRoute
 
         component = new DesignationsComponent(designationsService, dialog, activatedRoute, snackBar)
+        // this.environment is assigned in ngOnInit; methods under test write to it directly.
+        component.environment = {}
+        // The error branch reads its message out of designationConfig.
+        component.designationConfig = { internalErrorMsg: 'Something went wrong' } as any
 
         // Now mock methods in the service
         designationsService.setUserProfile = jest.fn()

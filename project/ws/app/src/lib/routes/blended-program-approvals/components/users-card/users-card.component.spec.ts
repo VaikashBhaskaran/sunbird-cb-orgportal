@@ -127,7 +127,12 @@ describe('UsersCardComponent', () => {
     describe('loadUser', () => {
         it('should emit user data through showUser EventEmitter', () => {
             const user = { id: 1, name: 'John Doe' }
+            // loadUser parks the user on programData before emitting, so that input has to
+            // be bound.
+            component.programData = {}
             component.loadUser(user)
+
+            expect(component.programData.user).toBe(user)
 
             expect(showUserSpy).toHaveBeenCalledWith(user)
         })

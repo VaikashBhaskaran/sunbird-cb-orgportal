@@ -8,14 +8,15 @@
 import { HttpClient } from '@angular/common/http'
 import { AppTocService } from './app-toc.service'
 import { ConfigurationsService } from '@sunbird-cb/utils-v2'
-import { WidgetContentService } from '@ws-widget/collection'
 import { of } from 'rxjs'
 
 describe('AppTocService', () => {
   let service: AppTocService
   let httpClientMock: jest.Mocked<HttpClient>
   let configServiceMock: jest.Mocked<ConfigurationsService>
-  let widgetServiceMock: jest.Mocked<WidgetContentService>
+  // WidgetContentService comes from @ws-widget/collection, which is not installed in this
+  // repository and is stubbed for tests, so it cannot be used as a type here.
+  let widgetServiceMock: any
 
   beforeEach(() => {
     httpClientMock = {

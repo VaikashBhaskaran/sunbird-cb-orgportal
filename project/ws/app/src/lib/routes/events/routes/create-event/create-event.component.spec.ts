@@ -105,6 +105,12 @@ describe('CreateEventComponent', () => {
 	})
 
 	it('should initialize properly', () => {
+		// ngOnInit narrows timeArr to the slots still ahead of the current clock time and
+		// then reads timeArr[0], so it depends on when the suite runs - and throws outright
+		// after 23:30, when nothing is left. Pin the clock to midday so this is
+		// deterministic. The nightly crash is recorded in product-bugs.md.
+		jest.useFakeTimers().setSystemTime(new Date('2025-03-15T12:00:00'))
+
 		// Spy on ngOnInit
 		jest.spyOn(component, 'ngOnInit')
 
@@ -120,6 +126,8 @@ describe('CreateEventComponent', () => {
 		expect(component.createEventForm.get('eventType')?.value).toBe('Webinar')
 		expect(component.createEventForm.get('eventDurationHours')?.value).toBe(0)
 		expect(component.createEventForm.get('eventDurationMinutes')?.value).toBe(30)
+
+		jest.useRealTimers()
 	})
 
 	it('should get user profile from ConfigService when available', () => {
@@ -133,6 +141,9 @@ describe('CreateEventComponent', () => {
 		document.getElementById = jest.fn().mockReturnValue({
 			scrollIntoView: jest.fn()
 		})
+
+		// tabsData is populated during init; onSideNavTabClick iterates it.
+		component.tabsData = [{ key: 'datetime', name: 'Date and Time' }] as any
 
 		// Call the tab click method
 		component.onSideNavTabClick('datetime')
@@ -187,11 +198,10 @@ describe('CreateEventComponent', () => {
 			afterClosed: jest.fn().mockReturnValue(of(mockResponse))
 		} as any)
 
-		// Call the openDialog method
+		// Call the openDialog method. afterClosed() emits synchronously here, so
+		// openDialog has already forwarded the response to addPresenters by the time it
+		// returns - calling addPresenters again would add every presenter twice.
 		component.openDialog()
-
-		// Manually call addPresenters since the mock afterClosed won't trigger it
-		component.addPresenters(mockResponse)
 
 		// Verify presenters and participants arrays are updated
 		expect(component.presentersArr.length).toBe(1)
@@ -315,9 +325,10 @@ describe('CreateEventComponent', () => {
 		// Call submit method
 		component.onSubmit()
 
-		// Verify loading state
-		expect(component.disableCreateButton).toBe(true)
-		expect(component.displayLoader).toBe(true)
+		// Verify loading state. createEvent's mock emits synchronously, so by the time
+		// onSubmit returns the success handler has already cleared both flags again.
+		expect(component.disableCreateButton).toBe(false)
+		expect(component.displayLoader).toBe(false)
 
 		// Verify APIs were called
 		expect(mockEventsService.createEvent).toHaveBeenCalledWith(expect.objectContaining({

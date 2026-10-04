@@ -130,7 +130,9 @@ describe('ViewUserComponent', () => {
                 responseData: ['Developer', 'Designer', 'Manager', 'Other']
             })),
             updateUserDetails: jest.fn().mockReturnValue(of({ success: true })),
-            addUserToDepartment: jest.fn().mockReturnValue(of({ success: true }))
+            addUserToDepartment: jest.fn().mockReturnValue(of({ success: true })),
+            // Subscribed to when the roles form is submitted.
+            addUserToRole: jest.fn().mockReturnValue(of({ success: true }))
         }
 
         mockSnackBar = {
@@ -208,6 +210,9 @@ describe('ViewUserComponent', () => {
         document.getElementById = jest.fn().mockImplementation(() => ({
             scrollIntoView: scrollIntoViewMock
         }))
+
+        // tabsData is populated during init; onSideNavTabClick iterates it.
+        component.tabsData = [{ key: 'personalInfo', name: 'Personal Info' }]
 
         // Execute
         component.onSideNavTabClick('personalInfo')
@@ -318,8 +323,8 @@ describe('ViewUserComponent', () => {
         // Execute
         component.onSubmit(component.updateUserRoleForm, 'Roles')
 
-        // Assert
-        expect(mockUsersService.addUserToDepartment).toHaveBeenCalledWith({
+        // Assert: the roles branch posts to addUserToRole, not addUserToDepartment.
+        expect(mockUsersService.addUserToRole).toHaveBeenCalledWith({
             request: {
                 organisationId: 'org123',
                 userId: 'user123',
@@ -330,15 +335,18 @@ describe('ViewUserComponent', () => {
     })
 
     it('should show error message when submitting roles form with no changes', () => {
-        // Setup
+        // Setup. The component detects "unchanged" by reference (form.value.roles !==
+        // this.orguserRoles), which is how it behaves in the app: patchUserRoles seeds the
+        // control with the orguserRoles array itself, and picking a role replaces it.
         component.orguserRoles = ['PUBLIC', 'CONTENT_CREATOR']
         component.userRoles = new Set(['PUBLIC', 'CONTENT_CREATOR'])
+        component.updateUserRoleForm.controls['roles'].setValue(component.orguserRoles)
 
         // Execute
         component.onSubmit(component.updateUserRoleForm, 'Roles')
 
         // Assert
-        expect(mockUsersService.addUserToDepartment).not.toHaveBeenCalled()
+        expect(mockUsersService.addUserToRole).not.toHaveBeenCalled()
         expect(mockSnackBar.open).toHaveBeenCalledWith('Select new roles', 'X', { duration: 5000 })
     })
 

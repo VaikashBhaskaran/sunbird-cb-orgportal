@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { HtmlPickerComponent } from './html-picker.component'
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core'
+import { commonTestingProviders, stubPipes, viewerRouteData } from '@test/helpers/testing-providers'
 
 describe('HtmlPickerComponent', () => {
   let component: HtmlPickerComponent
@@ -9,8 +10,9 @@ describe('HtmlPickerComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [HtmlPickerComponent],
-      imports: [CUSTOM_ELEMENTS_SCHEMA],
+      declarations: [HtmlPickerComponent, ...stubPipes()],
+      providers: [...commonTestingProviders({ routeData: viewerRouteData() })],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
     })
       .compileComponents()
   }))

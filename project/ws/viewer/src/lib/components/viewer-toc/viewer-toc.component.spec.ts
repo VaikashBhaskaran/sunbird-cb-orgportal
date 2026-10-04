@@ -10,11 +10,13 @@ describe('ViewerTocComponent', () => {
   let mockUtilityService: any
   let mockViewerDataService: any
   let mockConfigService: any
-  let mockContentProgressService: any
+  let mockViewerUtilService: any
 
   beforeEach(() => {
     // Mock services
     mockActivatedRoute = {
+      // ngOnInit reads snapshot.data.hierarchyData / .enrollmentData straight away.
+      snapshot: { data: {} },
       queryParamMap: of({
         get: (key: string) => {
           const params: { [key: string]: string } = {
@@ -34,12 +36,17 @@ describe('ViewerTocComponent', () => {
     }
 
     mockWidgetContentService = {
+      // The component reads res.result.content off this response.
       fetchContent: jest.fn().mockReturnValue(of({
-        identifier: 'test-content',
-        name: 'Test Content',
-        children: [],
-        mimeType: 'application/vnd.ekstep.content-collection',
-        primaryCategory: 'Course'
+        result: {
+          content: {
+            identifier: 'test-content',
+            name: 'Test Content',
+            children: [],
+            mimeType: 'application/vnd.ekstep.content-collection',
+            primaryCategory: 'Course'
+          }
+        }
       })),
       fetchAuthoringContent: jest.fn().mockReturnValue(of({
         identifier: 'test-content',
@@ -68,19 +75,23 @@ describe('ViewerTocComponent', () => {
       }
     }
 
-    mockContentProgressService = {
-      getProgressHash: jest.fn().mockReturnValue(of({}))
+    mockViewerUtilService = {
+      getContentTypeIcon: jest.fn(),
+      getPublicUrl: jest.fn()
     }
 
     // Initialize component
+    // Argument order matters: the 6th parameter is ViewerUtilService and the 7th is
+    // ConfigurationsService. Passing the config service 6th put it in the wrong slot, so
+    // configSvc.instanceConfig was never visible to the component.
     component = new ViewerTocComponent(
       mockActivatedRoute,
       mockDomSanitizer,
       mockWidgetContentService,
       mockUtilityService,
       mockViewerDataService,
-      mockConfigService,
-      mockContentProgressService
+      mockViewerUtilService,
+      mockConfigService
     )
   })
 
@@ -105,11 +116,12 @@ describe('ViewerTocComponent', () => {
 
   describe('changeTocMode', () => {
     it('should toggle between FLAT and TREE modes', () => {
-      expect(component.tocMode).toBe('FLAT')
-      component.changeTocMode()
+      // tocMode defaults to 'TREE' in the component.
       expect(component.tocMode).toBe('TREE')
       component.changeTocMode()
       expect(component.tocMode).toBe('FLAT')
+      component.changeTocMode()
+      expect(component.tocMode).toBe('TREE')
     })
   })
 

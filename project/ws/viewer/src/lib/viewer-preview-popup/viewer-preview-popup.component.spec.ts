@@ -1,5 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
+import { NO_ERRORS_SCHEMA } from '@angular/core'
+
+import { commonTestingProviders, stubPipes } from '@test/helpers/testing-providers'
 import { ViewerPreviewPopupComponent } from './viewer-preview-popup.component'
 
 describe('ViewerPreviewPopupComponent', () => {
@@ -8,7 +11,11 @@ describe('ViewerPreviewPopupComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ViewerPreviewPopupComponent],
+      // The component is standalone, so it is imported rather than declared.
+      imports: [ViewerPreviewPopupComponent],
+      declarations: [...stubPipes()],
+      providers: [...commonTestingProviders()],
+      schemas: [NO_ERRORS_SCHEMA],
     })
     .compileComponents()
   }))

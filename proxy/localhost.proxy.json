@@ -1,6 +1,6 @@
 {
   "/apis": {
-    "target": "https://mdo.dev.karmayogibharat.net/",
+    "target": "https://mdo.uat.karmayogibharat.net/",
     "secure": false,
     "logLevel": "debug",
     "changeOrigin": true,
@@ -12,7 +12,7 @@
     }
   },
   "/api": {
-    "target": "https://mdo.dev.karmayogibharat.net/",
+    "target": "https://mdo.uat.karmayogibharat.net/",
     "secure": false,
     "logLevel": "debug",
     "changeOrigin": true,

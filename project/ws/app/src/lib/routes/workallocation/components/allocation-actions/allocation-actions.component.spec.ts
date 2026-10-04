@@ -13,6 +13,21 @@ describe('AllocationActionsComponent', () => {
     let dialogRef: jest.Mocked<MatDialogRef<AllocationActionsComponent>>
 
     beforeEach(() => {
+
+        // displayLoader()/toggleDisplay() look elements up by id with a non-null
+
+        // assertion; jsdom has none unless the test creates them.
+
+        if (!document.getElementById('loader')) {
+
+            const el = document.createElement('div')
+
+            el.id = 'loader'
+
+            document.body.appendChild(el)
+
+        }
+
         // Mocking MatDialogRef to avoid TypeError
         dialogRef = {
             close: jest.fn(),
@@ -60,6 +75,14 @@ describe('AllocationActionsComponent', () => {
 
     it('should handle selecting a role', () => {
         const role = { name: 'Role1', description: 'Role Description' }
+        // selectRole picks the match out of similarRoles, which a search normally fills.
+        component.similarRoles = [{
+            name: 'Role1',
+            description: 'Role Description',
+            type: undefined,
+            status: undefined,
+            childNodes: [],
+        }]
         component.selectRole(role)
 
         expect(component.selectedRole).toEqual({
@@ -78,6 +101,9 @@ describe('AllocationActionsComponent', () => {
         const resetSpy = jest.spyOn(component.allocationFieldForm, 'reset')
         const closeSpy = jest.spyOn(dialogRef, 'close')
 
+        // saveWorkOrder starts with `delete this.selectedCompetency['childCount']`, which
+        // throws when the property is still undefined.
+        component.selectedCompetency = {}
         component.saveWorkOrder()
 
         expect(allocationService.createAllocation).toHaveBeenCalled()
@@ -86,7 +112,12 @@ describe('AllocationActionsComponent', () => {
     })
 
     it('should map selected competency and update form values', () => {
-        const competency = { name: 'Competency1', description: 'Competency Description' }
+        // The mapped entry's additionalProperties.competencyArea is written into the form.
+        const competency = {
+            name: 'Competency1',
+            description: 'Competency Description',
+            additionalProperties: { competencyArea: 'Area1' },
+        }
         component.selectCompetency(competency)
 
         expect(component.selectedCompetency.length).toBe(1)

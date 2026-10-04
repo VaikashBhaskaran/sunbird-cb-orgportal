@@ -22,7 +22,14 @@ describe('OrganisationUsersComponent', () => {
       navigate: jest.fn(),
     }
 
-    component = new OrganisationUsersComponent(mockActivatedRoute, mockRouter)
+    component = new OrganisationUsersComponent(
+      mockActivatedRoute,
+      mockRouter,
+      // Only changeLoaderState is called, and only for its side effect.
+      { changeLoaderState: jest.fn() } as any,
+      // ngOnInit reads the parent org off this service.
+      { getOrgData: jest.fn().mockReturnValue({}) } as any,
+    )
   })
 
   afterEach(() => {

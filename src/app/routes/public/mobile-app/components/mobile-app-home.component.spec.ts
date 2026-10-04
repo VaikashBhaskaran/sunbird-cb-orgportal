@@ -60,9 +60,11 @@ describe('MobileAppHomeComponent', () => {
     })
 
     it('should handle ngOnDestroy correctly', () => {
-        // Mocking route subscription
-        const unsubscribeSpy = jest.fn()
-        //  component.routeSubscription = { unsubscribe: unsubscribeSpy }
+        // ngOnInit is what creates routeSubscription, so drive it first and spy on the
+        // real subscription rather than planting a stand-in.
+        component.ngOnInit()
+        expect(component.routeSubscription).toBeTruthy()
+        const unsubscribeSpy = jest.spyOn(component.routeSubscription!, 'unsubscribe')
 
         // Call ngOnDestroy to trigger the cleanup logic
         component.ngOnDestroy()
@@ -72,7 +74,8 @@ describe('MobileAppHomeComponent', () => {
     })
 
     it('should handle Android and iOS app references correctly', () => {
-        // Test when iOsAppRef is set
+        // Both flags start true and ngOnInit only ever clears them, so the second case
+        // needs a fresh component rather than a second ngOnInit on the same one.
         mockMobileService.iOsAppRef = true
         mockMobileService.isAndroidApp = false
         component.ngOnInit()
@@ -82,8 +85,15 @@ describe('MobileAppHomeComponent', () => {
         // Test when isAndroidApp is set
         mockMobileService.iOsAppRef = false
         mockMobileService.isAndroidApp = true
-        component.ngOnInit()
-        expect(component.isAndriod).toBe(true)
-        expect(component.isIos).toBe(false)
+        const androidComponent = new MobileAppHomeComponent(
+            mockSanitizer,
+            mockActivatedRoute,
+            mockPlatform,
+            mockMobileService,
+            mockConfigService
+        )
+        androidComponent.ngOnInit()
+        expect(androidComponent.isAndriod).toBe(true)
+        expect(androidComponent.isIos).toBe(false)
     })
 })

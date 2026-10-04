@@ -101,8 +101,10 @@ describe('EventBannerComponent', () => {
     })
 
     test('should unsubscribe from timer in ngOnDestroy', () => {
-        // Setup subscription
-        // component.currentSubscription = mockTimerSubscription
+        // Setup subscription. currentSubscription is private and assigned in ngOnInit, so
+        // drive that; the mocked timer hands back mockTimerSubscription.
+        component.ngOnInit()
+        mockTimerSubscription.unsubscribe.mockClear()
 
         // Call ngOnDestroy
         component.ngOnDestroy()

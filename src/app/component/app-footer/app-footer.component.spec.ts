@@ -9,9 +9,11 @@ describe('AppFooterComponent', () => {
 
     beforeEach(() => {
         // Mock the ConfigurationsService
+        // The component clears termsOfUser only when the feature is in this set, so it has
+        // to be present for the assertion below to mean anything.
         mockConfigSvc = {
-            // restrictedFeatures: new Map([['termsOfUser', true]]), // Mock a restricted feature
-        }
+            restrictedFeatures: new Set(['termsOfUser']),
+        } as any
 
         // Mock the ValueService with an observable for isXSmall$
         mockValueSvc = {
@@ -57,7 +59,7 @@ describe('AppFooterComponent', () => {
 
     it('should not change termsOfUser if restrictedFeatures does not have "termsOfUser"', () => {
         // Modify the mock to remove 'termsOfUser' from restrictedFeatures
-        //  mockConfigSvc.restrictedFeatures = new Map()
+        ;(mockConfigSvc as any).restrictedFeatures = new Set()
 
         // Recreate the component with the updated mock
         component = new AppFooterComponent(

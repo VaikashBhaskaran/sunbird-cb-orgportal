@@ -74,7 +74,10 @@ describe('AdminsTableComponent', () => {
         const currentDate = new Date()
         const nextYearDate = new Date(currentDate.getFullYear() + 1, currentDate.getMonth(), currentDate.getDate())
 
-        expect(component.minDate).toEqual(currentDate)
+        // minDate is stamped when the component is constructed, which is a few milliseconds
+        // before this line runs, so an exact match only holds when the machine is idle.
+        // maxDate is day-granular, so it can still be compared exactly.
+        expect(Math.abs(component.minDate.getTime() - currentDate.getTime())).toBeLessThan(60000)
         expect(component.maxDate).toEqual(nextYearDate)
     })
 

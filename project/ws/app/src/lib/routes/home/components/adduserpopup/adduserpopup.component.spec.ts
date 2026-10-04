@@ -39,7 +39,19 @@ describe('AdduserpopupComponent', () => {
     })
 
     it('should initialize usersListData and dataSource in the constructor', () => {
+        // usersListData keeps the raw dialog payload; it is dataSource that receives the
+        // table-shaped rows the constructor maps out of it.
         expect(component.usersListData).toEqual([
+            {
+                firstName: 'John',
+                email: 'john@example.com',
+                channel: 'Marketing',
+                id: 1,
+                phone: '1234567890',
+            },
+        ])
+        expect(component.dataSource instanceof MatTableDataSource).toBe(true)
+        expect(component.dataSource.data).toEqual([
             {
                 fullname: 'John',
                 email: 'john@example.com',
@@ -48,8 +60,6 @@ describe('AdduserpopupComponent', () => {
                 mobile: '1234567890',
             },
         ])
-        expect(component.dataSource instanceof MatTableDataSource).toBe(true)
-        expect(component.dataSource.data.length).toBe(1)
     })
 
     it('should initialize statedata in ngOnInit', () => {
@@ -98,7 +108,8 @@ describe('AdduserpopupComponent', () => {
     })
 
     it('should return correct label for "select all" or "deselect all"', () => {
-        component.selection.select(component.dataSource.data[0])
+        // With no argument the label describes the header checkbox, so it reads
+        // "deselect all" exactly when every row is already selected. There is one row here.
         expect(component.checkboxLabel()).toBe('select all')
 
         component.selection.select(component.dataSource.data[0])

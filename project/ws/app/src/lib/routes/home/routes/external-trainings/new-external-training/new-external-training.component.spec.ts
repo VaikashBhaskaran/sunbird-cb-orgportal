@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { commonTestingProviders, stubPipes } from '@test/helpers/testing-providers';
 import { NewExternalTrainingComponent } from './new-external-training.component';
 
 describe('NewExternalTrainingComponent', () => {
@@ -8,7 +10,10 @@ describe('NewExternalTrainingComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [NewExternalTrainingComponent]
+      declarations: [NewExternalTrainingComponent, ...stubPipes()],
+      providers: [...commonTestingProviders()],
+      // Shallow smoke test: child components in the template are not declared here.
+      schemas: [NO_ERRORS_SCHEMA]
     });
     fixture = TestBed.createComponent(NewExternalTrainingComponent);
     component = fixture.componentInstance;

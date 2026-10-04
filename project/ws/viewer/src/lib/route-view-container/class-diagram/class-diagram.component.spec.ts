@@ -1,4 +1,4 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing'
+import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { ClassDiagramComponent } from './class-diagram.component'
 
@@ -6,7 +6,7 @@ describe('ClassDiagramComponent', () => {
   let component: ClassDiagramComponent
   let fixture: ComponentFixture<ClassDiagramComponent>
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [ClassDiagramComponent],
     })

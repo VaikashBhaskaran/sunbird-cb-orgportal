@@ -294,7 +294,9 @@ describe('CreateWorkallocationComponent', () => {
         expect(mockAllocateSrvc.createAllocationV2).toHaveBeenCalled()
         expect(mockSnackBar.open).toHaveBeenCalledWith('Work order saved successfully!', 'X', { duration: 5000 })
         expect(mockWatStore.clear).toHaveBeenCalled()
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/app/workallocation/drafts', 'mock-work-order-id'])
+        // workOrderId comes from the route params ('work-123'), which is what
+        // getWorkOrderId returns once it is set.
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/app/workallocation/drafts', 'work-123'])
     })
 
     it('should update WAT and navigate on successful update', () => {
@@ -324,11 +326,20 @@ describe('CreateWorkallocationComponent', () => {
             errorCount: 0
         }
 
+        // updateAllocationV2's result is piped through delay(500), so the handler only runs
+        // once the clock has moved past it.
+        jest.useFakeTimers()
+
         component.updateWat(false, false, true)
 
         expect(mockAllocateSrvc.updateAllocationV2).toHaveBeenCalled()
+
+        jest.advanceTimersByTime(500)
+
         expect(mockSnackBar.open).toHaveBeenCalledWith('Work order updated successfully!', 'X', { duration: 5000 })
         expect(mockWatStore.clear).toHaveBeenCalled()
-        expect(mockRouter.navigate).toHaveBeenCalledWith(['/app/workallocation/drafts', 'mock-work-order-id'])
+        expect(mockRouter.navigate).toHaveBeenCalledWith(['/app/workallocation/drafts', 'work-123'])
+
+        jest.useRealTimers()
     })
 })

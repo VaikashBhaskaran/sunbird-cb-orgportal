@@ -59,6 +59,11 @@ describe('BatchDetailsComponent', () => {
 
         // Mock blended approval service
         mockBpService = {
+            // listReports awaits this; the report list is empty by default.
+            listBpReports: jest.fn().mockReturnValue(of({ result: { content: [] } })),
+            getBpConsumptionReportStatusApi: jest.fn().mockReturnValue(of({ result: {} })),
+            generateBpConsumptionReport: jest.fn().mockReturnValue(of({ params: { status: 'success' } })),
+            downloadReport: jest.fn().mockReturnValue(of(new Blob())),
             getBlendedProgramsDetails: jest.fn().mockReturnValue(of({
                 result: {
                     content: {
@@ -122,7 +127,7 @@ describe('BatchDetailsComponent', () => {
             generateBpReport: jest.fn().mockReturnValue(of({
                 params: { status: 'SUCCESS' }
             })),
-            downloadReport: jest.fn().mockResolvedValue(true)
+            downloadReports: jest.fn().mockResolvedValue(true)
         }
 
         // Mock snackbar
@@ -162,7 +167,7 @@ describe('BatchDetailsComponent', () => {
     })
 
     it('should initialize with correct values', async () => {
-        spyOn(component, 'getNewRequestsList')
+        jest.spyOn(component, 'getNewRequestsList').mockImplementation()
         await component.ngOnInit()
 
         expect(component.programID).toBe('test-program-123')
@@ -172,7 +177,7 @@ describe('BatchDetailsComponent', () => {
     })
 
     it('should get program details successfully', () => {
-        spyOn(component, 'getNewRequestsList')
+        jest.spyOn(component, 'getNewRequestsList').mockImplementation()
         component.getBPDetails('test-program-123')
 
         expect(mockBpService.getBlendedProgramsDetails).toHaveBeenCalledWith('test-program-123')
@@ -183,8 +188,14 @@ describe('BatchDetailsComponent', () => {
     })
 
     describe('filter method', () => {
+        beforeEach(() => {
+            // filter('reportStatus') reaches listReports, which reads the signed-in user's
+            // roles; ngOnInit is what normally fetches them.
+            component.userDetails = { roles: ['MDO_ADMIN'] }
+        })
+
         it('should set currentFilter to pending and call getNewRequestsList', () => {
-            spyOn(component, 'getNewRequestsList')
+            jest.spyOn(component, 'getNewRequestsList').mockImplementation()
             component.filter('pending')
 
             expect(component.currentFilter).toBe('pending')
@@ -193,7 +204,7 @@ describe('BatchDetailsComponent', () => {
         })
 
         it('should set currentFilter to approved and call getLearnersList', () => {
-            spyOn(component, 'getLearnersList')
+            jest.spyOn(component, 'getLearnersList').mockImplementation()
             component.filter('approved')
 
             expect(component.currentFilter).toBe('approved')
@@ -202,7 +213,7 @@ describe('BatchDetailsComponent', () => {
         })
 
         it('should set currentFilter to rejected and call getRejectedList', () => {
-            spyOn(component, 'getRejectedList')
+            jest.spyOn(component, 'getRejectedList').mockImplementation()
             component.filter('rejected')
 
             expect(component.currentFilter).toBe('rejected')
@@ -211,7 +222,7 @@ describe('BatchDetailsComponent', () => {
         })
 
         it('should set currentFilter to sessions and call getSessionDetails', () => {
-            spyOn(component, 'getSessionDetails')
+            jest.spyOn(component, 'getSessionDetails').mockImplementation()
             component.filter('sessions')
 
             expect(component.currentFilter).toBe('sessions')
@@ -220,7 +231,7 @@ describe('BatchDetailsComponent', () => {
         })
 
         it('should set currentFilter to approvalStatus and call getApprovalStatusList', () => {
-            spyOn(component, 'getApprovalStatusList')
+            jest.spyOn(component, 'getApprovalStatusList').mockImplementation()
             component.filter('approvalStatus')
 
             expect(component.currentFilter).toBe('approvalStatus')
@@ -228,12 +239,13 @@ describe('BatchDetailsComponent', () => {
             expect(mockEvents.raiseInteractTelemetry).toHaveBeenCalled()
         })
 
-        it('should set currentFilter to reportStatus and call getBpReportStatus', () => {
-            spyOn(component, 'getBpReportStatus')
+        it('should set currentFilter to reportStatus and list the reports', () => {
+            // The reportStatus tab goes through listReports now, not getBpReportStatus.
+            jest.spyOn(component, 'listReports').mockImplementation()
             component.filter('reportStatus')
 
             expect(component.currentFilter).toBe('reportStatus')
-            expect(component.getBpReportStatus).toHaveBeenCalled()
+            expect(component.listReports).toHaveBeenCalled()
             expect(mockEvents.raiseInteractTelemetry).toHaveBeenCalled()
         })
     })
@@ -254,7 +266,7 @@ describe('BatchDetailsComponent', () => {
     })
 
     it('should get learners list', () => {
-        spyOn(component, 'getAllLearner')
+        jest.spyOn(component, 'getAllLearner').mockImplementation()
         component.batchData = {
             batchId: 'test-batch-123'
         }
@@ -268,7 +280,7 @@ describe('BatchDetailsComponent', () => {
     })
 
     it('should get new requests list', () => {
-        spyOn(component, 'getAllLearner')
+        jest.spyOn(component, 'getAllLearner').mockImplementation()
         component.batchData = {
             batchId: 'test-batch-123'
         }
@@ -282,7 +294,7 @@ describe('BatchDetailsComponent', () => {
     })
 
     it('should handle request approval', () => {
-        spyOn(component, 'getNewRequestsList')
+        jest.spyOn(component, 'getNewRequestsList').mockImplementation()
         // spyOn(component, 'requestMesages').mockReturnValue('Request is approved successfully!')
 
         component.programData = {
@@ -339,12 +351,12 @@ describe('BatchDetailsComponent', () => {
         component.onSubmit(eventData)
 
         expect(mockBpService.updateBlendedRequests).toHaveBeenCalled()
-        expect(mockSnackBar.open).toHaveBeenCalledWith('Test error')
+        expect(mockSnackBar.open).toHaveBeenCalledWith('Test error', 'X', { duration: 5000 })
     })
 
     it('should remove a learner', () => {
-        spyOn(component, 'filter')
-        spyOn(component, 'getLearnersList')
+        jest.spyOn(component, 'filter').mockImplementation()
+        jest.spyOn(component, 'getLearnersList').mockImplementation()
 
         const eventData = {
             action: 'Remove',
@@ -359,7 +371,7 @@ describe('BatchDetailsComponent', () => {
         component.removeUser(eventData)
 
         expect(mockBpService.removeLearner).toHaveBeenCalled()
-        expect(mockSnackBar.open).toHaveBeenCalledWith('Learner is removed successfully!')
+        expect(mockSnackBar.open).toHaveBeenCalledWith('Learner is removed successfully!', 'X', { duration: 5000 })
         expect(component.filter).toHaveBeenCalledWith('approved')
         expect(component.getLearnersList).toHaveBeenCalled()
     })
@@ -380,7 +392,7 @@ describe('BatchDetailsComponent', () => {
         component.removeUser(eventData)
 
         expect(mockBpService.removeLearner).toHaveBeenCalled()
-        expect(mockSnackBar.open).toHaveBeenCalledWith('Something went wrong. Please try after sometime.')
+        expect(mockSnackBar.open).toHaveBeenCalledWith('Something went wrong. Please try after sometime.', 'X', { duration: 5000 })
     })
 
     it('should open nominate users dialog', async () => {
@@ -421,7 +433,9 @@ describe('BatchDetailsComponent', () => {
         await component.onNominateUsersClick('nominate')
 
         expect(mockDialogue.open).toHaveBeenCalled()
-        expect(mockDialogue.open.mock.calls[0][0].name).toBe('DialogConfirmComponent')
+        // onNominateUsersClick opens the nominate dialog; the confirm dialog is what the
+        // batch-full path used to show.
+        expect(mockDialogue.open.mock.calls[0][0].name).toBe('NominateUsersDialogComponent')
     })
 
     it('should filter new users based on search text', () => {
@@ -476,6 +490,8 @@ describe('BatchDetailsComponent', () => {
             rootOrgId: 'test-org-123',
             roles: ['MDO_ADMIN']
         }
+        // Every report method branches on this, and it starts empty.
+        component.selectedReportType = 'enrollment'
 
         await component.getBpReportStatus()
 
@@ -487,7 +503,9 @@ describe('BatchDetailsComponent', () => {
     })
 
     it('should generate report', async () => {
-        spyOn(component, 'getBpReportStatus')
+        // On success, generateReport refreshes through listReports, not getBpReportStatus.
+        jest.spyOn(component, 'listReports').mockImplementation()
+        component.selectedReportType = 'enrollment'
         component.batchData = {
             batchId: 'test-batch-123'
         }
@@ -503,21 +521,22 @@ describe('BatchDetailsComponent', () => {
         await component.generateReport()
 
         expect(mockBpService.generateBpReport).toHaveBeenCalled()
-        expect(component.getBpReportStatus).toHaveBeenCalled()
+        expect(component.listReports).toHaveBeenCalled()
     })
 
     it('should download report', async () => {
         component.batchData = {
             name: 'Test Batch'
         }
-        component.reportStatusList = [
-            {
-                lastReportGeneratedOn: '2025-01-01T00:00:00Z',
-                downloadLink: 'https://test.com/gcpbpreports/report.xlsx'
-            }
-        ]
+        // downloadReports now takes the row to download rather than reading it off
+        // reportStatusList.
+        const reportItem = {
+            lastReportGeneratedOn: '2025-01-01T00:00:00Z',
+            downloadLink: 'https://test.com/gcpbpreports/report.xlsx'
+        }
+        component.reportStatusList = [reportItem]
 
-        await component.downloadReport()
+        await component.downloadReports(reportItem)
 
         expect(mockBpService.downloadReport).toHaveBeenCalled()
         expect(mockBpService.downloadReport.mock.calls[0][0]).toBe('report.xlsx')

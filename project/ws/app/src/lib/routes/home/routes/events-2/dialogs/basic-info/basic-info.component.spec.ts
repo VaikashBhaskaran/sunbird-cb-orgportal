@@ -62,7 +62,9 @@ describe('BasicInfoComponent', () => {
       mockFormBuilder as FormBuilder,
       mockMatSnackBar,
       mockEventSvc,
-      mockLoaderService
+      mockLoaderService,
+      // ConfigurationsService, added since this spec was written.
+      { unMappedUser: { roles: [] } } as any
     )
   })
 

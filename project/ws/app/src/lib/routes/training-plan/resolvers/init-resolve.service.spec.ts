@@ -23,7 +23,8 @@ describe('InitResolver', () => {
     } as any
 
     resolver.resolve(mockRoute).subscribe((result) => {
-      expect(result).toEqual(undefined)
+      // resolve() forkJoins a single of(undefined), so it emits [undefined].
+      expect(result).toEqual([undefined])
       done()
     })
   })
@@ -37,7 +38,8 @@ describe('InitResolver', () => {
     // Since the actual code is commented out and doesn't call any real methods
     // the result will still be `undefined` because we only push `of(undefined)`
     resolver.resolve(mockRoute).subscribe((result) => {
-      expect(result).toEqual(undefined) // Should resolve with `undefined` as no actual processing happens in this test
+      // resolve() forkJoins a single of(undefined), so it emits [undefined].
+      expect(result).toEqual([undefined]) // Should resolve with `undefined` as no actual processing happens in this test
       done()
     })
   })
@@ -49,7 +51,8 @@ describe('InitResolver', () => {
     } as any
 
     resolver.resolve(mockRoute).subscribe((result) => {
-      expect(result).toEqual(undefined) // No data was pushed into forkJoin, it should return undefined
+      // resolve() forkJoins a single of(undefined), so it emits [undefined].
+      expect(result).toEqual([undefined]) // No data was pushed into forkJoin, it should return undefined
       done()
     })
   })

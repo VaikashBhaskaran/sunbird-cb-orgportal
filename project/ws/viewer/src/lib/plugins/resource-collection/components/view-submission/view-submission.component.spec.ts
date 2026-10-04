@@ -1,6 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'
 
 import { ViewSubmissionComponent } from './view-submission.component'
+import { NO_ERRORS_SCHEMA } from '@angular/core'
+import { commonTestingProviders, stubPipes, viewerRouteData } from '@test/helpers/testing-providers'
 
 describe('ViewSubmissionComponent', () => {
   let component: ViewSubmissionComponent
@@ -8,7 +10,10 @@ describe('ViewSubmissionComponent', () => {
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ViewSubmissionComponent],
+      declarations: [ViewSubmissionComponent, ...stubPipes()],
+      providers: [...commonTestingProviders({ routeData: viewerRouteData() })],
+      // Shallow smoke test: child components in the template are not declared here.
+      schemas: [NO_ERRORS_SCHEMA],
     })
       .compileComponents()
   }))

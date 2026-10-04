@@ -109,10 +109,26 @@ describe('MentorManageComponent', () => {
 
         // Setup route.snapshot.parent.data for rootOrgId extraction
         const parent = { data: { configService: { unMappedUser: { rootOrg: { rootOrgId: 'test-root-org' } } } } }
-        jest.spyOn(mockRoute, 'snapshot', 'get').mockReturnValue({
+        // snapshot is a plain property on the mock, not a getter, so assign it directly
+        // rather than spying on an accessor that does not exist. The component reads
+        // route.parent.snapshot.data.configService, so parent has to hang off the route.
+        ;(mockRoute as any).snapshot = {
             params: { tab: 'verified' },
             parent
-        } as any)
+        }
+        ;(mockRoute as any).parent = {
+            snapshot: {
+                data: {
+                    configService: {
+                        userProfile: { userId: 'test-user' },
+                        unMappedUser: {
+                            rootOrg: { rootOrgId: 'test-root-org' },
+                            profileDetails: { profileStatus: 'VERIFIED' }
+                        }
+                    }
+                }
+            }
+        }
 
         component.ngOnInit()
 
@@ -125,10 +141,26 @@ describe('MentorManageComponent', () => {
     it('should set proper reportsNoteList on ngOnInit', () => {
         // Setup route.snapshot.parent.data for rootOrgId extraction
         const parent = { data: { configService: { unMappedUser: { rootOrg: { rootOrgId: 'test-root-org' } } } } }
-        jest.spyOn(mockRoute, 'snapshot', 'get').mockReturnValue({
+        // snapshot is a plain property on the mock, not a getter, so assign it directly
+        // rather than spying on an accessor that does not exist. The component reads
+        // route.parent.snapshot.data.configService, so parent has to hang off the route.
+        ;(mockRoute as any).snapshot = {
             params: { tab: 'verified' },
             parent
-        } as any)
+        }
+        ;(mockRoute as any).parent = {
+            snapshot: {
+                data: {
+                    configService: {
+                        userProfile: { userId: 'test-user' },
+                        unMappedUser: {
+                            rootOrg: { rootOrgId: 'test-root-org' },
+                            profileDetails: { profileStatus: 'VERIFIED' }
+                        }
+                    }
+                }
+            }
+        }
 
         component.ngOnInit()
 

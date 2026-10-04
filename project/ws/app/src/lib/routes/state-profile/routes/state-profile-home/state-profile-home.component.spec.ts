@@ -14,6 +14,7 @@ describe('StateProfileHomeComponent', () => {
     let stepServiceMock: jest.Mocked<StepService>
     let snackBarMock: jest.Mocked<MatSnackBar>
     let configServiceMock: jest.Mocked<ConfigurationsService>
+    let orgServiceMock: any
 
     beforeEach(() => {
         valueServiceMock = {
@@ -64,6 +65,14 @@ describe('StateProfileHomeComponent', () => {
             },
         } as any
 
+        // The 7th parameter is OrgProfileService; the component calls getFormStatus,
+        // formValues and updateOrgProfileDetails on it, so null is not usable.
+        orgServiceMock = {
+            getFormStatus: jest.fn().mockReturnValue(true),
+            formValues: {},
+            updateOrgProfileDetails: jest.fn().mockReturnValue(of({})),
+        } as any
+
         component = new StateProfileHomeComponent(
             valueServiceMock,
             routeMock,
@@ -71,7 +80,7 @@ describe('StateProfileHomeComponent', () => {
             stepServiceMock,
             configServiceMock,
             snackBarMock,
-            null as any // Mock other service if needed
+            orgServiceMock
         )
     })
 
@@ -85,9 +94,10 @@ describe('StateProfileHomeComponent', () => {
     })
 
     it('should call init method on constructor', () => {
-        const initSpy = jest.spyOn(component, 'init')
-        component.ngOnInit()
-        expect(initSpy).toHaveBeenCalled()
+        // init() runs from the constructor, so a spy installed after construction can never
+        // see it. Assert the state init() leaves behind instead.
+        expect(component.tabs).toBeDefined()
+        expect(stepServiceMock.allSteps.next).toHaveBeenCalledWith(component.tabs.length)
     })
 
     it('should unsubscribe from router events in ngOnDestroy', () => {
@@ -114,15 +124,20 @@ describe('StateProfileHomeComponent', () => {
     })
 
     it('should check if next step is allowed', () => {
+        // isNextStepAllowed inspects the tab whose step matches currentStep; 'welcome' is
+        // the key that allows it unconditionally.
+        component.currentStep = 1
+        component.tabs = [{ step: 1, key: 'welcome', routerLink: '/welcome', name: '', badges: { enabled: false, uri: undefined }, enabled: false, description: '' }] as any
         const result = component.isNextStepAllowed
-        expect(result).toBe(true) // Assuming it returns true based on current step
+        expect(result).toBe(true)
     })
 
     it('should show snackbar on error in updateOrgProfile', () => {
         const error = { error: 'Error: Something went wrong' }
         const openSnackbarSpy = jest.spyOn(snackBarMock, 'open')
         component.updateOrgProfile(true)
-        component['openSnackbar'](error.error.split(':')[1])
+        // split(':')[1] keeps the leading space, so trim before handing it over.
+        component['openSnackbar'](error.error.split(':')[1].trim())
         expect(openSnackbarSpy).toHaveBeenCalledWith('Something went wrong', 'X', { duration: 5000 })
     })
 
@@ -151,11 +166,16 @@ describe('StateProfileHomeComponent', () => {
             },
         ]
         const nextStep = component.next
-        expect(nextStep).toEqual({ step: 2, key: 'nextStep', routerLink: '/next' })
+        // The tab objects carry name/badges/enabled/description too, so match on the
+        // fields under test rather than the whole shape.
+        expect(nextStep).toEqual(expect.objectContaining({ step: 2, key: 'nextStep', routerLink: '/next' }))
     })
 
     it('should return null if no next step from next getter', () => {
         component.currentStep = 3
+        // next returns early unless isNextStepAllowed and isFormValid hold, and both are
+        // derived from the tab matching currentStep - so it has to be present.
+        component.tabs = [{ step: 3, key: 'welcome', routerLink: '/welcome', name: '', badges: { enabled: false, uri: undefined }, enabled: false, description: '' }] as any
         const nextStep = component.next
         expect(nextStep).toBe('done')
     })
@@ -185,7 +205,7 @@ describe('StateProfileHomeComponent', () => {
             },
         ]
         const prevStep = component.previous
-        expect(prevStep).toEqual({ step: 1, key: 'welcome', routerLink: '/welcome' })
+        expect(prevStep).toEqual(expect.objectContaining({ step: 1, key: 'welcome', routerLink: '/welcome' }))
     })
 
     it('should return null if no current step from current getter', () => {
@@ -195,7 +215,10 @@ describe('StateProfileHomeComponent', () => {
     })
 
     it('should check form validity from isFormValid getter', () => {
-        // component.current = { key: 'someKey' } as any
+        // `current` is a getter over tabs, so it cannot be assigned directly - give the
+        // component a tab matching currentStep instead.
+        component.currentStep = 1
+        component.tabs = [{ step: 1, key: 'welcome', routerLink: '/welcome', name: '', badges: { enabled: false, uri: undefined }, enabled: false, description: '' }] as any
         const isValid = component.isFormValid
         expect(isValid).toBe(true) // Assuming the form status is valid
     })

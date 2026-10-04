@@ -34,7 +34,13 @@ describe('FilterDisplayComponent', () => {
         activatedRouteMock = new ActivatedRoute()
         routerMock = new Router()
         searchServServiceMock = new SearchServService(null as any, null as any, null as any, null as any)
-        configurationsServiceMock = new ConfigurationsService()
+        configurationsServiceMock = new ConfigurationsService(null as any)
+
+        // ngOnInit both awaits translateSearchFilters and subscribes to queryParamMap, and
+        // the mocks above supply neither. Tests that care about particular values override
+        // these; the rest just need them to exist.
+        searchServServiceMock.translateSearchFilters.mockResolvedValue({})
+        activatedRouteMock.queryParamMap = of({ get: jest.fn().mockReturnValue(null) })
 
         component = new FilterDisplayComponent(
             activatedRouteMock,
@@ -59,7 +65,11 @@ describe('FilterDisplayComponent', () => {
     })
 
     it('should process queryParams and set searchRequest filters', () => {
-        const mockQueryParams = { get: jest.fn().mockReturnValue(JSON.stringify({ key: ['value'] })) }
+        // The handler checks has('f') before reading it.
+        const mockQueryParams = {
+            has: jest.fn().mockReturnValue(true),
+            get: jest.fn().mockReturnValue(JSON.stringify({ key: ['value'] })),
+        }
         activatedRouteMock.queryParamMap = of(mockQueryParams)
 
         component.ngOnInit()
@@ -112,8 +122,8 @@ describe('FilterDisplayComponent', () => {
     })
 
     it('should call advancedFilterClick method and navigate', () => {
-        // const filter = { filters: { key: 'value', title: '' } }
-        // component.advancedFilterClick(filter)
+        const filter = { filters: { key: 'value' }, title: '' } as any
+        component.advancedFilterClick(filter)
 
         expect(routerMock.navigate).toHaveBeenCalledWith([], {
             queryParams: { f: JSON.stringify({ key: 'value' }) },
@@ -123,10 +133,13 @@ describe('FilterDisplayComponent', () => {
     })
 
     it('should correctly handle lowerCaseFilter method', () => {
-        const filterObject = { someKey: { value: 'test' } }
+        // lowerCaseFilter recurses into each entry's `value`, so that has to be a nested
+        // object of filters - a primitive there makes Object.defineProperty throw.
+        const filterObject = { someKey: { value: { NestedKey: { value: {} } } } }
         component.lowerCaseFilter(filterObject, ['someKey'])
 
         expect(Object.hasOwnProperty.call(filterObject, 'somekey')).toBe(true)
+        expect(Object.hasOwnProperty.call(filterObject.someKey.value, 'nestedkey')).toBe(true)
     })
 
     it('should track filters using filterUnitResponseTrackBy', () => {

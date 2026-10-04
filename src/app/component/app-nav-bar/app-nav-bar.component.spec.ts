@@ -1,5 +1,6 @@
 import { AppNavBarComponent } from './app-nav-bar.component'
 import { NavigationEnd } from '@angular/router'
+import { of } from 'rxjs'
 
 describe('AppNavBarComponent', () => {
     let component: AppNavBarComponent
@@ -29,7 +30,9 @@ describe('AppNavBarComponent', () => {
             startTour: jest.fn(),
             startPopupTour: jest.fn(),
             cancelPopupTour: jest.fn(),
-            createPopupTour: jest.fn(),
+            // popupTour is stored from this and later guards cancelPopupTour, so it has to
+            // hand something back.
+            createPopupTour: jest.fn().mockReturnValue({ id: 'popup-tour' }),
             isTourComplete: { subscribe: jest.fn() },
         }
 
@@ -38,6 +41,11 @@ describe('AppNavBarComponent', () => {
             mockConfigService,
             mockTourService,
             mockRouter,
+            // Added since this spec was written; inert stand-ins.
+            { unreadCount$: of(0), fetchNotifications: jest.fn() } as any,
+            { handleRedirection: jest.fn() } as any,
+            { raiseInteractTelemetry: jest.fn() } as any,
+            { open: jest.fn() } as any,
         )
     })
 
@@ -53,18 +61,27 @@ describe('AppNavBarComponent', () => {
     })
 
     it('should handle navigation events in ngOnInit', () => {
-        mockRouter.events.subscribe.mock.calls[0][0](new NavigationEnd(0, '/app/my-dashboard-temp/temp', '/app/my-dashboard-temp/temp'))
+        // The component subscribes to router.events twice - once in the constructor and
+        // again in ngOnInit - so replay the event through every registered subscriber
+        // rather than guessing which index owns showAppNavBar.
+        component.ngOnInit()
+        const navEvent = new NavigationEnd(0, '/app/my-dashboard-temp/temp', '/app/my-dashboard-temp/temp')
+        mockRouter.events.subscribe.mock.calls.forEach(([cb]: any) => cb(navEvent))
         expect(component.showAppNavBar).toBe(true)
     })
 
     it('should hide navbar when navigating to logout page', () => {
-        mockRouter.events.subscribe.mock.calls[0][0](new NavigationEnd(0, '/public/logout', '/public/logout'))
+        component.ngOnInit()
+        const logoutEvent = new NavigationEnd(0, '/public/logout', '/public/logout')
+        mockRouter.events.subscribe.mock.calls.forEach(([cb]: any) => cb(logoutEvent))
         expect(component.showAppNavBar).toBe(false)
     })
 
     it('should handle tour guide availability', () => {
+        // Replaying a callback that ngOnInit registers, so run it first.
+        component.ngOnInit()
         const canShow = true
-        mockConfigService.tourGuideNotifier.subscribe.mock.calls[0][0](canShow)
+        mockConfigService.tourGuideNotifier.subscribe.mock.calls.forEach(([cb]: any) => cb(canShow))
         expect(component.isTourGuideAvailable).toBe(true)
         expect(component.popupTour).toBeDefined()
     })
@@ -76,6 +93,10 @@ describe('AppNavBarComponent', () => {
     })
 
     it('should cancel popup tour', () => {
+        // cancelTour is a no-op until a popup tour exists; ngOnInit creates one when the
+        // tour guide notifier fires.
+        component.popupTour = { id: 'popup-tour' }
+
         component.cancelTour()
         expect(mockTourService.cancelPopupTour).toHaveBeenCalled()
         expect(component.isTourGuideClosed).toBe(false)

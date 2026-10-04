@@ -5,6 +5,7 @@ import { Router } from '@angular/router'
 import { MatDialog } from '@angular/material/dialog'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import _ from 'lodash'
+import { of } from 'rxjs'
 
 // Mock dependencies
 jest.mock('../../services/org-profile.service')
@@ -24,7 +25,20 @@ describe('ConsultancyComponent', () => {
 
     beforeEach(() => {
         orgSvc = new OrgProfileService(null as any)  // Mocked instance, replace with actual mock
-        configSvc = new ConfigurationsService()  // Mocked instance, replace with actual mock
+
+        // jest.mock auto-mocks the class's methods but not its instance fields, so
+        // formValues - which the component reads in ngOnInit - has to be restored by hand.
+        orgSvc.formValues = {
+            instituteProfile: {},
+            rolesAndFunctions: {},
+            infrastructure: {},
+            trainingPrograms: {},
+            research: {},
+            consultancy: {},
+            faculty: {},
+            platformWalkthrough: {},
+        }
+        configSvc = new ConfigurationsService(null as any)  // Mocked instance, replace with actual mock
         router = new Router()  // Mocked instance
         dialog = new MatDialog(null as any, null as any, null as any, null as any, null as any, null as any, null as any, null as any)  // Mocked instance
         snackBar = new MatSnackBar(null as any, null as any, null as any, null as any, null as any, null as any)  // Mocked instance
@@ -40,7 +54,9 @@ describe('ConsultancyComponent', () => {
         // Mock methods
         orgSvc.updateFormStatus = jest.fn()
         configSvc.unMappedUser = { orgProfile: { profileDetails: { consultancy: { projects: [] } } } }
-        // dialog.open = jest.fn(() => ({ afterClosed: jest.fn(() => ({ subscribe: jest.fn() })) }))
+        // The real MatDialog cannot open anything here, so hand back a ref that closes
+        // immediately with a confirmation.
+        dialog.open = jest.fn(() => ({ afterClosed: () => of(true) })) as any
         snackBar.open = jest.fn()
     })
 
@@ -52,7 +68,8 @@ describe('ConsultancyComponent', () => {
         expect(component.consultancyForm.get('projectName')).toBeDefined()
         expect(component.consultancyForm.get('programeStatus')?.value).toBe('Ongoing')
         expect(component.consultancyForm.get('industrySponsored')?.value).toBe(true)
-        expect(component.consultancyForm.get('govtSponsored')?.value).toBe(false)
+        // Only industrySponsored is seeded with a boolean; the other two start empty.
+        expect(component.consultancyForm.get('govtSponsored')?.value).toBe('')
     })
 
     it('should call orgSvc.updateFormStatus in ngOnInit', () => {
@@ -73,7 +90,8 @@ describe('ConsultancyComponent', () => {
         component.addProject()
 
         expect(component.addedconsultancies.length).toBe(1)
-        expect(component.consultancyForm.reset).toHaveBeenCalled()
+        // resetConsultancyForm clears the form through FormGroup.reset.
+        expect(component.consultancyForm.get('projectName')?.value).toBeNull()
         expect(orgSvc.updateLocalFormValue).toHaveBeenCalledWith('consultancy', { projects: component.addedconsultancies })
     })
 
@@ -146,7 +164,8 @@ describe('ConsultancyComponent', () => {
 
         component.resetConsultancyForm()
 
-        expect(component.consultancyForm.get('projectName')?.value).toBe('')
+        // FormGroup.reset() clears controls to null unless given a value to reset to.
+        expect(component.consultancyForm.get('projectName')?.value).toBeNull()
         expect(component.consultancyForm.get('programeStatus')?.value).toBe('Ongoing')
         expect(component.consultancyForm.get('industrySponsored')?.value).toBe(true)
     })

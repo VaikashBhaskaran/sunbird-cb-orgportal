@@ -11,7 +11,7 @@ describe('SubmitQuizDialogComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       declarations: [SubmitQuizDialogComponent],
-      imports: [CUSTOM_ELEMENTS_SCHEMA],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
       providers: [{ provide: MAT_DIALOG_DATA, useValue: {} },
       { provide: MatDialogRef, useValue: {} },
       ],

@@ -1,6 +1,6 @@
 import { AudioNativeComponent } from './audio-native.component'
 import { ActivatedRoute, ActivatedRouteSnapshot } from '@angular/router'
-import { ConfigurationsService } from '@sunbird-cb/utils'
+import { ConfigurationsService } from '@sunbird-cb/utils-v2'
 import { NsContent } from '@sunbird-cb/collection'
 
 describe('AudioNativeComponent', () => {
@@ -52,7 +52,9 @@ describe('AudioNativeComponent', () => {
 
   beforeEach(() => {
     mockActivatedRoute = {
-      snapshot: {
+      // A hand-built stand-in, not a real snapshot: cast once rather than satisfying
+        // every field of ActivatedRouteSnapshot.
+        snapshot: {
         queryParams: {},
         url: [],
         params: {},
@@ -68,7 +70,7 @@ describe('AudioNativeComponent', () => {
         pathFromRoot: [],
         paramMap: undefined,
         queryParamMap: undefined
-      }
+      } as any
     }
 
     mockConfigService = {
@@ -145,7 +147,9 @@ describe('AudioNativeComponent', () => {
       component.audioData = mockAudioData
       expect(component.audioData).toEqual(mockAudioData)
       expect(component.audioData?.mediaType).toBe('audio')
-      expect(component.audioData?.contentType).toBe('Program')
+      // Assert against the enum, not its literal value: EContentTypes.PROGRAM reads
+      // 'Learning Path' in the current @sunbird-cb/collection and may change again.
+      expect(component.audioData?.contentType).toBe(NsContent.EContentTypes.PROGRAM)
     })
 
 

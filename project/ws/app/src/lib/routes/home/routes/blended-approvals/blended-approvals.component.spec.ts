@@ -13,7 +13,9 @@ describe('BlendedApprovalsComponent', () => {
         component = new BlendedApprovalsComponent(
             activeRouter as ActivatedRoute,
             router as Router,
-            bpService as BlendedService
+            bpService as BlendedService,
+            // Only changeLoaderState is called, and only for its side effect.
+            { changeLoaderState: jest.fn() } as any
         )
     })
 

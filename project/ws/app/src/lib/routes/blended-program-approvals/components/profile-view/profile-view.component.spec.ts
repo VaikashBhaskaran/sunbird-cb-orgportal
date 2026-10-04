@@ -24,12 +24,14 @@ describe('ProfileViewComponent', () => {
     beforeEach(() => {
         // Manually mock the services
         bpServiceMock = {
-            getUserById: jest.fn(),
-            downloadCert: jest.fn(),
+            // The component subscribes to each of these.
+            getUserById: jest.fn().mockReturnValue(of({ result: {} })),
+            downloadCert: jest.fn().mockReturnValue(of({ result: { printUri: '' } })),
         } as unknown as jest.Mocked<BlendedApporvalService>
 
         userSvcMock = {
-            fetchUserBatchList: jest.fn(),
+            // Result is iterated with forEach, so it must be an array.
+            fetchUserBatchList: jest.fn().mockReturnValue(of([])),
         } as unknown as jest.Mocked<WidgetUserService>
 
         dialogMock = {
@@ -49,7 +51,10 @@ describe('ProfileViewComponent', () => {
                     },
                 },
             } as any,
-        } as jest.Mocked<ActivatedRoute>
+            // ngOnInit does `this.route.data.subscribe(...)`; without it the callback
+            // throws part-way and the rest of the profile is never populated.
+            data: of({}),
+        } as unknown as jest.Mocked<ActivatedRoute>
 
         // Instantiate the component
         component = new ProfileViewComponent(
@@ -83,11 +88,20 @@ describe('ProfileViewComponent', () => {
         bpServiceMock.getUserById.mockReturnValue(of(userProfile))
         userSvcMock.fetchUserBatchList.mockReturnValue(of([]))
 
-        // Call ngOnInit method (which will call the mocked services)
-        component.ngOnInit()
+        // ngOnInit() is empty on this component - the profile is fetched from the
+        // constructor, so the instance has to be rebuilt after the mocks are set.
+        component = new ProfileViewComponent(
+            dialogMock,
+            routeMock,
+            bpServiceMock,
+            routerMock,
+            userSvcMock,
+        )
 
         // Assertions after service calls
-        expect(component.portalProfile).toEqual(userProfile)
+        // portalProfile is first set to the whole response and then reassigned to
+        // res.profileDetails inside the route.data subscription.
+        expect(component.portalProfile).toEqual(userProfile.profileDetails)
         expect(component.verifiedBadge).toBe(true)
         expect(component.academics).toEqual(userProfile.profileDetails.academics)
         expect(component.hobbies).toEqual(userProfile.profileDetails.interests)
@@ -112,7 +126,9 @@ describe('ProfileViewComponent', () => {
                 identifier: 'cert123',
                 dataUrl: 'url_to_certificate',
                 content: undefined,
-                issuedCertificates: mockCert.issuedCertificates[0],
+                // The component pushes the iterated certificate itself (cid), which here
+                // is mockCert - not its nested issuedCertificates entry.
+                issuedCertificates: mockCert,
             },
         ])
     })
@@ -128,16 +144,15 @@ describe('ProfileViewComponent', () => {
     it('should handle scroll and set sticky state', () => {
         component.elementPosition = 100
 
-        // Simulate window scroll event
-        global.innerHeight = 500
-        global.scrollY = 150
+        // handleScroll reads window.pageYOffset, not scrollY, so set that.
+        Object.defineProperty(window, 'pageYOffset', { value: 150, configurable: true })
 
         component.handleScroll()
 
         expect(component.sticky).toBe(true)
 
-        // Simulate window scroll event where scrollY < elementPosition
-        global.scrollY = 50
+        // Scrolled back above elementPosition
+        Object.defineProperty(window, 'pageYOffset', { value: 50, configurable: true })
 
         component.handleScroll()
 
@@ -159,7 +174,11 @@ describe('ProfileViewComponent', () => {
     })
 
     it('should not open certificate dialog if issuedCertificates do not match identifier', () => {
+        // openCertificateDialog compares value.issuedCertificates.identifier - a property
+        // of the array itself, so always undefined - against value.identifier. Give the item
+        // a real identifier so the two genuinely differ; see product-bugs.md.
         const mockItem = {
+            identifier: 'cert123',
             issuedCertificates: [{ identifier: 'cert456' }],
             dataUrl: 'certificate_url',
         }

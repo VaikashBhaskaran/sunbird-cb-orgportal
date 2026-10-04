@@ -407,11 +407,15 @@ describe('CreateUserComponent', () => {
     })
 
     it('should clean up subscriptions on destroy', () => {
-        const mockSubscription = { unsubscribe: jest.fn() }
-        // component.defaultSideNavBarOpenedSubscription = mockSubscription
+        // The subscription is private and created in ngOnInit, so drive that and spy on
+        // the real one rather than planting a stand-in.
+        component.ngOnInit()
+        const subscription = (component as any).defaultSideNavBarOpenedSubscription
+        expect(subscription).toBeTruthy()
+        const unsubscribeSpy = jest.spyOn(subscription, 'unsubscribe')
 
         component.ngOnDestroy()
 
-        expect(mockSubscription.unsubscribe).toHaveBeenCalled()
+        expect(unsubscribeSpy).toHaveBeenCalled()
     })
 })

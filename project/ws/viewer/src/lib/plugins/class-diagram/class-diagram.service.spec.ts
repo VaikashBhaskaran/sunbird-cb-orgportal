@@ -22,10 +22,11 @@ describe('ClassDiagramService', () => {
   it('should submit class diagram', (done) => {
     const mockIdentifier = 'test-identifier'
     const mockUserSolution = { someData: 'example' }
-    const mockApiResponse: NSClassDiagram.IClassDiagramApiResponse = {
+    // Both results are required on the response; the service only passes them through.
+    const mockApiResponse = {
       submitResult: undefined,
       verifyResult: undefined
-    }
+    } as unknown as NSClassDiagram.IClassDiagramApiResponse
 
     // Mock the http.post method to return an observable with mock response
     httpClientMock.post.mockReturnValue(of(mockApiResponse))

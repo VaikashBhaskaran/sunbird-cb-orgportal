@@ -16,8 +16,9 @@ describe('BulkUploadComponent', () => {
   beforeEach(() => {
     // Mock services
     fileServiceMock = {
-      getBulkDesignationUploadData: jest.fn(),
-      getBulkDesignationStatus: jest.fn(),
+      // Both are piped through takeUntil and subscribed; res.result.content is sorted.
+      getBulkDesignationUploadData: jest.fn().mockReturnValue(of({ result: { content: [] } })),
+      getBulkDesignationStatus: jest.fn().mockReturnValue(of({ result: { content: [] } })),
       downloadWithDispositionName: jest.fn(),
       downloadBulkUploadSampleFile: jest.fn(),
       validateExcelFile: jest.fn(),
@@ -44,7 +45,8 @@ describe('BulkUploadComponent', () => {
     }
 
     usersServiceMock = {
-      sendOtp: jest.fn()
+      // generateAndVerifyOTP pipes and subscribes to this; individual tests override it.
+      sendOtp: jest.fn().mockReturnValue(of({ result: 'success' }))
     }
 
     activateRouteMock = {
@@ -405,8 +407,9 @@ describe('BulkUploadComponent', () => {
     // Timer should be running
     expect(component.interval).toBeDefined()
 
-    // Advance by 2 seconds
-    jest.advanceTimersByTime(2000)
+    // timeLeft counts 2 -> 1 -> 0 and only fires on the tick after it reaches 0, so three
+    // intervals are needed, not two.
+    jest.advanceTimersByTime(3000)
 
     // Timer should complete and getBulkStatusList should be called
     expect(getBulkStatusListSpy).toHaveBeenCalled()

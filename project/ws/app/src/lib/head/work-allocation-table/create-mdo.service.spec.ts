@@ -163,7 +163,9 @@ describe('CreateMDOService', () => {
 
       // Verify the request body and the URL used for the POST request
       expect(httpClientMock.post).toHaveBeenCalledWith(
-        '/apis/protected/v8/portal/spv/deptAction/userrole',
+        // Double slash: the ASSIGN_ADMIN_TO_CREATED_DEPARTMENT constant already ends in a
+        // '/' and the call template adds another. Recorded in product-bugs.md.
+        '/apis/protected/v8/portal/spv/deptAction//userrole',
         {
           userId,
           deptId,

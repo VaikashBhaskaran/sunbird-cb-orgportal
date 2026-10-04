@@ -14,7 +14,6 @@ describe('CommunityDashboardComponent', () => {
   let mockRouter: any
   let mockCommunitySvc: any
   let mockActivatedRoute: any
-  let mockRolesService: any
 
   beforeEach(() => {
     // Setup mocks
@@ -59,29 +58,13 @@ describe('CommunityDashboardComponent', () => {
       }
     }
 
-    mockRolesService = {
-      getAllRoles: jest.fn().mockReturnValue(of({
-        result: {
-          response: {
-            value: JSON.stringify({
-              orgTypeList: [
-                {
-                  name: 'MDO',
-                  roles: ['COMMUNITY_MODERATOR', 'OTHER_ROLE']
-                }
-              ]
-            })
-          }
-        }
-      }))
-    }
 
     // Create component with mocks
     component = new CommunityDashboardComponent(
       mockRouter,
       mockCommunitySvc,
-      mockActivatedRoute,
-      mockRolesService
+      mockActivatedRoute
+      // The component no longer injects RolesService; the dependency is commented out.
     )
 
     // Spy on component methods
@@ -96,8 +79,9 @@ describe('CommunityDashboardComponent', () => {
   test('should initialize the component correctly', () => {
     expect(component).toBeDefined()
     expect(component.dataSource).toBeInstanceOf(MatTableDataSource)
-    // expect(component.getRouteSubscription).toHaveBeenCalled()
-    expect(component.fetchCommunityData).toHaveBeenCalledWith('')
+    // The constructor calls fetchCommunityData itself, before any spy could be attached,
+    // so assert on the service call it makes.
+    expect(mockCommunitySvc.communitySearch).toHaveBeenCalled()
   })
 
   // Test getRouteSubscription
@@ -122,13 +106,27 @@ describe('CommunityDashboardComponent', () => {
   })
 
   // Test getOrgRolesList
-  test('should fetch roles and set community moderator flag', () => {
+  // getOrgRolesList no longer talks to a roles service. It reads the signed-in user off
+  // the route and narrows the visible tabs for a community moderator who is not also an
+  // MDO leader.
+  test('should show only the Community tab to a community moderator', () => {
+    mockActivatedRoute.snapshot.data.configService = {
+      unMappedUser: { roles: ['COMMUNITY_MODERATOR'] },
+    }
+
     component.getOrgRolesList()
 
-    expect(mockRolesService.getAllRoles).toHaveBeenCalled()
-    expect(component.masterData.rolesList).toBeDefined()
-    expect(component.masterData.mdoRoles).toEqual(['COMMUNITY_MODERATOR', 'OTHER_ROLE'])
-    expect(component.isCommunityModeratorRole).toBe(true)
+    expect(component.filteredTabs.map((t: any) => t.label)).toEqual(['Community'])
+  })
+
+  test('should leave every tab in place for an MDO leader', () => {
+    mockActivatedRoute.snapshot.data.configService = {
+      unMappedUser: { roles: ['COMMUNITY_MODERATOR', 'MDO_LEADER'] },
+    }
+
+    component.getOrgRolesList()
+
+    expect(component.filteredTabs).toEqual(component.tabs)
   })
 
   // Test fetchCommunityData
@@ -252,23 +250,32 @@ describe('CommunityDashboardComponent', () => {
 
     component.ngAfterViewInit()
 
+    // The accessor reads the API's own field names, not the column ids: a community row
+    // carries createdOn/updatedOn/countOfPeopleJoined/countOfModerators, and the author's
+    // name is looked up in additionalUserInfo rather than held on the row.
     const testItem = {
+      // 'name' sorts on item.communityName, which is the one column id the accessor does
+      // read off the declared shape.
       communityName: 'Test Community',
-      startDate: new Date('2023-01-01'),
-      createdBy: 'test-user-id',
-      publishedOn: new Date('2023-01-015'),
-      members: 10,
-      mods: 2,
-      createdByUserId: 'user-001'
-    }
+      createdOn: '2025-01-01',
+      createdBy: 'user-001',
+      updatedOn: '2025-01-02',
+      countOfPeopleJoined: 10,
+      countOfModerators: 2,
+      // The declared Community type names the table's columns rather than these API
+      // fields; the rows are assigned straight from search_results.data.
+    } as any
+    component.additionalUserInfo = { 'user-001': { first_name: 'John' } }
 
-    expect(component.dataSource.sortingDataAccessor(testItem, 'communityName')).toBe('Test Community')
+    expect(component.dataSource.sortingDataAccessor(testItem, 'name')).toBe('test community')
     expect(component.dataSource.sortingDataAccessor(testItem, 'startDate')).toBe(new Date('2025-01-01').getTime())
     expect(component.dataSource.sortingDataAccessor(testItem, 'createdBy')).toBe('john')
     expect(component.dataSource.sortingDataAccessor(testItem, 'publishedOn')).toBe(new Date('2025-01-02').getTime())
     expect(component.dataSource.sortingDataAccessor(testItem, 'members')).toBe(10)
     expect(component.dataSource.sortingDataAccessor(testItem, 'mods')).toBe(2)
-    expect(component.dataSource.sortingDataAccessor(testItem, 'createdByUserId')).toBe('user001')
+    // Anything the switch does not name falls through to the row's own property.
+    expect(component.dataSource.sortingDataAccessor(testItem, 'createdBy' as any)).toBe('john')
+    expect(component.dataSource.sortingDataAccessor(testItem, 'countOfModerators' as any)).toBe(2)
   })
 
   // Test cleanup

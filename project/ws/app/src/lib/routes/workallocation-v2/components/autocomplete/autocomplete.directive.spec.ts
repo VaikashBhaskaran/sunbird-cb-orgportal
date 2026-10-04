@@ -19,7 +19,11 @@ describe('AutocompleteDirective', () => {
   beforeEach(() => {
     // Mocking the dependencies
     overlayRefMock = {
+      // openDropdown attaches a TemplatePortal to the overlay.
+      attach: jest.fn(),
       detach: jest.fn(),
+      hasAttached: jest.fn().mockReturnValue(false),
+      dispose: jest.fn(),
       overlayElement: document.createElement('div'),
       detachments: jest.fn().mockReturnValue(of('detached')),
     } as unknown as jest.Mocked<OverlayRef>
@@ -55,9 +59,14 @@ describe('AutocompleteDirective', () => {
 
   it('should open dropdown on focus event with debounce', () => {
     const openDropdownSpy = jest.spyOn(directive, 'openDropdown')
-    // jest.spyOn(fromEvent, 'subscribe').mockImplementationOnce((callback: any) => callback()) // Simulate focus event
 
+    // ngOnInit listens for 'focus' on the host and debounces by 1000ms, so the event has
+    // to be dispatched and the timer advanced.
+    jest.useFakeTimers()
     directive.ngOnInit()
+    elementRefMock.nativeElement.dispatchEvent(new Event('focus'))
+    jest.advanceTimersByTime(1000)
+    jest.useRealTimers()
 
     expect(openDropdownSpy).toHaveBeenCalled()
   })
@@ -81,7 +90,8 @@ describe('AutocompleteDirective', () => {
 
   it('should close the overlay when close is called', () => {
     directive.openDropdown()
-    // directive.close()
+    // close() is private on the directive.
+    directive['close']()
     expect(overlayRefMock.detach).toHaveBeenCalled()
   })
 

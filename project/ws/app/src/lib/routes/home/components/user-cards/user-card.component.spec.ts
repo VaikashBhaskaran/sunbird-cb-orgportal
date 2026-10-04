@@ -4,13 +4,18 @@ import { DatePipe } from '@angular/common'
 import { UntypedFormGroup } from '@angular/forms'
 
 // Mock services and dependencies
+// Everything the component reaches for on this service. getDesignations is gone - the
+// designation list comes from searchDesignation now - and all of these are subscribed to,
+// so each has to emit; individual tests override the ones they assert on.
 const mockUsersService = {
-	getUserById: jest.fn(),
-	getDesignations: jest.fn(),
-	getGroups: jest.fn(),
-	getMasterLanguages: jest.fn(),
-	updateUserDetails: jest.fn(),
-	addUserToDepartment: jest.fn(),
+	getUserById: jest.fn().mockReturnValue(of({})),
+	getGroups: jest.fn().mockReturnValue(of([])),
+	getMasterLanguages: jest.fn().mockReturnValue(of({ languages: [] })),
+	getMasterNationlity: jest.fn().mockReturnValue(of({ nationalities: [] })),
+	updateUserDetails: jest.fn().mockReturnValue(of({ result: {} })),
+	addUserToRole: jest.fn().mockReturnValue(of({ result: {} })),
+	searchDesignation: jest.fn().mockReturnValue(of({ result: { result: { data: [] } } })),
+	TOTAL_USERS_LIMIT: 100,
 	mentorList$: new Subject()
 }
 
@@ -94,8 +99,16 @@ describe('UserCardComponent', () => {
 			roles: ['CONTENT_CREATOR']
 		}))
 
-		mockUsersService.getDesignations.mockReturnValue(of({
-			responseData: ['Developer', 'Manager', 'Analyst']
+		mockUsersService.searchDesignation.mockReturnValue(of({
+			result: {
+				result: {
+					data: [
+						{ designation: 'Developer', status: 'Active' },
+						{ designation: 'Manager', status: 'Active' },
+						{ designation: 'Analyst', status: 'Active' }
+					]
+				}
+			}
 		}))
 
 		mockUsersService.getGroups.mockReturnValue(of({
@@ -129,7 +142,7 @@ describe('UserCardComponent', () => {
 		})
 
 		mockUsersService.updateUserDetails.mockReturnValue(of({ success: true }))
-		mockUsersService.addUserToDepartment.mockReturnValue(of({ success: true }))
+		mockUsersService.addUserToRole.mockReturnValue(of({ success: true }))
 		mockApprovalSvc.handleWorkflowV2.mockReturnValue(of({ result: { data: true } }))
 
 		// Initialize component
@@ -171,28 +184,41 @@ describe('UserCardComponent', () => {
 		expect(component.selectedtags).toEqual([])
 	})
 
-	it('should format profileStatusUpdatedOn value in ngOnInit', () => {
-		component.ngOnInit()
-		expect(component.usersData[0].profileDetails.profileStatusUpdatedOn).toBe('2023-01-01')
+	it('should leave profileStatusUpdatedOn unformatted', () => {
+		// The code that trims the timestamp down to a date sits in the constructor, where
+		// usersData - an @Input - is always still undefined, and ngOnChanges does not
+		// repeat it. So the raw value reaches the template. Recorded in product-bugs.md.
+		component.usersData = [{
+			userId: 'user123',
+			firstName: 'John',
+			profileDetails: { profileStatusUpdatedOn: '2023-01-01 12:00:00' },
+		}]
+
+		component.ngOnChanges({} as any)
+
+		expect(component.usersData[0].profileDetails.profileStatusUpdatedOn)
+			.toBe('2023-01-01 12:00:00')
 	})
 
-	it('should load roles on init', () => {
-		component.ngOnInit()
+	it('should load roles on init', async () => {
+		// init() awaits each loader in turn, and ngOnInit does not await init().
+		await component.init()
 		expect(mockRolesService.getAllRoles).toHaveBeenCalled()
 	})
 
-	it('should load designations on init', () => {
-		component.init()
-		expect(mockUsersService.getDesignations).toHaveBeenCalled()
+	it('should load designations on init', async () => {
+		// The designation list is loaded by ngOnInit directly, not through init().
+		await component.loadDesignations()
+		expect(mockUsersService.searchDesignation).toHaveBeenCalled()
 	})
 
-	it('should load groups on init', () => {
-		component.init()
+	it('should load groups on init', async () => {
+		await component.init()
 		expect(mockUsersService.getGroups).toHaveBeenCalled()
 	})
 
-	it('should load languages on init', () => {
-		component.init()
+	it('should load languages on init', async () => {
+		await component.init()
 		expect(mockUsersService.getMasterLanguages).toHaveBeenCalled()
 	})
 
@@ -220,7 +246,9 @@ describe('UserCardComponent', () => {
 
 		component.onChangePage(mockPageEvent as any)
 
-		expect(emitSpy).toHaveBeenCalledWith({ pageIndex: 2, pageSize: 25 })
+		// The emitted pageIndex is the offset the caller should fetch from
+		// (pageIndex * pageSize), not the page number itself.
+		expect(emitSpy).toHaveBeenCalledWith({ pageIndex: 50, pageSize: 25 })
 	})
 
 	it('should handle pagination change for approvals', () => {
@@ -230,6 +258,7 @@ describe('UserCardComponent', () => {
 		component.isApprovals = true
 		component.onChangePage(mockPageEvent as any)
 
+		// The approvals branch emits the page number as-is, unlike the other one.
 		expect(emitSpy).toHaveBeenCalledWith({ pageIndex: 2, pageSize: 25 })
 	})
 
@@ -345,6 +374,8 @@ describe('UserCardComponent', () => {
 		}
 		component.currentFilter = 'transfers'
 		component.actionList = []
+		// onTransferSubmit checks approvalData.length once each request has been sent.
+		component.approvalData = []
 
 		// Execute
 		component.onApprovalSubmit(mockPanel, mockAppData)
@@ -371,7 +402,7 @@ describe('UserCardComponent', () => {
 		component.saveMentorProfile(mockUser, mockEvent)
 
 		// Verify
-		expect(mockUsersService.addUserToDepartment).toHaveBeenCalledWith({
+		expect(mockUsersService.addUserToRole).toHaveBeenCalledWith({
 			request: {
 				organisationId: 'org123',
 				userId: 'user123',

@@ -1,11 +1,13 @@
 import { TestBed, inject } from '@angular/core/testing'
 
+import { commonTestingProviders } from '@test/helpers/testing-providers'
 import { LoginGuard } from './login.guard'
 
 describe('LoginGuard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [LoginGuard],
+      providers: [
+        ...commonTestingProviders(),LoginGuard],
     })
   })
 

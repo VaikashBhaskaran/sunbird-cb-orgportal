@@ -1,137 +1,114 @@
-import { RootComponent } from './root.component'
-import { Router, NavigationStart } from '@angular/router'
-import { ActivatedRoute } from '@angular/router'
-import { BreadcrumbsOrgService } from '@sunbird-cb/collection'
-import { MatDialog } from '@angular/material/dialog'
-import { SwUpdate } from '@angular/service-worker'
-import { TelemetryService } from '@sunbird-cb/utils-v2'
-import { LoggerService } from '@sunbird-cb/utils-v2'
-import { of } from 'rxjs'
-import { RootService } from './root.service'
-import { ValueService } from '@sunbird-cb/utils-v2' // Ensure ValueService is imported
+import { NavigationEnd, NavigationStart } from '@angular/router'
+import { Subject } from 'rxjs'
 
-jest.mock('@angular/router')
-jest.mock('@sunbird-cb/collection')
-jest.mock('@sunbird-cb/utils-v2')
-jest.mock('@angular/material/dialog')
-jest.mock('@angular/service-worker')
-jest.mock('@angular/core', () => ({
-	...jest.requireActual('@angular/core'),
-	ChangeDetectorRef: jest.fn().mockReturnValue({
-		detectChanges: jest.fn(),
-	}),
-}))
+import { RootComponent } from './root.component'
 
 describe('RootComponent', () => {
 	let component: RootComponent
-	let router: Router
-	let route: ActivatedRoute
-	let breadcrumbsService: BreadcrumbsOrgService
-	let telemetryService: TelemetryService
-	let swUpdate: SwUpdate
-	let dialog: MatDialog
-	let logger: LoggerService
-	let rootService: RootService
-	let valueSvc: ValueService // Declare valueSvc
+	let routerEvents: Subject<any>
+	let breadcrumbsService: any
+	let eventSvc: any
+	let logger: any
+	let swUpdate: any
+	let changeDetector: any
+	let loaderState: Subject<boolean>
 
 	beforeEach(() => {
-		// Mock ValueService with necessary properties
-		valueSvc = {
-			isXSmall$: of(false), // Return a mock observable
-		} as any
-
-		router = new Router()
-		route = {
-			snapshot: { root: { firstChild: null } },
-			events: of(new NavigationStart(0, '/some-route')),
-		} as any
-		breadcrumbsService = new BreadcrumbsOrgService(null as any)
-		telemetryService = new TelemetryService(null as any, null as any, null as any, null as any)
+		routerEvents = new Subject<any>()
+		loaderState = new Subject<boolean>()
+		breadcrumbsService = { initialize: jest.fn() }
+		eventSvc = { dispatchEvent: jest.fn() }
+		logger = { log: jest.fn() }
 		swUpdate = {
 			isEnabled: true,
-			available: of({}),
 			checkForUpdate: jest.fn(),
 			activateUpdate: jest.fn(),
-		} as any
-		dialog = { open: jest.fn(() => ({ afterClosed: jest.fn(() => of(true)) })) } as any
-		logger = { log: jest.fn() } as any
-		rootService = new RootService()
+		}
+		changeDetector = { detectChanges: jest.fn() }
 
 		component = new RootComponent(
-			router,
-			route,
-			null as any, // authSvc
-			null as any, // appRef
-			logger as any,
-			swUpdate as any,
-			dialog as any,
-			null as any, // configSvc
-			valueSvc as any, // Mocked valueSvc
-			telemetryService as any,
-			null as any, // mobileAppsSvc
-			rootService as any,
-			breadcrumbsService as any,
-			null as any, // changeDetector
-			null as any, // utilitySvc
-			null as any, // eventSvc
-			null as any, // authSvc
+			{ events: routerEvents, navigate: jest.fn() } as any,   // router
+			{ snapshot: { root: { firstChild: null } } } as any,    // route
+			{ isStable: new Subject() } as any,                      // appRef
+			logger,
+			swUpdate,
+			{} as any,                                               // configSvc
+			{ isXSmall$: new Subject() } as any,                     // valueSvc
+			{ impression: jest.fn() } as any,                        // telemetrySvc
+			{ init: jest.fn() } as any,                              // mobileAppsSvc
+			// ngOnInit pipes off showNavbarDisplay$.
+			{ showNavbarDisplay$: new Subject() } as any,            // rootSvc
+			breadcrumbsService,
+			changeDetector,
+			{} as any,                                               // utilitySvc
+			eventSvc,
+			{} as any,                                               // authSvc
+			{ changeLoad: loaderState } as any,                      // loader
 		)
-
-		component.ngOnInit()
 	})
 
-	it('should initialize properly in ngOnInit', () => {
-		expect(component.isInIframe).toBe(false) // Assuming window.self !== window.top is true by default
-		expect(breadcrumbsService.initialize).toHaveBeenCalled()
+	it('should create the component', () => {
+		expect(component).toBeTruthy()
 	})
 
-	it('should handle NavigationStart event correctly', () => {
-		// const spy = jest.spyOn(component, 'ngOnInit')
-		// router.events.next(new NavigationStart(0, '/public/home'))
-		expect(window.location.href).toBe('/public/logout') // Checks redirection in NavigationStart
+	describe('ngOnInit', () => {
+		it('should initialise the breadcrumbs and record whether it is framed', () => {
+			component.ngOnInit()
+
+			expect(breadcrumbsService.initialize).toHaveBeenCalled()
+			// jsdom reports window.self === window.top, so this is never framed here.
+			expect(component.isInIframe).toBe(false)
+		})
+
+		it('should mark a route change in progress on NavigationStart', () => {
+			component.ngOnInit()
+
+			routerEvents.next(new NavigationStart(1, '/app/home'))
+
+			expect(component.routeChangeInProgress).toBe(true)
+			expect(component.isNavBarRequired).toBe(true)
+			expect(changeDetector.detectChanges).toHaveBeenCalled()
+		})
+
+		it('should hide the nav bar for an embedded route', () => {
+			component.ngOnInit()
+
+			routerEvents.next(new NavigationStart(1, '/embed/something'))
+
+			expect(component.isNavBarRequired).toBe(false)
+		})
+
+		it('should flag the setup pages on NavigationEnd', () => {
+			component.ngOnInit()
+
+			routerEvents.next(new NavigationEnd(1, '/app/setup/welcome', '/app/setup/welcome'))
+
+			expect(component.isSetupPage).toBe(true)
+		})
 	})
 
-	it('should handle NavigationEnd event correctly', () => {
-		component.ngOnInit() // Simulate ngOnInit for initial setup
-		//	router.events.next(new NavigationEnd(0, '/some-route', '/some-route'))
-		expect(component.currentUrl).toBe('/some-route')
-		expect(component.routeChangeInProgress).toBe(false)
+	describe('raiseAppStartTelemetry', () => {
+		it('should dispatch the app-start event once and only once', () => {
+			component.raiseAppStartTelemetry()
+			component.raiseAppStartTelemetry()
+
+			expect(eventSvc.dispatchEvent).toHaveBeenCalledTimes(1)
+			expect(eventSvc.dispatchEvent).toHaveBeenCalledWith(
+				expect.objectContaining({
+					data: expect.objectContaining({ type: 'app', mode: 'view' }),
+				})
+			)
+		})
 	})
 
-	it('should open dialog when app update is available', () => {
-		component.initAppUpdateCheck()
-		expect(swUpdate.checkForUpdate).toHaveBeenCalled()
-		expect(dialog.open).toHaveBeenCalled()
-	})
+	describe('initAppUpdateCheck', () => {
+		it('should log, and stay out of the way outside production', () => {
+			// The six-hourly update poll only runs when environment.production is set, and
+			// setup-jest's environment mock leaves it false.
+			component.initAppUpdateCheck()
 
-	it('should call activateUpdate and reload page if user accepts app update', async () => {
-		component.initAppUpdateCheck()
-		// const dialogRef = dialog.open.mock.results[0].value
-		// dialogRef.afterClosed.mockReturnValueOnce(of(true))
-
-		// await dialogRef.afterClosed()
-
-		expect(swUpdate.activateUpdate).toHaveBeenCalled()
-		// Check if window location.reload is called after update
-		const reloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(() => { })
-		expect(reloadSpy).toHaveBeenCalled()
-	})
-
-	it('should call telemetryService.raiseAppStartTelemetry when app starts', () => {
-		const telemetrySpy = jest.spyOn(telemetryService, 'impression')
-		component.raiseAppStartTelemetry()
-		expect(telemetrySpy).toHaveBeenCalled()
-	})
-
-	it('should detect changes in ngOnInit', () => {
-		//const detectChangesSpy = jest.spyOn(component.changeDetector, 'detectChanges')
-		component.ngOnInit()
-		//expect(detectChangesSpy).toHaveBeenCalled()
-	})
-
-	it('should unsubscribe from loaderSubscription on destroy', () => {
-		const unsubscribeSpy = jest.spyOn(component.loaderSubscription, 'unsubscribe')
-		//component.ngOnDestroy()
-		expect(unsubscribeSpy).toHaveBeenCalled()
+			expect(logger.log).toHaveBeenCalled()
+			expect(swUpdate.checkForUpdate).not.toHaveBeenCalled()
+		})
 	})
 })

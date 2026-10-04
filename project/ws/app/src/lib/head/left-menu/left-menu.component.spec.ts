@@ -11,7 +11,11 @@ describe('LeftMenuComponent', () => {
     beforeAll(() => {
         component = new LeftMenuComponent(
             activatedRoute as ActivatedRoute,
-            router as Router
+            router as Router,
+            // Added since this spec was written; inert stand-ins.
+            { open: jest.fn() } as any,
+            { open: jest.fn() } as any,
+            { raiseInteractTelemetry: jest.fn() } as any
         )
     })
 

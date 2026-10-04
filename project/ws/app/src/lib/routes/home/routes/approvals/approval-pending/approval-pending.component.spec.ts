@@ -38,8 +38,10 @@ describe('ApprovalPendingComponent', () => {
 
 		// Mock approvals service
 		mockApprService = {
-			getApprovalsList: jest.fn(),
-			handleWorkflow: jest.fn()
+			// The component subscribes to both, so they need an observable by default.
+			// Individual tests still override these with their own payloads.
+			getApprovalsList: jest.fn().mockReturnValue(of({ result: { count: 0, data: [] } })),
+			handleWorkflow: jest.fn().mockReturnValue(of({}))
 		} as unknown as jest.Mocked<ApprovalsService>
 
 		// Mock activated route with parent data

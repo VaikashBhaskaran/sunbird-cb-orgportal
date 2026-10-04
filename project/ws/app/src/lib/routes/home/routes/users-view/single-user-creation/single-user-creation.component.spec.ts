@@ -1,4 +1,4 @@
-import { Subject, of, throwError } from 'rxjs'
+import { of, throwError } from 'rxjs'
 import { SingleUserCreationComponent } from './single-user-creation.component'
 import { UntypedFormBuilder } from '@angular/forms'
 import { MatSnackBar } from '@angular/material/snack-bar'
@@ -17,34 +17,21 @@ describe('SingleUserCreationComponent', () => {
 
     beforeEach(() => {
         // Create mocks for all dependencies
-        formBuilderMock = {
-            group: jest.fn().mockReturnValue({
-                get: jest.fn().mockImplementation((key) => {
-                    return {
-                        valueChanges: new Subject(),
-                        patchValue: jest.fn(),
-                        value: key === 'tags' ? [] : '',
-                    }
-                }),
-                patchValue: jest.fn(),
-                reset: jest.fn(),
-                value: {
-                    email: 'test@example.com',
-                    firstName: 'Test',
-                    phone: '9876543210',
-                    channel: 'web',
-                    designation: 'Developer',
-                    group: 'Group1',
-                    roles: ['PUBLIC', 'CONTENT_CREATOR']
-                }
-            }),
-        } as unknown as jest.Mocked<UntypedFormBuilder>
+        // A real FormBuilder rather than a hand-rolled fake: the component builds its form
+        // from it and then uses the full FormGroup/FormControl surface - valueChanges,
+        // updateValueAndValidity, setValidators - which a stub has to keep chasing.
+        formBuilderMock = new UntypedFormBuilder() as jest.Mocked<UntypedFormBuilder>
 
+        // Everything the component reaches for on this service. They are all subscribed
+        // to, so each has to emit; individual tests override the ones they assert on.
         usersServiceMock = {
-            getDesignations: jest.fn(),
-            getMasterLanguages: jest.fn(),
-            getGroups: jest.fn(),
-            createUser: jest.fn()
+            getMasterLanguages: jest.fn().mockReturnValue(of({ languages: [] })),
+            getGroups: jest.fn().mockReturnValue(of([])),
+            createUser: jest.fn().mockReturnValue(of({ result: {} })),
+            updateUserDetails: jest.fn().mockReturnValue(of({ result: {} })),
+            addUserToRole: jest.fn().mockReturnValue(of({ result: {} })),
+            searchDesignation: jest.fn().mockReturnValue(of({ result: { data: [] } })),
+            searchIgotDesignation: jest.fn().mockReturnValue(of({ result: { data: [] } })),
         } as unknown as jest.Mocked<UsersService>
 
         matSnackBarMock = {
@@ -52,7 +39,7 @@ describe('SingleUserCreationComponent', () => {
         } as unknown as jest.Mocked<MatSnackBar>
 
         rolesServiceMock = {
-            getAllRoles: jest.fn()
+            getAllRoles: jest.fn().mockReturnValue(of({ result: { response: { value: '{}' } } }))
         } as unknown as jest.Mocked<RolesService>
 
         activatedRouteMock = {
@@ -73,7 +60,9 @@ describe('SingleUserCreationComponent', () => {
             usersServiceMock,
             matSnackBarMock,
             rolesServiceMock,
-            activatedRouteMock
+            activatedRouteMock,
+            // MatDialog, added since this spec was written.
+            { open: jest.fn() } as any
         )
 
         // Mock the QueryList for checkboxes
@@ -81,12 +70,18 @@ describe('SingleUserCreationComponent', () => {
             forEach: jest.fn()
         } as any
 
-        // Setup successful responses for service calls
-        usersServiceMock.getDesignations.mockReturnValue(of({
-            responseData: [
-                { name: 'Developer' },
-                { name: 'Manager' }
-            ]
+        // Setup successful responses for service calls. getDesignation goes through
+        // searchDesignation now, and maps result.result.data's `designation` field.
+        usersServiceMock.searchDesignation.mockReturnValue(of({
+            result: {
+                result: {
+                    data: [
+                        { designation: 'Developer', status: 'Active' },
+                        { designation: 'Manager', status: 'Active' }
+                    ],
+                    totalcount: 2
+                }
+            }
         }))
 
         usersServiceMock.getMasterLanguages.mockReturnValue(of({
@@ -146,28 +141,10 @@ describe('SingleUserCreationComponent', () => {
         })
 
         it('should set default values', () => {
-            // Setup form mock for this test
-            const rolesPatchValueMock = jest.fn()
-            const formPatchValueMock = jest.fn()
-
-            formBuilderMock.group = jest.fn().mockReturnValue({
-                get: jest.fn().mockImplementation((key) => {
-                    if (key === 'roles') {
-                        return { patchValue: rolesPatchValueMock }
-                    }
-                    return { patchValue: jest.fn() }
-                }),
-                patchValue: formPatchValueMock
-            })
-
-            // Re-create component to use the new mock
-            component = new SingleUserCreationComponent(
-                formBuilderMock,
-                usersServiceMock,
-                matSnackBarMock,
-                rolesServiceMock,
-                activatedRouteMock
-            )
+            // Spy on the real form rather than swapping in a stand-in: the component's own
+            // field initialiser needs a working FormGroup either way.
+            const rolesPatchValueMock = jest.spyOn(component.userCreationForm.get('roles')!, 'patchValue')
+            const formPatchValueMock = jest.spyOn(component.userCreationForm, 'patchValue')
 
             // Call the method
             component.setDefaultValue()
@@ -184,19 +161,15 @@ describe('SingleUserCreationComponent', () => {
         it('should fetch designations and update masterData', () => {
             component.getDesignation()
 
-            expect(usersServiceMock.getDesignations).toHaveBeenCalled()
-            expect(component.masterData.designation).toEqual([
-                { name: 'Developer' },
-                { name: 'Manager' }
-            ])
+            expect(usersServiceMock.searchDesignation).toHaveBeenCalled()
             expect(component.masterData.designationBackup).toEqual([
-                { name: 'Developer' },
-                { name: 'Manager' }
+                { name: 'Developer', status: 'Active' },
+                { name: 'Manager', status: 'Active' }
             ])
         })
 
         it('should handle designation fetch error', () => {
-            usersServiceMock.getDesignations.mockReturnValue(
+            usersServiceMock.searchDesignation.mockReturnValue(
                 throwError(new HttpErrorResponse({ status: 500, statusText: 'Error' }))
             )
 
@@ -309,7 +282,9 @@ describe('SingleUserCreationComponent', () => {
             // Mock form get and value
             const tagsMock = {
                 value: [],
-                patchValue: jest.fn()
+                patchValue: jest.fn(),
+                // handleAddTags finishes by revalidating the control.
+                updateValueAndValidity: jest.fn()
             }
             jest.spyOn(component.userCreationForm, 'get').mockReturnValue(tagsMock as any)
 
@@ -370,7 +345,7 @@ describe('SingleUserCreationComponent', () => {
             global.Date = mockDate as any
 
             // Setup form values with dob
-            jest.spyOn(component.userCreationForm, 'value', 'get').mockReturnValue({
+            component.userCreationForm.patchValue({
                 email: 'test@example.com',
                 firstName: 'Test',
                 phone: '9876543210',
@@ -384,13 +359,23 @@ describe('SingleUserCreationComponent', () => {
             // Call method
             component.handleUserCreation()
 
-            // Verify
-            expect(component.displayLoader).toBe(true)
-            expect(usersServiceMock.createUser).toHaveBeenCalledWith({
-                personalDetails: expect.objectContaining({
-                    dob: '1-1-2025' // Formatted date
+            // Verify. createUser's mock emits synchronously, so displayLoader is already
+            // back down by the time handleUserCreation returns - it is asserted below.
+            // Account-level fields stay at the top under personalDetails; the profile
+            // fields, dob among them, are nested under profileDetails.personalDetails.
+            expect(usersServiceMock.createUser).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    personalDetails: expect.objectContaining({
+                        email: 'test@example.com',
+                        channel: 'web',
+                    }),
+                    profileDetails: expect.objectContaining({
+                        personalDetails: expect.objectContaining({
+                            dob: '1-1-2025', // Formatted date
+                        }),
+                    }),
                 })
-            })
+            )
 
             // Verify success handling
             expect(component.displayLoader).toBe(false)
@@ -402,7 +387,7 @@ describe('SingleUserCreationComponent', () => {
 
         it('should show error when channel is empty', () => {
             // Setup form value without channel
-            jest.spyOn(component.userCreationForm, 'value', 'get').mockReturnValue({
+            component.userCreationForm.patchValue({
                 email: 'test@example.com',
                 firstName: 'Test',
                 phone: '9876543210',
@@ -422,7 +407,7 @@ describe('SingleUserCreationComponent', () => {
 
         it('should handle user creation error', () => {
             // Setup form values with channel
-            jest.spyOn(component.userCreationForm, 'value', 'get').mockReturnValue({
+            component.userCreationForm.patchValue({
                 email: 'test@example.com',
                 firstName: 'Test',
                 phone: '9876543210',

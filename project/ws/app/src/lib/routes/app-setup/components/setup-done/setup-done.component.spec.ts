@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router'
 import { DomSanitizer } from '@angular/platform-browser'
 import { Globals } from '../../globals'
 import { AppTourDialogComponent } from '@sunbird-cb/collection'
+import { of } from 'rxjs'
 
 jest.mock('@sunbird-cb/utils-v2')
 jest.mock('@angular/router')
@@ -23,8 +24,9 @@ describe('SetupDoneComponent', () => {
 
     beforeEach(() => {
         // Mock the services
-        mockConfigSvc = new ConfigurationsService() // You can pass mock data if necessary
-        mockRoute = { data: { subscribe: jest.fn() } } as unknown as ActivatedRoute
+        mockConfigSvc = new ConfigurationsService(null as any) // You can pass mock data if necessary
+        // ngOnInit reads data.badges.data off the route, so the stream has to emit it.
+        mockRoute = { data: of({ badges: { data: 'testBadge' } }) } as unknown as ActivatedRoute
         mockDomSanitizer = { bypassSecurityTrustResourceUrl: jest.fn() } as unknown as DomSanitizer
         mockMatDialog = { open: jest.fn() } as unknown as MatDialog
         mockRouter = { navigate: jest.fn() } as unknown as Router
@@ -47,9 +49,10 @@ describe('SetupDoneComponent', () => {
 
     describe('ngOnInit', () => {
         it('should set badges from route data and sanitize appIcon if instanceConfig is available', () => {
-            //const badgesData = { data: 'testBadge' }
-            // mockRoute.data.subscribe.mockImplementationOnce(callback => callback({ badges: badgesData }))
-            // mockConfigSvc.instanceConfig = { logos: { thumpsUp: 'testLogoUrl' } }
+            // The appIcon branch only runs when instanceConfig is present.
+            mockConfigSvc.instanceConfig = { logos: { thumpsUp: 'testLogoUrl' } } as any
+            ;(mockDomSanitizer.bypassSecurityTrustResourceUrl as jest.Mock)
+                .mockReturnValue('safeLogoUrl')
 
             component.ngOnInit()
 

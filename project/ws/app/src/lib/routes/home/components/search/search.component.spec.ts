@@ -3,6 +3,7 @@ import { LoaderService } from '../../../../../../../../../src/app/services/loade
 import { UsersService } from '../../../users/services/users.service'
 import { MatDialog } from '@angular/material/dialog'
 import { EventEmitter } from '@angular/core'
+import { of, Subject } from 'rxjs'
 
 describe('SearchComponent', () => {
     let component: SearchComponent
@@ -14,7 +15,11 @@ describe('SearchComponent', () => {
 
     beforeEach(() => {
         mockDialog = { open: jest.fn(() => ({ afterClosed: jest.fn(() => ({ subscribe: jest.fn() })) })) } as unknown as MatDialog
-        mockUsersService = { getAllUsers: jest.fn() } as unknown as UsersService
+        // openFilter/hideFilter push onto usersSvc.filterToggle, so it must be a Subject.
+        mockUsersService = {
+            getAllUsers: jest.fn(),
+            filterToggle: new Subject<any>()
+        } as unknown as UsersService
         mockLoaderService = { changeLoaderState: jest.fn() } as unknown as LoaderService
         mockHandleApiData = new EventEmitter()
         mockHandleApproveAll = new EventEmitter()
@@ -22,6 +27,11 @@ describe('SearchComponent', () => {
         component = new SearchComponent(mockDialog, mockUsersService, mockLoaderService)
         component.handleApiData = mockHandleApiData
         component.handleapproveAll = mockHandleApproveAll
+
+        // These are real Subject/EventEmitter methods; they have to be spied to be asserted on.
+        jest.spyOn((mockUsersService as any).filterToggle, 'next')
+        jest.spyOn(mockHandleApiData, 'emit')
+        jest.spyOn(mockHandleApproveAll, 'emit')
     })
 
     it('should create the component', () => {
@@ -109,8 +119,9 @@ describe('SearchComponent', () => {
     })
 
     it('should call confirmApproval and emit approveAll if confirmed', () => {
-        //const dialogMock = { afterClosed: jest.fn(() => ({ subscribe: jest.fn((cb: any) => cb(true)) })) }
-        //mockDialog.open = jest.fn(() => dialogMock)
+        // The shared dialog stub's subscribe never invokes its callback, so the confirmed
+        // branch was never reached. Emit true here.
+        mockDialog.open = jest.fn(() => ({ afterClosed: () => of(true) })) as any
 
         const template = {}
         const emitSpy = jest.spyOn(component.handleapproveAll, 'emit')
@@ -122,8 +133,9 @@ describe('SearchComponent', () => {
     })
 
     it('should not emit approveAll if approval is not confirmed in confirmApproval', () => {
-        // const dialogMock = { afterClosed: jest.fn(() => ({ subscribe: jest.fn((cb: any) => cb(false)) })) }
-        // mockDialog.open = jest.fn(() => dialogMock)
+        // Emit false so the not-confirmed branch is genuinely exercised rather than passing
+        // because the callback never ran.
+        mockDialog.open = jest.fn(() => ({ afterClosed: () => of(false) })) as any
 
         const template = {}
         const emitSpy = jest.spyOn(component.handleapproveAll, 'emit')

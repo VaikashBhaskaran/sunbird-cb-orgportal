@@ -92,7 +92,9 @@ describe('ActivityLabelsComponent', () => {
             component.createForm()
 
             expect(component.activityForm).toBeDefined()
-            expect(addNewGroupSpy).toHaveBeenCalledWith(true)
+            // With no edit data createForm calls addNewGroup() with no arguments; the
+            // explicit true is only passed on the edit path with no unmapped activities.
+            expect(addNewGroupSpy).toHaveBeenCalledWith()
         })
 
         it('should create form with edit data', () => {

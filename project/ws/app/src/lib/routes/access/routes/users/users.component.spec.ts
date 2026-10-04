@@ -1,4 +1,4 @@
-import { Router, ActivatedRoute } from '@angular/router'
+import {ActivatedRoute} from '@angular/router'
 import { UsersService } from '../../services/users.service'
 import { UsersService as UsersService2 } from '../../../users/services/users.service'
 import { ProfileV2UtillService } from '../../../home/services/home-utill.service'
@@ -8,8 +8,6 @@ describe('UsersComponent', () => {
     let component: UsersComponent
 
     const usersSvc: Partial<UsersService> = {}
-    const router: Partial<Router> = {}
-    const activatedRoute: Partial<ActivatedRoute> = {}
     const route: Partial<ActivatedRoute> = {}
     const profileUtilSvc: Partial<ProfileV2UtillService> = {}
     const userS: Partial<UsersService2> = {}
@@ -18,8 +16,7 @@ describe('UsersComponent', () => {
     beforeAll(() => {
         component = new UsersComponent(
             usersSvc as UsersService,
-            router as Router,
-            activatedRoute as ActivatedRoute,
+            // The component takes a single ActivatedRoute and no Router.
             route as ActivatedRoute,
             profileUtilSvc as ProfileV2UtillService,
             userS as UsersService2,

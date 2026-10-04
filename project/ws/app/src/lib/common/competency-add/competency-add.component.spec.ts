@@ -38,6 +38,9 @@ describe('CompetencyAddComponent', () => {
       mockCompetencies,
       mockProfileV2Service
     )
+    // searchControl is created in ngOnInit; setFilteredThemes reads its value, and these
+    // tests call the methods directly. Tests that need a specific value override it.
+    component.searchControl = { value: '' } as any
   })
 
   it('should initialize component', () => {

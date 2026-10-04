@@ -26,6 +26,16 @@ describe('CreateContentComponent', () => {
         tpdsSvcMock.isContentSelected = jest.fn((identifier: string) =>
             (tpdsSvcMock.trainingPlanStepperData?.contentList || [])
                 .some((item: any) => (typeof item === 'string' ? item : item?.identifier) === identifier))
+        // The chips are the plan's content in plan order, so this mirrors the real method:
+        // the ids on the plan, resolved against the content the service is holding.
+        tpdsSvcMock.getSelectedContentInPlanOrder = jest.fn(() => {
+            const byId = new Map<string, any>()
+            ;(tpdsSvcMock.trainingPlanContentData?.data?.content || [])
+                .forEach((item: any) => byId.set(item.identifier, item))
+            return (tpdsSvcMock.trainingPlanStepperData?.contentList || [])
+                .map((item: any) => byId.get(typeof item === 'string' ? item : item?.identifier))
+                .filter((item: any) => !!item)
+        })
         component = new CreateContentComponent(tpdsSvcMock, dialogMock, routerMock)
     })
 
@@ -73,8 +83,12 @@ describe('CreateContentComponent', () => {
                 content: [{ identifier: '1', selected: false }, { identifier: '2', selected: true }]
             }
         }
+        // Both the chips and the count come from the plan's content list, not from the page
+        // being shown, so one selected id means one chip and a count of one.
+        tpdsSvcMock.trainingPlanStepperData = { contentList: ['2'] }
         component.handleSelectedChips(true)
-        expect(component.selectedContentChips.length).toBe(2)
+        expect(component.selectedContentChips.length).toBe(1)
+        expect(component.selectedContentChips[0].identifier).toBe('2')
         expect(component.selectContentCount).toBe(1)
     })
 
@@ -98,6 +112,9 @@ describe('CreateContentComponent', () => {
                 content: [{ identifier: '1', selected: false }, { identifier: '2', selected: true }]
             }
         } as any
+        // itemsRemovedFromChip also reads trainingPlanStepperData.status straight off the
+        // service, so it has to exist.
+        tpdsSvcMock.trainingPlanStepperData = { contentList: ['2'], status: 'Draft' }
         const spy = jest.spyOn(component, 'handleSelectedChips')
         component.itemsRemovedFromChip()
         expect(spy).toHaveBeenCalledWith(true)

@@ -1,11 +1,13 @@
 import { TestBed, inject } from '@angular/core/testing'
 
+import { commonTestingProviders } from '@test/helpers/testing-providers'
 import { GeneralGuard } from './general.guard'
 
 describe('GeneralGuard', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [GeneralGuard],
+      providers: [
+        ...commonTestingProviders(),GeneralGuard],
     })
   })
 

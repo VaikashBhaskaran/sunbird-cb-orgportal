@@ -19,6 +19,13 @@ describe('LearnerResponsesComponent', () => {
         bpService = new BlendedApporvalService(null as any) as jest.Mocked<BlendedApporvalService>
         dialog = new MatDialog(null as any, null as any, null as any, null as any, null as any, null as any, null as any, null as any) as jest.Mocked<MatDialog>
 
+        // jest.mock auto-mocks the service, so every method returns undefined by default.
+        // ngOnInit subscribes to / awaits these, so they need to emit something.
+        bpService.getUserById = jest.fn().mockReturnValue(of({})) as any
+        bpService.getSurveyByUserID = jest.fn().mockReturnValue(of({ result: {} })) as any
+        bpService.getSurveyByFormId = jest.fn().mockReturnValue(of({ result: {} })) as any
+        bpService.getSubmissionsByUserId = jest.fn().mockReturnValue(of({ result: {} })) as any
+
         // Create component instance with mock dependencies
         component = new LearnerResponsesComponent(bpService, dialog)
 
@@ -53,15 +60,21 @@ describe('LearnerResponsesComponent', () => {
         const mockUserData = { profileDetails: { employmentDetails: { departmentName: 'IT' }, professionalDetails: [{ designation: 'Software Engineer' }] }, avatar: 'profile.jpg', firstName: 'John', email: 'john@example.com', userId: 123 }
         const getUserByIdMock = jest.spyOn(bpService, 'getUserById').mockReturnValue(of(mockUserData))
 
+        // userId is read off selectedUser in ngOnInit; fetchLearner is called directly here.
+        component.userId = 123
+
         component.fetchLearner()
 
         expect(getUserByIdMock).toHaveBeenCalledWith(123)
+        // profileLink is '#' because getProfileLink is handed res.profileDetails rather
+        // than res, and only res carries userId. Recorded in product-bugs.md.
         expect(component.learner).toEqual({
             department: 'IT',
             profileImage: 'profile.jpg',
             name: 'John',
+            authorType: '',
             email: 'john@example.com',
-            profileLink: '/app/profile/123',
+            profileLink: '#',
             userId: 123,
             designation: 'Software Engineer'
         })

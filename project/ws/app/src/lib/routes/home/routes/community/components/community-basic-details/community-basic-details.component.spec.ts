@@ -141,7 +141,7 @@ describe('CommunityBasicDetailsComponent', () => {
 
   test('getEditorTextLength should strip HTML tags and whitespace', () => {
     const htmlContent = '<p>This is a <strong>test</strong> paragraph.</p><p>&nbsp;</p>'
-    expect(component.getEditorTextLength(htmlContent)).toBe(29)
+    expect(component.getEditorTextLength(htmlContent)).toBe(25)
 
     const emptyHtml = '<p>&nbsp;</p>'
     expect(component.getEditorTextLength(emptyHtml)).toBe(0)

@@ -9,16 +9,18 @@ describe('PublicContactComponent', () => {
     let mockActivatedRoute: Partial<ActivatedRoute>
 
     beforeEach(() => {
+        // pageNavbar is a field initialiser, so pageNavBar has to be on the service before
+        // the component is constructed; contactUsMail is read in ngOnInit.
         mockConfigService = {
-            // pageNavBar: {
-            //     title: 'Test Page',
-            // } as NsPage.INavBackground,
-            // instanceConfig: {
-            //     mailIds: {
-            //         contactUs: 'contact@igot.com',
-            //     },
-            // },
-        }
+            pageNavBar: {
+                title: 'Test Page',
+            },
+            instanceConfig: {
+                mailIds: {
+                    contactUs: 'contact@igot.com',
+                },
+            },
+        } as any
 
         mockActivatedRoute = {
             data: of({
