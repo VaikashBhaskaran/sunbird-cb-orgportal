@@ -175,7 +175,7 @@ export class PracticeService {
       identifier,
       title,
     }
-    quizWithAnswers.questions.map(question => {
+    quizWithAnswers.questions.forEach(question => {
       if (
         question.questionType === undefined ||
         question.questionType === 'mcq-mca' ||
@@ -183,13 +183,12 @@ export class PracticeService {
         question.questionType === 'mcq-mca-w' ||
         question.questionType === 'mcq-sca-tf'
       ) {
-        return question.options.map(option => {
+        question.options.forEach(option => {
           if (questionAnswerHash[question.questionId]) {
             option.userSelected = questionAnswerHash[question.questionId].includes(option.optionId)
           } else {
             option.userSelected = false
           }
-          return option
         })
       } if (question.questionType === 'ftb') {
         for (let i = 0; i < question.options.length; i += 1) {
@@ -239,7 +238,6 @@ export class PracticeService {
         //   }
         // }
       }
-      return question
     })
     return quizWithAnswers
   }
@@ -254,9 +252,9 @@ export class PracticeService {
   }
 
   sanitizeAssessmentSubmitRequest(requestData: NSPractice.IQuizSubmitRequest): NSPractice.IQuizSubmitRequest {
-    requestData.questions.map(question => {
+    requestData.questions.forEach(question => {
       question.question = ''
-      question.options.map(option => {
+      question.options.forEach(option => {
         option.hint = ''
         option.text = question.questionType === 'ftb' || question.questionType === 'mtf' ? option.text : ''
       })

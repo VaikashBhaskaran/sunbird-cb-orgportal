@@ -36,7 +36,7 @@
 
                 <div class="input-wrapper flex flex-col flex-1 margin-top-xs">
                     <div class="flex flex-1">
-                        <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                        <label for="fullAddress" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                             aria-label="Full address label">
                             Full address
                         </label>
@@ -56,23 +56,23 @@
                         <div class="flex w-full btn-table-row justify-between">
                             <div class="col-3">
                                 <div class="flex flex-1">
-                                    <label class=" margin-remove-bottom form-label flex mat-subheading-2"
+                                    <label for="institute-profile-building-no" class=" margin-remove-bottom form-label flex mat-subheading-2"
                                         aria-label="Building number label">
                                         Building number
                                     </label>
                                 </div>
                                 <mat-form-field class="margin-top-s form_field flex flex-1 full-width"
                                     appearance="outline">
-                                    <input matInput placeholder="Enter Building number" #buildingNo
+                                    <input id="institute-profile-building-no" matInput placeholder="Enter Building number" #buildingNo
                                         formControlName="buildingNo" aria-label="Building No input" />
                                 </mat-form-field>
                             </div>
                             <div class="col-3">
                                 <div class="flex flex-1">
-                                    <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                                    <span id="institute-profile-state-name-label" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                                         aria-label="Full address label">
                                         State
-                                    </label>
+                                    </span>
                                 </div>
                                 <!-- <mat-form-field appearance="outline"
                                     class="margin-top-xs form_field flex flex-1 full-width">
@@ -87,7 +87,7 @@
 
                                 <mat-form-field appearance="outline"
                                     class="margin-top-s form_field flex flex-1 full-width">
-                                    <mat-select formControlName="stateName" placeholder="Select state"
+                                    <mat-select aria-labelledby="institute-profile-state-name-label" formControlName="stateName" placeholder="Select state"
                                         aria-label="State input label">
                                         <mat-option [value]="sname" *ngFor="let sname of stateNames">{{sname}}
                                         </mat-option>
@@ -101,14 +101,14 @@
                             </div>
                             <div class="col-3">
                                 <div class="flex flex-1">
-                                    <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                                    <label for="institute-profile-pincode" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                                         aria-label="Full address label">
                                         Pincode
                                     </label>
                                 </div>
                                 <mat-form-field class="margin-top-s form_field flex flex-1 full-width"
                                     appearance="outline">
-                                    <input matInput #pinCode maxlength="6" placeholder="Enter your pincode"
+                                    <input id="institute-profile-pincode" matInput #pinCode maxlength="6" placeholder="Enter your pincode"
                                         formControlName="pincode" aria-label="Pincode input" />
                                     <mat-error [hidden]="false"
                                         *ngIf="instituteProfileForm?.controls['pincode'].errors?.required"
@@ -131,7 +131,7 @@
                         <div class="flex w-full btn-table-row justify-between">
                             <div class="col-3">
                                 <div class="flex flex-1">
-                                    <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                                    <label for="fullAddress" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                                         aria-label="Year of establishment label">
                                         Year of establishment of the training institute
                                     </label>
@@ -172,14 +172,14 @@
                         <div class="flex w-full btn-table-row justify-between">
                             <div class="col-2">
                                 <div class="flex flex-1">
-                                    <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                                    <span id="institute-profile-std-code-label" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                                         aria-label="Telephone number label">
                                         Telephone number
-                                    </label>
+                                    </span>
                                 </div>
                                 <div class="flex flex-align combined-field">
                                     <mat-form-field appearance="outline" class="margin-top-s country_code_box">
-                                        <mat-select formControlName="stdCode" #stdCode placeholder="STD Code"
+                                        <mat-select aria-labelledby="institute-profile-std-code-label" formControlName="stdCode" #stdCode placeholder="STD Code"
                                             aria-label="Telephone Number label">
                                             <mat-option [value]="scode" *ngFor="let scode of stdCodes">{{scode}}
                                             </mat-option>
@@ -211,14 +211,14 @@
 
                             <div class="col-2">
                                 <div class="flex flex-1">
-                                    <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                                    <span id="institute-profile-country-code-label" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                                         aria-label="Mobile number label">
                                         Mobile number.
-                                    </label>
+                                    </span>
                                 </div>
                                 <div class="flex flex-align combined-field">
                                     <mat-form-field appearance="outline" class="margin-top-s country_code_box">
-                                        <mat-select formControlName="countryCode" placeholder="--Select--"
+                                        <mat-select aria-labelledby="institute-profile-country-code-label" formControlName="countryCode" placeholder="--Select--"
                                             aria-label="Mobile Number label">
                                             <mat-option [value]="code" *ngFor="let code of countryCodes">{{code}}
                                             </mat-option>
@@ -249,7 +249,7 @@
                         <div class="flex w-full btn-table-row justify-between">
                             <div class="col-2">
                                 <div class="flex flex-1">
-                                    <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                                    <label for="institute-profile-email" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                                         aria-label="Email label">
                                         Email address
                                     </label>
@@ -257,7 +257,7 @@
                                 <mat-form-field class="margin-top-s form_field flex flex-1 full-width"
                                     appearance="outline">
 
-                                    <input matInput #emailAddress placeholder="Enter Email address"
+                                    <input id="institute-profile-email" matInput #emailAddress placeholder="Enter Email address"
                                         formControlName="email" aria-label="Email input" type="email" />
                                     <mat-error [hidden]="false"
                                         *ngIf="instituteProfileForm?.controls['email'].errors?.required"
@@ -274,7 +274,7 @@
 
                             <div class="col-2">
                                 <div class="flex flex-1">
-                                    <label
+                                    <label for="institute-profile-website"
                                         class=" margin-remove-bottom form-label required flex mat-subheading-2 w-full"
                                         aria-label="Website address label">
                                         Website address
@@ -283,7 +283,7 @@
 
                                 <mat-form-field appearance="outline"
                                     class="margin-top-s form_field flex flex-1 full-width">
-                                    <input matInput autocomplete="off" #websiteAddress
+                                    <input id="institute-profile-website" matInput autocomplete="off" #websiteAddress
                                         placeholder="Enter Website address" class="flex flex-1"
                                         formControlName="website" aria-label="Website input" />
                                     <mat-error [hidden]="false"
@@ -331,7 +331,7 @@
 
                 <div id="maindiv" class="input-wrapper flex flex-col flex-1 margin-top-l">
                     <div class="flex flex-1">
-                        <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                        <label for="institute-profile-training-institute" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                             aria-label="Training institute label">
                             Add attached training institutes or centers
                         </label>
@@ -339,7 +339,7 @@
 
                     <mat-form-field appearance="outline" class="margin-top-s form_field flex flex-1 full-"
                         [ngClass]="{ 'mat-focused': textBoxActive}">
-                        <input matInput autocomplete="off" #trainingInstitute
+                        <input id="institute-profile-training-institute" matInput autocomplete="off" #trainingInstitute
                             placeholder="Name of the training institute or center" class="flex flex-1"
                             formControlName="trainingInstitute" aria-label="Training institute input" />
                         <mat-error [hidden]="false"

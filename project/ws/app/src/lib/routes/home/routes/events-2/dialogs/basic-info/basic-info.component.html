@@ -68,6 +68,7 @@
       <mat-card class="upload-card" appearance="outlined">
         <div class="upload flex justify-center items-center cursor-pointer"
           [ngClass]="imgURL ? 'dashed-border-none' : 'dashed-border'"
+          role="button" tabindex="0" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }"
           onclick="document.getElementById('upload-file').click();">
           <input #file type="file" name="upload-file" id="upload-file" class="hidden" accept=".png, .jpg, .jpeg"
             (change)="onFileSelected(file.files);">
@@ -95,11 +96,11 @@
             </div>
             <div class="input-event mb-4">
               <ng-container *ngIf="eventForm?.get('eventName') && eventForm.get('eventName').value">
-                <label class="custome-title" #tooltip="matTooltip" [matTooltip]="eventForm.get('eventName').value"
-                  matTooltipClass="new-toolTip" matTooltipPosition="above">{{eventForm.get('eventName').value}}</label>
+                <span class="custome-title" #tooltip="matTooltip" [matTooltip]="eventForm.get('eventName').value"
+                  matTooltipClass="new-toolTip" matTooltipPosition="above">{{eventForm.get('eventName').value}}</span>
               </ng-container>
               <ng-container *ngIf="!(eventForm?.get('eventName') && eventForm.get('eventName').value)">
-                <label class="custome-title">Event Name</label>
+                <span class="custome-title">Event Name</span>
               </ng-container>
             </div>
             <div class="flex flex-row gap-4 items-center">

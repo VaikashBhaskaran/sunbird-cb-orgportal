@@ -529,7 +529,7 @@ export class UserCardComponent implements OnInit, OnChanges, AfterViewChecked, A
         (_err: any) => {
           console.error('Error loading designations:', _err)
           this.isLoadingMoreDesignations = false
-          reject(_err)
+          reject(new Error(_err?.message || 'Error loading designations'))
         })
     })
   }

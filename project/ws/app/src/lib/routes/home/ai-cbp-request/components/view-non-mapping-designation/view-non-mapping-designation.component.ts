@@ -71,7 +71,7 @@ export class ViewNonMappingDesignationComponent implements OnInit {
             status: request.status || 'N/A',
             email: request.email || 'N/A',
             id: request.id,
-            created_at: new Date(request.created_at) || 'N/A',
+            created_at: new Date(request.created_at),
           })
 
         })

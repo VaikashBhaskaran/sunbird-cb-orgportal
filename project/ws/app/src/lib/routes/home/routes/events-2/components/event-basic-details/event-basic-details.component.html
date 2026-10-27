@@ -18,7 +18,8 @@
   </ng-container>
   <ng-template #uploadIcon>
     <div class="upload flex justify-center items-center cursor-pointer dashed-border"
-      [ngClass]="{'disable': openMode === 'view'}" onclick="document.getElementById('upload-file').click();">
+      [ngClass]="{'disable': openMode === 'view'}" role="button" [attr.tabindex]="openMode === 'view' ? -1 : 0"
+      onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" onclick="document.getElementById('upload-file').click();">
       <input #file type="file" name="upload-file" id="upload-file" class="hidden" accept=".png, .jpg, .jpeg"
         (change)="onFileSelected(file.files);">
       <div class="flex flex-column items-center gap-2">
@@ -139,7 +140,8 @@
         [ngClass]="{'disable': (openMode === 'view' || disableUpload) }" cdkDropList [cdkDropListData]="videoData"
         (cdkDropListDropped)="onVideoSelected($event)" (dragover)="preventDefaultCDK($event)"
         (dragenter)="preventDefaultCDK($event, 'enter')" (dragleave)="preventDefaultCDK($event, 'leave')"
-        (drop)="onDrop($event)" onclick="document.getElementById('upload-video').click();">
+        (drop)="onDrop($event)" role="button" [attr.tabindex]="(openMode === 'view' || disableUpload) ? -1 : 0"
+        onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" onclick="document.getElementById('upload-video').click();">
         <input #file type="file" name="upload-video" id="upload-video" class="hidden"
           accept="video/mp4, video/mov, video/avi" (change)="onVideoSelected(file.files);">
         <div class="flex flex-column items-center gap-2">

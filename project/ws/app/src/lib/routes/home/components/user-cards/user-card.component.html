@@ -96,9 +96,9 @@
             </p>
             <div class="flex flex-row margin-top-m">
               <div class="md:w-1/2">
-                <label class="margin-remove-bottom form-label required">Group</label>
+                <div id="{{ 'user-card-group-3-label-' + i }}" class="margin-remove-bottom form-label required">Group</div>
                 <mat-form-field appearance="outline">
-                  <mat-select #group formControlName="group" placeholder="Select group">
+                  <mat-select aria-labelledby="{{ 'user-card-group-3-label-' + i }}" #group formControlName="group" placeholder="Select group">
                     <mat-option [value]="g" *ngFor="let g of groupsList">
                       {{g}}
                     </mat-option>
@@ -118,9 +118,9 @@
                   class="mat-caption status-text ws-mat-black40-text"> Non-verified</span>
               </div>
               <div class="md:w-1/2">
-                <label class="margin-remove-bottom form-label">Designation</label>
+                <div id="{{ 'user-card-designation-label-' + i }}" class="margin-remove-bottom form-label">Designation</div>
                 <mat-form-field appearance="outline" class="fixed-height-select">
-                  <mat-select #designation formControlName="designation" placeholder="Select designation"
+                  <mat-select aria-labelledby="{{ 'user-card-designation-label-' + i }}" #designation formControlName="designation" placeholder="Select designation"
                     panelClass="search-panel" (openedChange)="setupScrollListener($event)"
                     (closed)="onDesignationDropdownClosed()">
 
@@ -167,9 +167,9 @@
 
             <div class="flex flex-row margin-top-m">
               <div class="md:w-1/3">
-                <label class="margin-remove-bottom form-label">Employee ID</label>
+                <label for="{{ 'user-card-employee-id-' + i }}" class="margin-remove-bottom form-label">Employee ID</label>
                 <mat-form-field appearance="outline">
-                  <input type="text" matInput #employeeID formControlName="employeeID">
+                  <input id="{{ 'user-card-employee-id-' + i }}" type="text" matInput #employeeID formControlName="employeeID">
                   <mat-error [hidden]="false" class="custom-error" *ngIf="updateUserDataForm?.controls['employeeID'].touched &&
                     updateUserDataForm?.controls['employeeID'].errors?.pattern" aria-label="Please enter a valid id">
                     Please enter a valid employee Id
@@ -178,7 +178,7 @@
               </div>
 
               <div class="md:w-1/3">
-                <label class="margin-remove-bottom form-label required">Email</label>
+                <label for="primaryEmail" class="margin-remove-bottom form-label required">Email</label>
                 <mat-form-field appearance="outline">
                   <input id="primaryEmail" name="primaryEmailField" type="email" matInput placeholder="Type here"
                     #primaryEmail formControlName="primaryEmail" aria-label="Primary Email readonly input"
@@ -195,7 +195,7 @@
               </div>
 
               <div class="md:w-1/3">
-                <label class="margin-remove-bottom form-label required">Mobile number</label>
+                <label for="mobileNumber" class="margin-remove-bottom form-label required">Mobile number</label>
                 <!-- <mat-form-field appearance="outline" class="w82 mobile-country-code"> -->
                 <!-- <mat-select formControlName="countryCode" default="+91"  placeholder="Select code"
                      aria-label="Mobile Number label">
@@ -257,7 +257,7 @@
             </div>
             <div class="flex flex-row margin-top-m">
               <div class="md:w-1/3">
-                <label class="margin-remove-bottom form-label">Date of Birth</label>
+                <label for="birthDate" class="margin-remove-bottom form-label">Date of Birth</label>
                 <mat-form-field appearance="outline" class="customdob">
                   <input id="birthDate" matInput #dob formControlName="dob" [matDatepicker]="picker"
                     (focus)="picker.open()" placeholder="Choose date of birth" [min]="1/1/1900" [max]="today">
@@ -271,7 +271,7 @@
               </div>
 
               <div class="md:w-1/3">
-                <label class="margin-remove-bottom form-label">Mother Tongue</label>
+                <label for="language" class="margin-remove-bottom form-label">Mother Tongue</label>
                 <mat-form-field appearance="outline">
                   <input id="language" matInput type="text" placeholder="Mother Tongue" formControlName="domicileMedium"
                     [matAutocomplete]="motherTongueAuto" aria-label="Domicile Medium (Mother Tongue)" #motherTongue
@@ -294,9 +294,9 @@
               </div>
 
               <div class="md:w-1/3">
-                <label class="margin-remove-bottom form-label">Gender</label>
+                <div id="{{ 'user-card-gender-label-' + i }}" class="margin-remove-bottom form-label">Gender</div>
                 <mat-form-field appearance="outline">
-                  <mat-select #gender formControlName="gender" placeholder="Select gender">
+                  <mat-select aria-labelledby="{{ 'user-card-gender-label-' + i }}" #gender formControlName="gender" placeholder="Select gender">
                     <mat-option [value]="gender" *ngFor="let gender of genderList">
                       {{gender}}
                     </mat-option>
@@ -310,7 +310,7 @@
 
             <div class="flex flex-row margin-top-m">
               <div class="md:w-1/3">
-                <label class="margin-remove-bottom form-label">Office Pin Code</label>
+                <label for="pinCode" class="margin-remove-bottom form-label">Office Pin Code</label>
                 <mat-form-field appearance="outline">
                   <input id="pinCode" #pincode type="text" matInput placeholder="Type here" formControlName="pincode"
                     aria-label="Pin Code input field" autocomplete="off" (keypress)="numericOnly($event)" maxlength="6">
@@ -321,16 +321,16 @@
               </div>
 
               <div class="md:w-1/3">
-                <label class="margin-remove-bottom form-label">eHRMS ID</label>
+                <label for="{{ 'user-card-ehrms-id-' + i }}" class="margin-remove-bottom form-label">eHRMS ID</label>
                 <mat-form-field appearance="outline">
-                  <input type="text" matInput #ehrmsID formControlName="ehrmsID">
+                  <input id="{{ 'user-card-ehrms-id-' + i }}" type="text" matInput #ehrmsID formControlName="ehrmsID">
                 </mat-form-field>
               </div>
 
               <div class="md:w-1/3">
-                <label class="margin-remove-bottom form-label">Category</label>
+                <div id="{{ 'user-card-category-label-' + i }}" class="margin-remove-bottom form-label">Category</div>
                 <mat-form-field appearance="outline">
-                  <mat-select #category formControlName="category" placeholder="Select category">
+                  <mat-select aria-labelledby="{{ 'user-card-category-label-' + i }}" #category formControlName="category" placeholder="Select category">
                     <mat-option [value]="ctg" *ngFor="let ctg of categoryList">
                       {{ctg}}
                     </mat-option>
@@ -345,25 +345,25 @@
 
             <div class="flex flex-row margin-top-m">
               <div class="md:w-1/3">
-                <label class="margin-remove-bottom form-label">Are you a Cadre Employee?</label>
+                <label for="{{ 'user-card-are-you-a-cadre-employee-' + i }}" class="margin-remove-bottom form-label">Are you a Cadre Employee?</label>
                 <mat-form-field appearance="outline">
-                  <input type="text" matInput [disabled]="true"
+                  <input id="{{ 'user-card-are-you-a-cadre-employee-' + i }}" type="text" matInput [disabled]="true"
                     [value]="user?.profileDetails?.hasOwnProperty('cadreDetails') ? (user?.profileDetails?.cadreDetails?.civilServiceType ? 'Yes': 'No') : ''">
                 </mat-form-field>
               </div>
 
               <div class="md:w-1/3" *ngIf="user?.profileDetails?.cadreDetails?.civilServiceType">
-                <label class="margin-remove-bottom form-label">Type of Civil Service</label>
+                <label for="{{ 'user-card-type-of-civil-service-' + i }}" class="margin-remove-bottom form-label">Type of Civil Service</label>
                 <mat-form-field appearance="outline">
-                  <input type="text" matInput [disabled]="true"
+                  <input id="{{ 'user-card-type-of-civil-service-' + i }}" type="text" matInput [disabled]="true"
                     [value]="user?.profileDetails?.cadreDetails?.civilServiceType ? user?.profileDetails?.cadreDetails?.civilServiceType: ''">
                 </mat-form-field>
               </div>
 
               <div class="md:w-1/3" *ngIf="user?.profileDetails?.cadreDetails?.civilServiceType">
-                <label class="margin-remove-bottom form-label">Service</label>
+                <label for="{{ 'user-card-service-' + i }}" class="margin-remove-bottom form-label">Service</label>
                 <mat-form-field appearance="outline">
-                  <input type="text" matInput [disabled]="true"
+                  <input id="{{ 'user-card-service-' + i }}" type="text" matInput [disabled]="true"
                     [value]="user?.profileDetails?.cadreDetails?.civilServiceName ? user?.profileDetails?.cadreDetails?.civilServiceName: ''">
                 </mat-form-field>
               </div>
@@ -373,25 +373,25 @@
               ((user?.profileDetails?.cadreDetails?.civilServiceName || '').trim() === 'Indian Administrative Service (IAS)' ||
             (user?.profileDetails?.cadreDetails?.civilServiceName || '').trim() === 'Indian Police Service (IPS)' ||
             (user?.profileDetails?.cadreDetails?.civilServiceName || '').trim() === 'Indian Forest Service (IFoS)')">
-                <label class="margin-remove-bottom form-label">Cadre</label>
+                <label for="{{ 'user-card-cadre-' + i }}" class="margin-remove-bottom form-label">Cadre</label>
                 <mat-form-field appearance="outline">
-                  <input type="text" matInput [disabled]="true"
+                  <input id="{{ 'user-card-cadre-' + i }}" type="text" matInput [disabled]="true"
                     [value]="user?.profileDetails?.cadreDetails?.cadreName ? user?.profileDetails?.cadreDetails?.cadreName: ''">
                 </mat-form-field>
               </div>
 
               <div class="md:w-1/3" *ngIf="user?.profileDetails?.cadreDetails?.civilServiceType">
-                <label class="margin-remove-bottom form-label">Batch</label>
+                <label for="{{ 'user-card-batch-' + i }}" class="margin-remove-bottom form-label">Batch</label>
                 <mat-form-field appearance="outline">
-                  <input type="text" matInput [disabled]="true"
+                  <input id="{{ 'user-card-batch-' + i }}" type="text" matInput [disabled]="true"
                     [value]="user?.profileDetails?.cadreDetails?.cadreBatch ? user?.profileDetails?.cadreDetails?.cadreBatch: ''">
                 </mat-form-field>
               </div>
 
               <div class="md:w-1/3" *ngIf="user?.profileDetails?.cadreDetails?.civilServiceType">
-                <label class="margin-remove-bottom form-label">Cadre Controlling Authority</label>
+                <label for="{{ 'user-card-cadre-controlling-authority-' + i }}" class="margin-remove-bottom form-label">Cadre Controlling Authority</label>
                 <mat-form-field appearance="outline">
-                  <input type="text" matInput [disabled]="true"
+                  <input id="{{ 'user-card-cadre-controlling-authority-' + i }}" type="text" matInput [disabled]="true"
                     [value]="user?.profileDetails?.cadreDetails?.cadreControllingAuthorityName ? user?.profileDetails?.cadreDetails?.cadreControllingAuthorityName: ''">
                 </mat-form-field>
               </div>
@@ -400,11 +400,11 @@
 
             <div class="flex flex-row margin-top-m">
               <div class="md:w-1/2">
-                <label class="margin-remove-bottom form-label">Tags</label>
+                <label for="{{ 'user-card-tags-' + i }}" class="margin-remove-bottom form-label">Tags</label>
                 <!-- <mat-form-field> -->
                 <div class="left-input-div">
                   <div class="flex-col">
-                    <input class="appr-text-field w-full-imp" #tags matInput="Type here" placeholder="Type here"
+                    <input id="{{ 'user-card-tags-' + i }}" class="appr-text-field w-full-imp" #tags matInput="Type here" placeholder="Type here"
                       formControlName="tags" aria-label="Type here" [matChipInputFor]="chipListTags" autocomplete="off"
                       maxlength="100" [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
                       (matChipInputTokenEnd)="addActivity($event)" maxlength="100" />
@@ -449,7 +449,7 @@
               </div>
 
               <div class="md:w-1/1" *ngIf="!canEditRoles(user)">
-                <label class="view-text-label">Roles</label>
+                <div class="view-text-label">Roles</div>
                 <div *ngIf="user?.organisations && user?.organisations[0]?.roles?.length > 0">
                   <ul class="roleslist">
                     <li *ngFor="let t of user?.organisations[0]?.roles">{{t}}
@@ -462,10 +462,10 @@
 
             <div class="flex flex-row margin-top-m" *ngIf="isBpTrainerSelected">
               <div class="md:w-1/1">
-                <label class="margin-remove-bottom form-label required" aria-label="BP Co-Trainer Role label">
+                <div id="{{ 'user-card-bp-co-trainer-role-label-' + i }}" class="margin-remove-bottom form-label required" aria-label="BP Co-Trainer Role label">
                   BP Co-Trainer Role
-                </label>
-                <mat-radio-group formControlName="bpCoTrainerRole" class="bp-co-trainer-roles">
+                </div>
+                <mat-radio-group [attr.aria-labelledby]="'user-card-bp-co-trainer-role-label-' + i" formControlName="bpCoTrainerRole" class="bp-co-trainer-roles">
                   <mat-radio-button *ngFor="let coTrainerRole of bpCoTrainerRoles" [value]="coTrainerRole.roleCode">
                     {{ coTrainerRole.roleName }}
                   </mat-radio-button>
@@ -502,7 +502,7 @@
           </div>
           <div class="flex flex-row margin-top-m">
             <div class="md:w-1/3">
-              <label class="view-text-label">Group</label>
+              <div class="view-text-label">Group</div>
               <p>{{(user?.profileDetails && user?.profileDetails?.professionalDetails &&
                 user?.profileDetails?.professionalDetails[0]?.group) ?
                 user?.profileDetails?.professionalDetails[0]?.group : '-'}}
@@ -519,7 +519,7 @@
               </p>
             </div>
             <div class="md:w-1/3">
-              <label class="view-text-label">Designation</label>
+              <div class="view-text-label">Designation</div>
               <p>{{(user?.profileDetails && user?.profileDetails?.professionalDetails &&
                 user?.profileDetails?.professionalDetails[0]?.designation) ?
                 user?.profileDetails?.professionalDetails[0]?.designation : '-'}}
@@ -546,26 +546,26 @@
 
           <div class="flex flex-row margin-top-m">
             <div class="md:w-1/4">
-              <label class="view-text-label">Employee ID</label>
+              <div class="view-text-label">Employee ID</div>
               <p class="word-wrap margin-right-l">{{(user?.profileDetails && user?.profileDetails?.employmentDetails &&
                 user?.profileDetails?.employmentDetails?.employeeCode) ?
                 user?.profileDetails?.employmentDetails?.employeeCode : '-'}}</p>
             </div>
 
             <div class="md:w-1/4">
-              <label class="view-text-label">Email</label>
+              <div class="view-text-label">Email</div>
               <p class="word-wrap">{{(user?.profileDetails && user?.profileDetails?.personalDetails) ?
                 user?.profileDetails?.personalDetails?.primaryEmail : '-'}}</p>
             </div>
 
             <div class="md:w-1/4">
-              <label class="view-text-label">Mobile Number</label>
+              <div class="view-text-label">Mobile Number</div>
               <p>+91 {{(user?.profileDetails && user?.profileDetails?.personalDetails) ?
                 user?.profileDetails?.personalDetails?.mobile : '-'}}</p>
             </div>
 
             <div class="md:w-1/4">
-              <label class="view-text-label">Gender</label>
+              <div class="view-text-label">Gender</div>
               <p>{{(user?.profileDetails && user?.profileDetails?.personalDetails &&
                 user?.profileDetails?.personalDetails?.gender) ?
                 user?.profileDetails?.personalDetails?.gender : '-'}}</p>
@@ -573,7 +573,7 @@
           </div>
           <div class="flex flex-row margin-top-m">
             <div class="md:w-1/4">
-              <label class="view-text-label">Date Of Birth</label>
+              <div class="view-text-label">Date Of Birth</div>
               <p>{{(user?.profileDetails && user?.profileDetails?.personalDetails &&
                 user?.profileDetails?.personalDetails?.dob)
                 ? user?.profileDetails?.personalDetails?.dob
@@ -581,14 +581,14 @@
             </div>
 
             <div class="md:w-1/4">
-              <label class="view-text-label">Mother Tongue</label>
+              <div class="view-text-label">Mother Tongue</div>
               <p>{{(user?.profileDetails && user?.profileDetails?.personalDetails &&
                 user?.profileDetails?.personalDetails?.domicileMedium) ?
                 user?.profileDetails?.personalDetails?.domicileMedium : '-'}}</p>
             </div>
 
             <div class="md:w-1/4">
-              <label class="view-text-label">Category</label>
+              <div class="view-text-label">Category</div>
               <p>{{(user?.profileDetails && user?.profileDetails?.personalDetails &&
                 user?.profileDetails?.personalDetails?.category) ?
                 user?.profileDetails?.personalDetails?.category : '-'}}</p>
@@ -603,21 +603,21 @@
           </div>
           <div class="flex flex-row margin-top-m">
             <div class="md:w-1/4">
-              <label class="view-text-label">Office Pin Code</label>
+              <div class="view-text-label">Office Pin Code</div>
               <p>{{(user?.profileDetails && user?.profileDetails?.employmentDetails &&
                 user?.profileDetails?.employmentDetails?.pinCode) ?
                 user?.profileDetails?.employmentDetails?.pinCode : '-'}}</p>
             </div>
 
             <div class="md:w-1/4">
-              <label class="view-text-label">eHRMS ID</label>
+              <div class="view-text-label">eHRMS ID</div>
               <p>{{(user?.profileDetails && user?.profileDetails?.additionalProperties &&
                 user?.profileDetails?.additionalProperties?.externalSystemId) ?
                 user?.profileDetails?.additionalProperties?.externalSystemId : '-'}}</p>
             </div>
 
             <div class="md:w-1/2">
-              <label class="view-text-label">Tags</label>
+              <div class="view-text-label">Tags</div>
               <div *ngIf="user?.profileDetails && user?.profileDetails?.additionalProperties &&
               user?.profileDetails?.additionalProperties?.tag &&
               user?.profileDetails?.additionalProperties?.tag.length > 0">
@@ -631,21 +631,21 @@
           <!-- Cader Related Code-->
           <div class="flex flex-row margin-top-m">
             <div class="md:w-1/4">
-              <label class="view-text-label">Are you a Cadre Employee?</label>
+              <div class="view-text-label">Are you a Cadre Employee?</div>
               <p *ngIf="user?.profileDetails?.hasOwnProperty('cadreDetails')">
                 {{user?.profileDetails?.cadreDetails?.civilServiceType ? 'Yes': 'No'}}</p>
               <p *ngIf="!(user?.profileDetails?.hasOwnProperty('cadreDetails'))">-</p>
             </div>
 
             <div class="md:w-1/4" *ngIf="user?.profileDetails?.cadreDetails?.civilServiceType">
-              <label class="view-text-label">Type of Civil Service</label>
+              <div class="view-text-label">Type of Civil Service</div>
               <p>{{user?.profileDetails?.cadreDetails?.civilServiceType ?
                 user?.profileDetails?.cadreDetails?.civilServiceType: '-'}}</p>
 
             </div>
 
             <div class="md:w-1/4" *ngIf="user?.profileDetails?.cadreDetails?.civilServiceType">
-              <label class="view-text-label">Service</label>
+              <div class="view-text-label">Service</div>
               <p>{{user?.profileDetails?.cadreDetails?.civilServiceName ?
                 user?.profileDetails?.cadreDetails?.civilServiceName: '-'}}</p>
 
@@ -655,7 +655,7 @@
             (user?.profileDetails?.cadreDetails?.civilServiceName || '').trim() === 'Indian Police Service (IPS)' ||
             (user?.profileDetails?.cadreDetails?.civilServiceName || '').trim() === 'Indian Forest Service (IFoS)')
             ">
-              <label class="view-text-label">Cadre</label>
+              <div class="view-text-label">Cadre</div>
               <p>{{user?.profileDetails?.cadreDetails?.cadreName ? user?.profileDetails?.cadreDetails?.cadreName: '-'}}
               </p>
 
@@ -663,7 +663,7 @@
           </div>
           <div class="flex flex-row margin-top-m">
             <div class="md:w-1/4" *ngIf="user?.profileDetails?.cadreDetails?.civilServiceType">
-              <label class="view-text-label">Batch</label>
+              <div class="view-text-label">Batch</div>
               <p>{{user?.profileDetails?.cadreDetails?.cadreBatch ? user?.profileDetails?.cadreDetails?.cadreBatch:
                 '-'}}
               </p>
@@ -671,7 +671,7 @@
             </div>
 
             <div class="md:w-1/2" *ngIf="user?.profileDetails?.cadreDetails?.civilServiceType">
-              <label class="view-text-label">Cadre Controlling Authority</label>
+              <div class="view-text-label">Cadre Controlling Authority</div>
               <p>{{user?.profileDetails?.cadreDetails?.cadreControllingAuthorityName ?
                 user?.profileDetails?.cadreDetails?.cadreControllingAuthorityName: '-'}}</p>
 
@@ -680,7 +680,7 @@
           <!-- End of Cadre Related Code-->
           <div class="flex flex-row margin-top-m">
             <div class="md:w-1/1">
-              <label class="view-text-label">Roles</label>
+              <div class="view-text-label">Roles</div>
               <div *ngIf="user?.organisations && user?.organisations?.[0]?.roles?.length > 0">
                 <ul class="roleslist">
                   <li *ngFor="let t of user?.organisations?.[0]?.roles">{{t}}
@@ -703,7 +703,7 @@
 <!-- for Approvals page -->
 <div *ngIf="isApprovals">
   <mat-accordion [multi]="true" *ngIf="approvalData">
-    <mat-expansion-panel class="user-card" *ngFor="let appData of approvalData | orderBy: 'firstName':'asc'" #panel
+    <mat-expansion-panel class="user-card" *ngFor="let appData of approvalData | orderBy: 'firstName':'asc'; let lblIdx0 = index" #panel
       (opened)="closeOtherPanels(panel)">
       <mat-expansion-panel-header (click)="getApprovalUserData(appData.user, appData.userWorkflow, panel);">
         <div class="float-left width82 flex" (click)="$event.stopPropagation();">
@@ -751,12 +751,12 @@
               </p> -->
             </div>
             <div class="flex flex-row margin-top-m" *ngIf="appData?.needApprovalList?.length > 0">
-              <ng-container *ngFor="let field of appData.needApprovalList">
+              <ng-container *ngFor="let field of appData.needApprovalList; let lblIdx1 = index">
                 <div class="md:w-1/3 margin-bottom-s" *ngIf="field.label === 'Group'">
-                  <label class="view-text-label">Group</label>
+                  <label for="{{ 'user-card-group-2-' + lblIdx0 + '-' + lblIdx1 }}" class="view-text-label">Group</label>
                   <div>
                     <span>
-                      <input type="text" class="appr-text-field margin-bottom-s" [value]="field.value"
+                      <input id="{{ 'user-card-group-2-' + lblIdx0 + '-' + lblIdx1 }}" type="text" class="appr-text-field margin-bottom-s" [value]="field.value"
                         [disabled]="true">
                       <mat-icon class="verified-icon margin-left-s"
                         *ngIf="field.action === 'APPROVE'">check_circle</mat-icon>
@@ -779,10 +779,10 @@
                   </div>
                 </div>
                 <div class="md:w-1/3 margin-bottom-s" *ngIf="field.label === 'Designation'">
-                  <label class="view-text-label">Designation</label>
+                  <label for="{{ 'user-card-designation-3-' + lblIdx0 + '-' + lblIdx1 }}" class="view-text-label">Designation</label>
                   <div>
                     <span>
-                      <input type="text" class="appr-text-field margin-bottom-s" [value]="field.value"
+                      <input id="{{ 'user-card-designation-3-' + lblIdx0 + '-' + lblIdx1 }}" type="text" class="appr-text-field margin-bottom-s" [value]="field.value"
                         [disabled]="true">
                       <mat-icon class="verified-icon margin-left-s"
                         *ngIf="field.action === 'APPROVE'">check_circle</mat-icon>
@@ -805,14 +805,14 @@
                 </div>
               </ng-container>
 
-              <ng-container *ngFor="let field of appData.noneedApprovalList">
+              <ng-container *ngFor="let field of appData.noneedApprovalList; let lblIdx1 = index">
                 <div class="md:w-1/3 margin-bottom-s" *ngIf="field.label === 'Group'">
-                  <label class="view-text-label">Group</label>
-                  <input type="text" class="appr-text-field margin-bottom-s" [value]="field.value" [disabled]="true">
+                  <label for="{{ 'user-card-group-' + lblIdx0 + '-' + lblIdx1 }}" class="view-text-label">Group</label>
+                  <input id="{{ 'user-card-group-' + lblIdx0 + '-' + lblIdx1 }}" type="text" class="appr-text-field margin-bottom-s" [value]="field.value" [disabled]="true">
                 </div>
                 <div class="md:w-1/3 margin-bottom-s" *ngIf="field.label === 'Designation'">
-                  <label class="view-text-label">Designation</label>
-                  <input type="text" class="appr-text-field margin-bottom-s" [value]="field.value" [disabled]="true">
+                  <label for="{{ 'user-card-designation-2-' + lblIdx0 + '-' + lblIdx1 }}" class="view-text-label">Designation</label>
+                  <input id="{{ 'user-card-designation-2-' + lblIdx0 + '-' + lblIdx1 }}" type="text" class="appr-text-field margin-bottom-s" [value]="field.value" [disabled]="true">
                 </div>
               </ng-container>
             </div>
@@ -826,7 +826,7 @@
 
             <div class="flex flex-row margin-top-m">
               <div class="md:w-1/4">
-                <label class="view-text-label">Employee ID</label>
+                <div class="view-text-label">Employee ID</div>
                 <p class="word-wrap margin-right-l">{{(appData?.user?.profileDetails &&
                   appData?.user?.profileDetails?.employmentDetails &&
                   appData?.user?.profileDetails?.employmentDetails?.employeeCode) ?
@@ -834,19 +834,19 @@
               </div>
 
               <div class="md:w-1/4">
-                <label class="view-text-label">Email</label>
+                <div class="view-text-label">Email</div>
                 <p>{{(appData?.user?.profileDetails && appData?.user?.profileDetails?.personalDetails) ?
                   appData?.user?.profileDetails?.personalDetails?.primaryEmail : '-'}}</p>
               </div>
 
               <div class="md:w-1/4">
-                <label class="view-text-label">Mobile Number</label>
+                <div class="view-text-label">Mobile Number</div>
                 <p>+91 {{(appData?.user?.profileDetails && appData?.user?.profileDetails?.personalDetails) ?
                   appData?.user?.profileDetails?.personalDetails?.mobile : '-'}}</p>
               </div>
 
               <div class="md:w-1/4">
-                <label class="view-text-label">Gender</label>
+                <div class="view-text-label">Gender</div>
                 <p>{{(appData?.user?.profileDetails && appData?.user?.profileDetails?.personalDetails &&
                   appData?.user?.profileDetails?.personalDetails?.gender) ?
                   appData?.user?.profileDetails?.personalDetails?.gender : '-'}}</p>
@@ -854,7 +854,7 @@
             </div>
             <div class="flex flex-row margin-top-m">
               <div class="md:w-1/4">
-                <label class="view-text-label">Date Of Birth</label>
+                <div class="view-text-label">Date Of Birth</div>
                 <p>{{(appData?.user?.profileDetails && appData?.user?.profileDetails?.personalDetails &&
                   appData?.user?.profileDetails?.personalDetails?.dob)
                   ? appData?.user?.profileDetails?.personalDetails?.dob
@@ -862,14 +862,14 @@
               </div>
 
               <div class="md:w-1/4">
-                <label class="view-text-label">Mother Tongue</label>
+                <div class="view-text-label">Mother Tongue</div>
                 <p>{{(appData?.user?.profileDetails && appData?.user?.profileDetails?.personalDetails &&
                   appData?.user?.profileDetails?.personalDetails?.domicileMedium) ?
                   appData?.user?.profileDetails?.personalDetails?.domicileMedium : '-'}}</p>
               </div>
 
               <div class="md:w-1/4">
-                <label class="view-text-label">Category</label>
+                <div class="view-text-label">Category</div>
                 <p>{{(appData?.user?.profileDetails && appData?.user?.profileDetails?.personalDetails &&
                   appData?.user?.profileDetails?.personalDetails?.category) ?
                   appData?.user?.profileDetails?.personalDetails?.category : '-'}}</p>
@@ -884,21 +884,21 @@
             </div>
             <div class="flex flex-row margin-top-m">
               <div class="md:w-1/4">
-                <label class="view-text-label">Office Pin Code</label>
+                <div class="view-text-label">Office Pin Code</div>
                 <p>{{(appData?.user?.profileDetails && appData?.user?.profileDetails?.employmentDetails &&
                   appData?.user?.profileDetails?.employmentDetails?.pinCode) ?
                   appData?.user?.profileDetails?.employmentDetails?.pinCode : '-'}}</p>
               </div>
 
               <div class="md:w-1/4">
-                <label class="view-text-label">eHRMS ID</label>
+                <div class="view-text-label">eHRMS ID</div>
                 <p>{{(appData?.user?.profileDetails && appData?.user?.profileDetails?.additionalProperties &&
                   appData?.user?.profileDetails?.additionalProperties?.externalSystemId) ?
                   appData?.user?.profileDetails?.additionalProperties?.externalSystemId : '-'}}</p>
               </div>
 
               <div class="md:w-1/2">
-                <label class="view-text-label">Tags</label>
+                <div class="view-text-label">Tags</div>
                 <div *ngIf="appData?.user?.profileDetails && appData?.user?.profileDetails?.additionalProperties &&
                     appData?.user?.profileDetails?.additionalProperties?.tag &&
                     appData?.user?.profileDetails?.additionalProperties?.tag.length > 0">
@@ -911,7 +911,7 @@
             </div>
             <div class="flex flex-row margin-top-m">
               <div class="md:w-1/1">
-                <label class="view-text-label">Roles</label>
+                <div class="view-text-label">Roles</div>
                 <div *ngIf="appData?.user?.organisations && appData?.user?.organisations[0]?.roles && appData?.user?.organisations[0]?.roles.length
                  &&  appData?.user?.organisations[0]?.roles.length > 0">
                   <ul class="roleslist">

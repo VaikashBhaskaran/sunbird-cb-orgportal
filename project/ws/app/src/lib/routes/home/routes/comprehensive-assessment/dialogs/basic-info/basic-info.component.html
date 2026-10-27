@@ -54,6 +54,7 @@
       <mat-card class="upload-card" appearance="outlined">
         <div class="upload flex justify-center items-center cursor-pointer"
           [ngClass]="imgURL ? 'dashed-border-none' : 'dashed-border'"
+          role="button" tabindex="0" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }"
           onclick="document.getElementById('upload-assessment-file').click();">
           <input #file type="file" name="upload-assessment-file" id="upload-assessment-file" class="hidden"
             accept=".png, .jpg, .jpeg" (change)="onFileSelected(file.files);">
@@ -83,15 +84,16 @@
             </div>
             <div class="input-assessment mb-4">
               <ng-container *ngIf="assessmentName?.value">
-                <label class="custome-title" #tooltip="matTooltip" [matTooltip]="assessmentName?.value"
-                  matTooltipClass="new-toolTip" matTooltipPosition="above">{{assessmentName?.value}}</label>
+                <span class="custome-title" #tooltip="matTooltip" [matTooltip]="assessmentName?.value"
+                  matTooltipClass="new-toolTip" matTooltipPosition="above">{{assessmentName?.value}}</span>
               </ng-container>
               <ng-container *ngIf="!assessmentName?.value">
-                <label class="custome-title">Assessment Name</label>
+                <span class="custome-title">Assessment Name</span>
               </ng-container>
             </div>
             <div class="flex flex-row gap-4 items-center">
               <div class="provider-logo flex justify-center items-center cursor-pointer" matTooltip="Upload logo"
+                role="button" tabindex="0" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }"
                 onclick="document.getElementById('upload-assessment-logo').click();">
                 <input #logoFile type="file" name="upload-assessment-logo" id="upload-assessment-logo" class="hidden"
                   accept=".png, .jpg, .jpeg" (change)="onLogoSelected(logoFile.files);">

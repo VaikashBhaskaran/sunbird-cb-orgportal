@@ -113,11 +113,6 @@ export class CommunityManageComponent {
             this.getReportedIssueList(discussionId).subscribe()  // Refresh the data
             // this.snackbar.open('Reported issues updated successfully!', 'Close', { duration: 3000 })
           }
-          (err: any) => {
-            this.snackbar.open('Unable to fetch Report, due to some error!', err)
-            // tslint:disable-next-line
-            console.log(err)
-          }
         })
       }
     })
@@ -144,12 +139,6 @@ export class CommunityManageComponent {
       confirmDialog.afterClosed().subscribe((response: any) => {
         if (response) {
           this.showOnPlatform(discussId, type)
-
-        }
-        (err: any) => {
-          this.snackbar.open('Something went wrong!', 'Close', { duration: 3000 })
-          // tslint:disable-next-line
-          console.log(err)
         }
       })
     }
@@ -170,10 +159,6 @@ export class CommunityManageComponent {
       confirmDialog.afterClosed().subscribe((response: any) => {
         if (response) {
           this.hideContent(discussId, type)
-        } (err: any) => {
-          this.snackbar.open('Something went wrong!', 'Close', { duration: 3000 })
-          // tslint:disable-next-line
-          console.log(err)
         }
       })
     }
@@ -349,21 +334,22 @@ export class CommunityManageComponent {
       "discussionId": discussionId,
       "type": type
     }
-    this.communitySvc.displayReportedPost(requestBody).subscribe((res: any) => {
-      if (res) {
-        this.snackbar.open('Post has been published on platform successfully!', 'Close', { duration: 3000 })
-        this.getReportedDiscussionItems()
-        this.getHiddenDiscussionItems()
-        this.getPostFilterItems()
-        this.getCommentFilterItems()
-        this.getReplyFilterItems()
-        // tslint:disable-next-line
-        console.log(res, 'response====')
-        // return res
-      } (err: any) => {
-        this.snackbar.open(err, 'Close', { duration: 3000 })
-      }
-
+    this.communitySvc.displayReportedPost(requestBody).subscribe({
+      next: (res: any) => {
+        if (res) {
+          this.snackbar.open('Post has been published on platform successfully!', 'Close', { duration: 3000 })
+          this.getReportedDiscussionItems()
+          this.getHiddenDiscussionItems()
+          this.getPostFilterItems()
+          this.getCommentFilterItems()
+          this.getReplyFilterItems()
+          // tslint:disable-next-line
+          console.log(res, 'response====')
+        }
+      },
+      error: (err: any) => {
+        this.snackbar.open(err?.error?.message || 'Something went wrong!', 'Close', { duration: 3000 })
+      },
     })
   }
 
@@ -372,20 +358,22 @@ export class CommunityManageComponent {
       "discussionId": discussionId,
       "type": type
     }
-    this.communitySvc.hideReportedPost(requestBody).subscribe((res: any) => {
-      if (res) {
-        this.snackbar.open('Post has been hidden from platform successfully!', 'Close', { duration: 3000 })
-        this.getReportedDiscussionItems()
-        this.getHiddenDiscussionItems()
-        this.getPostFilterItems()
-        this.getCommentFilterItems()
-        this.getReplyFilterItems()
-        // tslint:disable-next-line
-        console.log(res, 'response====')
-      }
-      (err: any) => {
-        this.snackbar.open(err, 'Close', { duration: 3000 })
-      }
+    this.communitySvc.hideReportedPost(requestBody).subscribe({
+      next: (res: any) => {
+        if (res) {
+          this.snackbar.open('Post has been hidden from platform successfully!', 'Close', { duration: 3000 })
+          this.getReportedDiscussionItems()
+          this.getHiddenDiscussionItems()
+          this.getPostFilterItems()
+          this.getCommentFilterItems()
+          this.getReplyFilterItems()
+          // tslint:disable-next-line
+          console.log(res, 'response====')
+        }
+      },
+      error: (err: any) => {
+        this.snackbar.open(err?.error?.message || 'Something went wrong!', 'Close', { duration: 3000 })
+      },
     })
   }
 

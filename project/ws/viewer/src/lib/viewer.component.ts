@@ -165,7 +165,11 @@ export class ViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
     }
   }
 
-  async ngOnInit() {
+  ngOnInit() {
+    this.initViewer()
+  }
+
+  private async initViewer() {
     this.getTocConfig()
     // for left side player scroll on right side resource click
     // this.pageScrollSubscription = this.tocSvc.updatePageScroll.subscribe((value: boolean) => {
@@ -469,7 +473,7 @@ export class ViewerComponent implements OnInit, OnDestroy, AfterViewChecked {
         if (data) {
           resolve(data)
         } else {
-          reject({})
+          reject(new Error('Content data not found'))
         }
       })
     })

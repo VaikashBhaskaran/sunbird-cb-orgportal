@@ -42,7 +42,7 @@
                                     <form class="create-event-form" [formGroup]="createEventForm">
                                         <div class="input-column px-2 ws-mat-accent-border mb-5 padding-top-l padding-bottom-l padding-right-xl padding-left-xl"
                                             id="eventInfo">
-                                            <label class="heading">Event details</label>
+                                            <span class="heading">Event details</span>
                                             <div class="input-wrapper margin-top-s">
                                                 <div class="image-box display-block">
                                                     <mat-card class="mb-10 text-center margin-right-l"
@@ -96,7 +96,7 @@
                                                     aria-label="summary label">
                                                     Summary
                                                 </label>
-                                                <label class="sub_title">This will appear in the preview card</label>
+                                                <label for="summary" class="sub_title">This will appear in the preview card</label>
                                                 <mat-form-field appearance="outline" class="margin-top-xs">
                                                     <textarea id="summary" matInput #summary formControlName="summary"
                                                         placeholder="Type here" aria-label="Summary input"
@@ -117,7 +117,7 @@
                                                     aria-label="description label">
                                                     Description
                                                 </label>
-                                                <label class="sub_title">Detailed description about the event. It will
+                                                <label for="description" class="sub_title">Detailed description about the event. It will
                                                     appear in <br /> the event details page</label>
                                                 <mat-form-field appearance="outline" class="margin-top-xs">
                                                     <textarea id="description" matInput #description
@@ -154,20 +154,20 @@
                                                         Agenda fields cannot contain numbers and special characters except '
                                                     </mat-error> -->
                                                 </mat-form-field>
-                                                <label>Event type</label>
+                                                <span>Event type</span>
                                                 <div class="flex custom mt-5" fxLayout="row wrap">
                                                     <mat-card class="event_container padding-remove" fxLayout="row"
                                                         fxLayoutWrap>
-                                                        <mat-card *ngFor="let type of eventTypes"
+                                                        <mat-card *ngFor="let type of eventTypes; let lblIdx0 = index"
                                                             class="event_types mb-10"
                                                             [ngClass]="type.disabled == false ? 'highlight' : 'dull'">
                                                             <mat-card-header>
                                                                 <mat-card-subtitle class="mat-body-2">
-                                                                    <input type="radio" name="eventType" checked
+                                                                    <input id="{{ 'create-event-event-type-' + lblIdx0 }}" type="radio" name="eventType" checked
                                                                         [value]="type.title"
                                                                         (change)="changeEventType($event)"
                                                                         [disabled]="type.disabled">
-                                                                    <label class="event_types">{{ type?.title }}</label>
+                                                                    <label for="{{ 'create-event-event-type-' + lblIdx0 }}" class="event_types">{{ type?.title }}</label>
                                                                 </mat-card-subtitle>
                                                             </mat-card-header>
                                                             <mat-card-content class="event_type_desc">
@@ -180,7 +180,7 @@
                                         </div>
                                         <div class="input-column px-2 ws-mat-accent-border mb-5 padding-top-xl padding-bottom-l padding-right-xl padding-left-l"
                                             id="datetime">
-                                            <label class="heading">Date time</label>
+                                            <span class="heading">Date time</span>
                                             <div class="input-wrapper margin-top-s">
                                                 <label for="eventDate" class=" margin-remove-bottom form-label required"
                                                     aria-label="Event Date label">
@@ -276,7 +276,7 @@
                                         </div>
                                         <div class="input-column px-2 ws-mat-accent-border mb-5 padding-top-xl padding-bottom-l padding-right-xl padding-left-l"
                                             id="videoinfo">
-                                            <label class="heading">Video conferencing</label>
+                                            <span class="heading">Video conferencing</span>
                                             <div class="input-wrapper margin-top-s">
                                                 <label for="conferenceLink"
                                                     class=" margin-remove-bottom form-label required"
@@ -303,12 +303,12 @@
                                         </div>
                                         <div class="input-column px-2 ws-mat-accent-border mb-5 padding-top-xl padding-bottom-l padding-right-xl padding-left-l"
                                             id="presenter">
-                                            <label class="heading">Presenters</label>
+                                            <span class="heading">Presenters</span>
                                             <div class="input-wrapper margin-top-s">
-                                                <label class="form-label required"
+                                                <span class="form-label required"
                                                     aria-label="conferenceLink label mb-10 ws-mat-black60-text">
                                                     Presenters added are displayed in the event details page.
-                                                </label>
+                                                </span>
                                                 <div class="flex flex-1 custom button-row-add-user">
                                                     <button mat-stroked-button color="accent" type="button"
                                                         class="mat-accent-border flex-auto-display"

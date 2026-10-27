@@ -247,7 +247,7 @@ export class StepperComponent implements OnInit, OnChanges, AfterViewInit {
       .map((item: any) => ({
         criteriaKey: item?.criteriaKey,
         criteriaValue: Array.isArray(item?.criteriaValue)
-          ? [...item.criteriaValue].map(String).sort()
+          ? [...item.criteriaValue].map(String).sort((a: string, b: string) => a.localeCompare(b))
           : item?.criteriaValue,
       }))
       .sort((left: any, right: any) => `${left.criteriaKey}`.localeCompare(`${right.criteriaKey}`))

@@ -4,7 +4,7 @@
             <span class="apar-labels-heading">APAR Assignment</span>
             <div class="apar-checkbox-toggle">
                 <input [(ngModel)]="isAparEnabled" type="checkbox" id="switch" (change)="onAparCheckboxChange($event)" />
-                <label for="switch"></label>
+                <label for="switch"><span class="cdk-visually-hidden">Enable APAR assignment</span></label>
             </div>
         </div>
         <span class="apar-labels-desc">If APAR Assignment is enabled, Karmayogis will see their assigned plans under the <b>APAR</b> section on the Home page.</span>

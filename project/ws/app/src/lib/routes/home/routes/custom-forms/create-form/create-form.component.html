@@ -19,7 +19,7 @@
         </span>
         <mat-form-field appearance="outline" class="surveytitle w-full">
           <input matInput #title formControlName="description" i18n-placeholder placeholder="Enter description"
-            tabindex="1" autocomplete="off" maxlength="50" />
+            autocomplete="off" maxlength="50" />
           <mat-error [hidden]="false" *ngIf="customForm?.controls['description'].errors?.required"
             i18n="Title Error | Explains title is required">
             Title is mandatory

@@ -575,9 +575,6 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
       const showTimer = _.toLower(_.get(this.quizSvc.paperSections, 'value.questionSet.showTimer')) === 'yes'
       if (showTimer || this.primaryCategory !== NsContent.EPrimaryCategory.PRACTICE_RESOURCE) {
         this.quizJson.timeLimit = (_.get(this.quizSvc.paperSections, 'value.questionSet.expectedDuration') || 0)
-      } else {
-        // this.quizJson.timeLimit = this.duration * 60
-        this.quizJson.timeLimit = this.quizJson.timeLimit
       }
       this.allSectionTimeLimit = (_.get(this.quizSvc.paperSections, 'value.questionSet.expectedDuration') || 0)
       this.fetchingSectionsStatus = 'done'
@@ -602,9 +599,6 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
                 const showTimer = _.toLower(_.get(section, 'result.questionSet.showTimer')) === 'yes'
                 if (showTimer) {
                   this.quizJson.timeLimit = section.result.questionSet.expectedDuration
-                } else {
-                  // this.quizJson.timeLimit = this.duration * 60
-                  this.quizJson.timeLimit = this.quizJson.timeLimit
                 }
                 this.allSectionTimeLimit = section.result.questionSet.expectedDuration
                 // this.quizSvc.paperSections.next(section.result)
@@ -660,9 +654,6 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
                 const showTimer = _.toLower(_.get(section, 'result.questionSet.showTimer')) === 'yes'
                 if (showTimer) {
                   this.quizJson.timeLimit = section.result.questionSet.expectedDuration
-                } else {
-                  // this.quizJson.timeLimit = this.duration * 60
-                  this.quizJson.timeLimit = this.quizJson.timeLimit
                 }
                 this.allSectionTimeLimit = section.result.questionSet.expectedDuration
                 // this.quizSvc.paperSections.next(section.result)
@@ -1425,7 +1416,7 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
       batchId: this.resBatchId,
       identifier: this.activatedRoute.snapshot.queryParams.preAssessment && this.widgetContentService.currentMetaData && this.widgetContentService.currentMetaData.content && this.widgetContentService.currentMetaData.content.data && this.widgetContentService.currentMetaData.content.data.identifier ? this.widgetContentService.currentMetaData?.content?.data?.identifier : this.identifier,
       primaryCategory: this.primaryCategory,
-      courseId: this.forPreview ? this.collectionId : (this.activatedRoute.snapshot.queryParams.preAssessment && this.activatedRoute.snapshot.queryParams.preAssessment && this.widgetContentService.currentMetaData && this.widgetContentService.currentMetaData.content && this.widgetContentService.currentMetaData.content.data && this.widgetContentService.currentMetaData.content.data.parent ? this.widgetContentService.currentMetaData?.content.data.parent : this.resCollectionId),
+      courseId: this.forPreview ? this.collectionId : (this.activatedRoute.snapshot.queryParams.preAssessment && this.widgetContentService.currentMetaData && this.widgetContentService.currentMetaData.content && this.widgetContentService.currentMetaData.content.data && this.widgetContentService.currentMetaData.content.data.parent ? this.widgetContentService.currentMetaData?.content.data.parent : this.resCollectionId),
       isAssessment: true,
       objectType: 'QuestionSet',
       timeLimit: this.quizJson.timeLimit,
@@ -2026,7 +2017,8 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
         }
       } else {
         if (
-          correctOptions.sort().join(',') === selectedOptions.sort().join(',')
+          correctOptions.sort((a: string, b: string) => a.localeCompare(b)).join(',') ===
+          selectedOptions.sort((a: string, b: string) => a.localeCompare(b)).join(',')
         ) {
           this.numCorrectAnswers += 1
         } else if (selectedOptions.length > 0) {
@@ -3127,8 +3119,8 @@ export class PracticeComponent implements OnInit, OnChanges, OnDestroy {
       config.panelClass = ['show-answer-alert-class']
       config.duration = duration
       config.verticalPosition = 'top'
-      config.horizontalPosition = 'center',
-        this.snackbar.open(primaryMsg, '', config)
+      config.horizontalPosition = 'center'
+      this.snackbar.open(primaryMsg, '', config)
     } else {
       const config = new MatSnackBarConfig()
       config.panelClass = ['show-answer-alert-class']

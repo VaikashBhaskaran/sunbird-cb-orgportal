@@ -301,7 +301,7 @@ export class AppTocAnalyticsComponent implements OnInit, OnDestroy {
     private configSvc: ConfigurationsService,
   ) { }
 
-  async ngOnInit() {
+  ngOnInit() {
     this.prefChangeSubscription = this.configSvc.prefChangeNotifier.subscribe(() => {
       this.populateChartData()
     })

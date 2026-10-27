@@ -1,6 +1,6 @@
 <mat-toolbar *ngIf="showAppNavBar" [color]="primaryNavbarBackground?.color" [ngStyle]="primaryNavbarBackground?.styles"
   class="mat-elevation-z3 custom mobile box-shadow-toolbar">
-  <div class="fix-ww" id="root-tool-bar" title="Home" role="toolbar">
+  <div class="fix-ww" id="root-tool-bar" title="Home">
     <ng-container *ngIf="mode === 'top'">
       <a (click)="routeToHome()" class="logo-dim cursor-pointer" role="link" title="Home">
         <img [src]="appIcon" alt="Application Logo" class="app-logo" />
@@ -85,7 +85,7 @@
   </div> -->
 </mat-toolbar>
 <mat-toolbar *ngIf="!showAppNavBar">
-  <div class="fix-ww" id="root-tool-bar" title="toolbar" role="toolbar">
+  <div class="fix-ww" id="root-tool-bar" title="toolbar">
     <ng-container *ngIf="mode === 'top'">
       <a class="logo-dim" role="link" title="Home" routerLink="/app/home" *ngIf="isSetUpPage">
         <img [src]="appIcon" alt="Application Logo" class="app-logo" />

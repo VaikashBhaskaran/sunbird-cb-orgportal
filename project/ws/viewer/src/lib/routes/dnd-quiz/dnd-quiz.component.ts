@@ -64,16 +64,16 @@ export class DndQuizComponent implements OnInit, OnDestroy {
     )
   }
 
-  async ngOnDestroy() {
+  ngOnDestroy() {
     if (this.activatedRoute.snapshot.queryParams.collectionId &&
       this.activatedRoute.snapshot.queryParams.collectionType
       && this.dndQuizData) {
-      await this.contentSvc.continueLearning(this.dndQuizData.identifier,
+      this.contentSvc.continueLearning(this.dndQuizData.identifier,
         this.activatedRoute.snapshot.queryParams.collectionId,
         this.activatedRoute.snapshot.queryParams.collectionType,
       )
     } else if (this.dndQuizData) {
-      await this.contentSvc.continueLearning(this.dndQuizData.identifier)
+      this.contentSvc.continueLearning(this.dndQuizData.identifier)
     }
     if (this.routeDataSubscription) {
       this.routeDataSubscription.unsubscribe()

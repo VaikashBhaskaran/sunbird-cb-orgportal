@@ -13,11 +13,11 @@
             <div class="input-wrapper  flex flex-col flex-1 margin-bottom-m">
                 <div class="flex flex-col">
                     <div class="flex flex-col">
-                        <label class=" margin-remove-bottom form-label flex mat-subheading required"
+                        <span class=" margin-remove-bottom form-label flex mat-subheading required"
                             aria-label="Infrastructure details label">
                             Enter the infrastructure details here. If you do not have the exact numbers, it is ok to
                             fill in approximate numbers.
-                        </label>
+                        </span>
                     </div>
                     <div class="flex flex-col margin-top-m margin-bottom-l">
                         <div class="flex flex-row infra_box">
@@ -151,7 +151,7 @@
             <div class="input-wrapper margin-top-s flex flex-col flex-1 margin-bottom-m">
                 <div class="flex flex-col">
                     <div class="flex flex-row justify-between">
-                        <label class=" margin-remove-bottom form-label flex mat-h2 required"
+                        <label for="infrastructure-latitude-longitude" class=" margin-remove-bottom form-label flex mat-h2 required"
                             aria-label="GPS coordinates label">
                             Latitude and longitude GPS coordinates
                         </label>
@@ -164,7 +164,7 @@
                     <div class="input-wrapper margin-top-s flex flex-col flex-1">
                         <mat-form-field appearance="outline"
                             class="margin-top-xs form_field flex flex-1 full-width text-area-field">
-                            <input matInput autocomplete="off" #latitudeLongitude placeholder="Type here"
+                            <input id="infrastructure-latitude-longitude" matInput autocomplete="off" #latitudeLongitude placeholder="Type here"
                                 formControlName="latitudeLongitude" class="flex flex-1" />
                             <mat-error [hidden]="false"
                                 aria-label="Latitude and longitude GPS coordinates Error|Explains Latitude and longitude GPS coordinates is required "

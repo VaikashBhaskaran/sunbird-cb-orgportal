@@ -55,16 +55,16 @@ export class HandsOnComponent implements OnInit, OnDestroy {
     )
   }
 
-  async ngOnDestroy() {
+  ngOnDestroy() {
     if (this.activatedRoute.snapshot.queryParams.collectionId &&
       this.activatedRoute.snapshot.queryParams.collectionType
       && this.handsOnData) {
-      await this.contentSvc.continueLearning(this.handsOnData.identifier,
+      this.contentSvc.continueLearning(this.handsOnData.identifier,
         this.activatedRoute.snapshot.queryParams.collectionId,
         this.activatedRoute.snapshot.queryParams.collectionType,
       )
     } else if (this.handsOnData) {
-      await this.contentSvc.continueLearning(this.handsOnData.identifier)
+      this.contentSvc.continueLearning(this.handsOnData.identifier)
     }
     if (this.handsOnData) {
       this.raiseEvent(WsEvents.EnumTelemetrySubType.Unloaded, this.handsOnData)

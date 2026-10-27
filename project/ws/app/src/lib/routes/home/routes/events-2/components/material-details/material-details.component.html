@@ -55,7 +55,8 @@
         [cdkDropListData]="videoData" (cdkDropListDropped)="onMaterialSelect($event)"
         (dragover)="preventDefaultCDK($event)" (dragenter)="preventDefaultCDK($event, 'enter')"
         (dragleave)="preventDefaultCDK($event, 'leave')" (drop)="onDrop($event)"
-        onclick="document.getElementById('upload-material').click();">
+        role="button" [attr.tabindex]="(openMode === 'view' || disableUpload || openTab === 'past') ? -1 : 0"
+        onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" onclick="document.getElementById('upload-material').click();">
         <input #file type="file" name="upload-material" id="upload-material" class="hidden"
           accept=".pdf, .doc, .ppt, .pptx, .docx" (change)="onMaterialSelect(file.files);">
         <div class="flex flex-column items-center gap-2">

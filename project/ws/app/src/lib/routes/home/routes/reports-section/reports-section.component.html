@@ -50,13 +50,13 @@
                 </div>
               </div>
               <div class="flex flex-col">
-                <label class="mt-4 password-lable">
+                <label for="reports-section-file-password" class="mt-4 password-lable">
                   File Password
                 </label>
                 <div class="flex flex-row flex-middle custom-report justify-between">
                   <div class="flex flex-row flex-1 password">
                     <mat-form-field appearance="outline" class="margin-top-xs password-input">
-                      <input [type]="showCustomReportPwd ? 'text' : 'password'" matInput [(ngModel)]="customReportPwd"
+                      <input id="reports-section-file-password" [type]="showCustomReportPwd ? 'text' : 'password'" matInput [(ngModel)]="customReportPwd"
                         readonly>
                       <mat-icon (click)="showCustomReportPwd = !showCustomReportPwd" class="eye-icon">
                         {{showCustomReportPwd ? 'visibility' : 'visibility_off'}}

@@ -70,16 +70,16 @@ export class ClassDiagramComponent implements OnInit, OnDestroy {
     )
   }
 
-  async ngOnDestroy() {
+  ngOnDestroy() {
     if (this.activatedRoute.snapshot.queryParams.collectionId &&
       this.activatedRoute.snapshot.queryParams.collectionType
       && this.classDiagramData) {
-      await this.contentSvc.continueLearning(this.classDiagramData.identifier,
+      this.contentSvc.continueLearning(this.classDiagramData.identifier,
         this.activatedRoute.snapshot.queryParams.collectionId,
         this.activatedRoute.snapshot.queryParams.collectionType,
       )
     } else if (this.classDiagramData) {
-      await this.contentSvc.continueLearning(this.classDiagramData.identifier)
+      this.contentSvc.continueLearning(this.classDiagramData.identifier)
     }
     if (this.routeDataSubscription) {
       this.routeDataSubscription.unsubscribe()

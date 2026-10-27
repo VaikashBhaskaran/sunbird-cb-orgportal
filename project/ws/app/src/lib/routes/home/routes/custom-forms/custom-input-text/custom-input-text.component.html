@@ -8,13 +8,13 @@
           </span>
         </div>
         <div class="filedTextbox">
-          <label>
+          <label for="custom-input-text-name">
             <div class="flex flex-middle" [ngClass]="{ required: true }">
               <span i18n class="mat-subheading-2 margin-remove flex">Field Name</span>
             </div>
           </label>
           <mat-form-field appearance="outline" class="w-full">
-            <input type="text" class="input-text" formControlName="name" matInput placeholder="Type here" />
+            <input id="custom-input-text-name" type="text" class="input-text" formControlName="name" matInput placeholder="Type here" />
             <mat-error [hidden]="false"
               *ngIf="question.get('name')?.touched && !question.get('name')?.hasError('required') && question.get('name')?.hasError('invalidCharacter')">
               HTML, JS code, combination of dots and slashes are not allowed.
@@ -29,26 +29,26 @@
         <div class="filedTextbox">
           <div class="flex gap-2 items-center justify-between">
             <div class="filedTextbox">
-              <label>
+              <label for="custom-input-text-attribute-name">
                 <div class="flex flex-middle" [ngClass]="{ required: true }">
                   <span i18n class="mat-subheading-2 margin-remove flex">Field Attribute</span>
                 </div>
               </label>
               <mat-form-field appearance="outline" class="w-full">
-                <input type="text" class="input-text" formControlName="attributeName" matInput
+                <input id="custom-input-text-attribute-name" type="text" class="input-text" formControlName="attributeName" matInput
                   placeholder="Type here" />
               </mat-form-field>
             </div>
           </div>
         </div>
         <div class="filedTextbox" *ngIf="question?.controls['validation']">
-          <label>
+          <span id="custom-input-text-validation-label">
             <div class="flex flex-middle" [ngClass]="{ required: true }">
               <span i18n class="mat-subheading-2 margin-remove flex">Field Type</span>
             </div>
-          </label>
+          </span>
           <mat-form-field appearance="none" class="w-full profile-form-field">
-            <mat-select placeholder="Select type" formControlName="validation"
+            <mat-select aria-labelledby="custom-input-text-validation-label" placeholder="Select type" formControlName="validation"
               (selectionChange)="onFieldValidationChange($event)">
               <mat-option *ngFor="let fType of fieldValidationTypes" [value]="fType.value">
                 {{ fType.key }}</mat-option>
@@ -58,13 +58,13 @@
         <div class="filedTextbox" *ngIf="question?.controls['validation']">
           <div class="flex gap-2 items-center justify-between">
             <div class="filedTextbox">
-              <label>
+              <label for="custom-input-text-attribute-max-length">
                 <div class="flex flex-middle">
                   <span i18n class="mat-subheading-2 margin-remove flex">Field Max Length</span>
                 </div>
               </label>
               <mat-form-field appearance="outline" class="w-full">
-                <input type="number" class="input-text" formControlName="attributeMaxLength" matInput
+                <input id="custom-input-text-attribute-max-length" type="number" class="input-text" formControlName="attributeMaxLength" matInput
                   placeholder="Type here" />
               </mat-form-field>
             </div>
@@ -75,13 +75,13 @@
         <div class="filedTextbox" *ngIf="question.controls['validation'].value === 'regex'">
           <div class="flex gap-2 items-center justify-between">
             <div class="filedTextbox">
-              <label>
+              <label for="custom-input-text-custom-validation">
                 <div class="flex flex-middle" [ngClass]="{ required: true }">
                   <span i18n class="mat-subheading-2 margin-remove flex">Regex Expression</span>
                 </div>
               </label>
               <mat-form-field appearance="outline" class="w-full">
-                <input type="text" class="input-text" formControlName="customValidation" matInput
+                <input id="custom-input-text-custom-validation" type="text" class="input-text" formControlName="customValidation" matInput
                   placeholder="Type here" />
               </mat-form-field>
             </div>

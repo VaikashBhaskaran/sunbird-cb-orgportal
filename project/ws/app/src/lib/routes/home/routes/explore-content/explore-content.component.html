@@ -24,6 +24,17 @@
         <td mat-cell *matCellDef="let row" [attr.colspan]="displayedColumns.length">
           <div class="element-detail" *ngIf="row === expandedElement">
             <table class="table-container w-full mt-4 sub-table">
+              <thead class="cdk-visually-hidden">
+                <tr>
+                  <th scope="col"></th>
+                  <th scope="col">Content Name</th>
+                  <th scope="col">Created By</th>
+                  <th scope="col">Language</th>
+                  <th scope="col">Created On</th>
+                  <th scope="col">Published On</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
               <ng-container *ngFor="let course of multilingualCourses">
                 <tr class="mb-1 subtable-row-item">
                   <td class="mat-subheading-2" [style.width.px]="30"></td>

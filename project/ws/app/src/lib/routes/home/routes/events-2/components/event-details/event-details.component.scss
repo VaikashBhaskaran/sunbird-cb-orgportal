@@ -4,7 +4,7 @@
 
   .course-listing-header {
     color: #1B4CA1;
-    font: 600 20px Montserrat;
+    font: 600 20px Montserrat, sans-serif;
   }
 
   .event-section {
@@ -18,7 +18,7 @@
       user-select: none;
 
       .section-title {
-        font: 600 18px/24px Lato;
+        font: 600 18px/24px Lato, sans-serif;
         color: #000000;
         margin: 0;
       }
@@ -38,7 +38,7 @@
     .field-label {
       display: flex;
       align-items: center;
-      font: 700 14px/20px Lato;
+      font: 700 14px/20px Lato, sans-serif;
       color: #333;
       margin-bottom: 8px;
 
@@ -80,19 +80,19 @@
       }
 
       .upload-text {
-        font: 700 14px/20px Lato;
+        font: 700 14px/20px Lato, sans-serif;
         color: #1B4CA1;
         margin: 0 0 4px 0;
       }
 
       .upload-subtext {
-        font: 400 12px/16px Lato;
+        font: 400 12px/16px Lato, sans-serif;
         color: #666;
         margin: 0 0 8px 0;
       }
 
       .upload-limit {
-        font: 400 12px/16px Lato;
+        font: 400 12px/16px Lato, sans-serif;
         color: #999;
         margin: 0;
       }
@@ -137,13 +137,13 @@
           flex: 1;
 
           .doc-name {
-            font: 500 14px/20px Lato;
+            font: 500 14px/20px Lato, sans-serif;
             color: #333;
             margin: 0 0 4px 0;
           }
 
           .doc-type {
-            font: 400 12px/16px Lato;
+            font: 400 12px/16px Lato, sans-serif;
             color: #666;
             margin: 0;
           }
@@ -168,7 +168,7 @@
     .or-divider {
       text-align: center;
       position: relative;
-      font: 400 14px/20px Lato;
+      font: 400 14px/20px Lato, sans-serif;
       color: #666;
 
       &::before,
@@ -210,7 +210,7 @@
 
     input,
     textarea {
-      font: 400 14px/20px Lato;
+      font: 400 14px/20px Lato, sans-serif;
       color: #333;
     }
 
@@ -223,13 +223,13 @@
     }
 
     .mat-hint {
-      font: 400 12px/16px Lato;
+      font: 400 12px/16px Lato, sans-serif;
       color: #666;
     }
   }
 
   ::ng-deep .mat-select {
-    font: 400 14px/20px Lato;
+    font: 400 14px/20px Lato, sans-serif;
   }
 }
 

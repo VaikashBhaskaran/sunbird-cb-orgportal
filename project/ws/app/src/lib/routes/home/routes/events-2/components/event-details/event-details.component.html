@@ -15,7 +15,7 @@
     <div class="section-content" *ngIf="isPreEventExpanded" [formGroup]="preEventForm">
       <!-- Upload Pre-read Document -->
       <div class="form-field mt-4">
-        <label class="field-label">Upload Pre-read Document</label>
+        <span class="field-label">Upload Pre-read Document</span>
 
         <!-- Upload Container - Show when no document uploaded -->
         <div class="upload-container" *ngIf="!showUploadedDoc" (drop)="onDrop($event)"
@@ -48,9 +48,9 @@
 
       <!-- Paste meeting link -->
       <div class="form-field mt-4 event-form">
-        <label class="field-label required">Paste meeting link</label>
+        <label for="event-details-meeting-link" class="field-label required">Paste meeting link</label>
         <mat-form-field appearance="outline" class="full-width">
-          <input matInput placeholder="Paste Zoom, Teams, or Google Meet link for participants"
+          <input id="event-details-meeting-link" matInput placeholder="Paste Zoom, Teams, or Google Meet link for participants"
             formControlName="meetingLink">
           <mat-error *ngIf="preEventControls['meetingLink'].hasError('required')">
             Meeting link is required
@@ -63,12 +63,12 @@
 
       <!-- Add agenda -->
       <div class="form-field mt-4">
-        <label class="field-label flex items-center gap-1 required">
+        <label for="event-details-agenda" class="field-label flex items-center gap-1 required">
           Add agenda
           <mat-icon class="info-icon" matTooltip="Add agenda for the event">info_outline</mat-icon>
         </label>
         <mat-form-field appearance="outline" class="full-width">
-          <textarea matInput placeholder="Add your description" formControlName="agenda" rows="4"
+          <textarea id="event-details-agenda" matInput placeholder="Add your description" formControlName="agenda" rows="4"
             maxlength="1000"></textarea>
           <mat-error *ngIf="preEventControls['agenda'].hasError('required')">
             Agenda is required
@@ -116,12 +116,12 @@
       <!-- Add Speaker - New Implementation -->
       <div class="flex gap-5">
         <div class="form-field mt-4 event-form w-full">
-          <label class="field-label flex items-center gap-1">
+          <span id="event-details-speaker-type-label" class="field-label flex items-center gap-1">
             Add Speaker
             <mat-icon class="info-icon" matTooltip="Add speaker information">info_outline</mat-icon>
-          </label>
+          </span>
           <mat-form-field appearance="outline" class="full-width">
-            <mat-select placeholder="Select Speaker Type" formControlName="speakerType"
+            <mat-select aria-labelledby="event-details-speaker-type-label" placeholder="Select Speaker Type" formControlName="speakerType"
               (selectionChange)="onSpeakerTypeChange($event)">
               <mat-option value="courseCreator">Course Creator</mat-option>
               <mat-option value="others">Others</mat-option>
@@ -132,9 +132,9 @@
         <!-- Speaker Name -->
         <div class="form-field mt-4 event-form w-full">
           <ng-container *ngIf="preEventControls['speakerType'].value">
-            <label class="field-label">Speaker Name</label>
+            <span id="event-details-speaker-name-label" class="field-label">Speaker Name</span>
             <mat-form-field appearance="outline" class="full-width">
-              <mat-chip-list #speakerChipList aria-label="Speaker selection">
+              <mat-chip-list aria-labelledby="event-details-speaker-name-label" #speakerChipList aria-label="Speaker selection">
                 <mat-chip *ngFor="let speaker of preEventForm.controls['selectedSpeaker'].value"
                   [selectable]="selectable" [removable]="removable" (removed)="removeSpeaker(speaker)">
                   {{ speaker?.name }}
@@ -203,7 +203,7 @@
 
       <!-- Summary Document -->
       <div id="summaryDocumentSection" class="form-field mt-4">
-        <label class="field-label required">Summary Document </label>
+        <span class="field-label required">Summary Document </span>
 
         <!-- Upload Container - Show when no document uploaded -->
         <div class="upload-container" *ngIf="!showUploadedSummaryDoc"
@@ -238,9 +238,9 @@
 
       <!-- Number of attendees -->
       <div class="form-field mt-4 event-form">
-        <label class="field-label required">Number of attendees</label>
+        <label for="event-details-no-of-attendes" class="field-label required">Number of attendees</label>
         <mat-form-field appearance="outline" class="full-width">
-          <input matInput placeholder="Enter attendees" formControlName="noOfAttendes" type="number" min="1" step="1"
+          <input id="event-details-no-of-attendes" matInput placeholder="Enter attendees" formControlName="noOfAttendes" type="number" min="1" step="1"
             (keypress)="onNumberKeyPress($event)" (input)="onAttendeesInput($event)" (paste)="onAttendeesPaste($event)">
           <mat-error *ngIf="postEventControls['noOfAttendes'].hasError('required')">
             Number of attendees is required
@@ -256,9 +256,9 @@
 
       <!-- Event Duration -->
       <div class="form-field mt-4 event-form">
-        <label class="field-label required">Event Duration</label>
+        <label for="event-details-event-duration" class="field-label required">Event Duration</label>
         <mat-form-field appearance="outline" class="full-width">
-          <input matInput formControlName="eventDuration" type="text" placeholder="1h 30m 55s">
+          <input id="event-details-event-duration" matInput formControlName="eventDuration" type="text" placeholder="1h 30m 55s">
           <mat-error *ngIf="postEventControls['eventDuration'].hasError('required')">
             Event duration is required
           </mat-error>
@@ -285,9 +285,9 @@
 
       <!-- Key takeaways -->
       <div class="form-field mt-4">
-        <label class="field-label">Key takeaways</label>
+        <label for="event-details-meeting-summary" class="field-label">Key takeaways</label>
         <mat-form-field appearance="outline" class="full-width">
-          <textarea matInput placeholder="Add your description" formControlName="meetingSummary" rows="4"
+          <textarea id="event-details-meeting-summary" matInput placeholder="Add your description" formControlName="meetingSummary" rows="4"
             maxlength="1000"></textarea>
           <mat-hint align="end">{{postEventControls['meetingSummary'].value?.length || 0}}/1000</mat-hint>
           <mat-error *ngIf="postEventControls['meetingSummary'].hasError('minlength')">

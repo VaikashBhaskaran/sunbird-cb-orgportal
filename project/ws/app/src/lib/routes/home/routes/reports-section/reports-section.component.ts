@@ -598,11 +598,11 @@ export class ReportsSectionComponent implements OnInit {
       }
     }
     this.downloadService.getFormReadForOrgSearch(payload).toPromise().then((publicConfig) => {
-      if (publicConfig && publicConfig && publicConfig.mdoOrgHierarchyLevelEnabled && publicConfig.mdoOrgHierarchyLevelEnabled.all) {
+      if (publicConfig && publicConfig.mdoOrgHierarchyLevelEnabled && publicConfig.mdoOrgHierarchyLevelEnabled.all) {
         this.hierarchySearchEnableForOrg = true
         this.filterOrgsSearch()
         //  console.log('this.configSvc', this.configSvc)
-      } else if (publicConfig && publicConfig && publicConfig.mdoOrgHierarchyLevelEnabled && publicConfig.mdoOrgHierarchyLevelEnabled.forOrg &&
+      } else if (publicConfig && publicConfig.mdoOrgHierarchyLevelEnabled && publicConfig.mdoOrgHierarchyLevelEnabled.forOrg &&
         publicConfig.mdoOrgHierarchyLevelEnabled.forOrg.length && publicConfig.mdoOrgHierarchyLevelEnabled.forOrg.includes(this.configSvc?.userProfile?.rootOrgId)
       ) {
         this.hierarchySearchEnableForOrg = true

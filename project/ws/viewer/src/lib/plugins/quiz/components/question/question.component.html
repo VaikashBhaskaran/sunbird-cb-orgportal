@@ -12,9 +12,8 @@
     </button>
   </div>
 
-  <h3 *ngIf="question.questionType !== 'fitb'" class="mat-h3" [innerHTML]="question?.question" class="quiz-question">
-  </h3>
-  <h3 *ngIf="question.questionType === 'fitb'" class="mat-h3" [innerHTML]="safeQuestion" class="quiz-question"></h3>
+  <h3 *ngIf="question.questionType !== 'fitb'" class="mat-h3" class="quiz-question"><span [innerHTML]="question?.question"></span></h3>
+  <h3 *ngIf="question.questionType === 'fitb'" class="mat-h3" class="quiz-question"><span [innerHTML]="safeQuestion"></span></h3>
 
   <div *ngIf="question.questionType === 'fitb'">
 

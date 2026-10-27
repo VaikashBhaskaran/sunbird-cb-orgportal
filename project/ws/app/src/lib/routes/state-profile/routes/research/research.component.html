@@ -15,14 +15,14 @@
                 </div>
                 <div id="maindiv" class="input-wrapper margin-top-s flex flex-col flex-1">
                     <div class="flex flex-1">
-                        <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                        <label for="research-project-name" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                             aria-label="Project name label">
                             Add project name
                         </label>
                     </div>
 
                     <mat-form-field appearance="outline" class="margin-top-xs flex flex-1 full-width">
-                        <input matInput autocomplete="off" #projectName formControlName="projectName"
+                        <input id="research-project-name" matInput autocomplete="off" #projectName formControlName="projectName"
                             aria-label="Project name input" placeholder="Name of the project" class="flex flex-1"
                             [ngClass]="{ 'mat-focused': textBoxActive}" />
                         <mat-error [hidden]="false"
@@ -36,13 +36,13 @@
                 <div class="input-wrapper margin-top-s flex flex-row flex-1 radio_btn_main">
                     <div class="flex flex-2 flex-col">
                         <div class="flex flex-1">
-                            <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                            <span id="research-programe-status-label" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                                 aria-label="Programe status label">
                                 Status
-                            </label>
+                            </span>
                         </div>
                         <div class="flex flex-1 margin-top-m">
-                            <mat-radio-group #programeStatus formControlName="programeStatus"
+                            <mat-radio-group aria-labelledby="research-programe-status-label" #programeStatus formControlName="programeStatus"
                                 aria-label="Programe status input" class="flex button_box flex-row">
                                 <mat-radio-button class="mat-radio-button radio-unselect" [value]="'Ongoing'">
                                     Ongoing
@@ -61,14 +61,14 @@
 
                     <div class="flex flex-1 flex-col margin-left-l radio_right">
                         <div class="flex">
-                            <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                            <span id="research-industry-sponsored-label" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                                 aria-label="Type of sponsorship label">
                                 Type of sponsorship
-                            </label>
+                            </span>
                         </div>
                         <div class="flex flex-row margin-top-m radio_left">
                             <div class="flex flex-1">
-                                <mat-checkbox #industrySponsored formControlName="industrySponsored"
+                                <mat-checkbox aria-labelledby="research-industry-sponsored-label" #industrySponsored formControlName="industrySponsored"
                                     aria-label=" Industry sponsored input" class="checkbox_btn">
                                     Industry sponsored
                                 </mat-checkbox>
@@ -156,7 +156,7 @@
             <form [formGroup]="researchPaperForm">
                 <div class="input-wrapper margin-top-s flex flex-col flex-1">
                     <div class="flex flex-1 flex-row justify-between">
-                        <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                        <label for="research-research-paper-name" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                             aria-label="Research papers published by faculty label">
                             Research papers published by faculty
                         </label>
@@ -170,7 +170,7 @@
                     </div>
 
                     <mat-form-field appearance="outline" class="margin-top-xs form_field flex flex-1 full-width">
-                        <input matInput autocomplete="off" #researchPaperName formControlName="researchPaperName"
+                        <input id="research-research-paper-name" matInput autocomplete="off" #researchPaperName formControlName="researchPaperName"
                             aria-label="Research paper name input" placeholder="Name of the research paper"
                             class="flex flex-1" [ngClass]="{ 'mat-focused': textBoxActive1}" />
                         <mat-error [hidden]="false"

@@ -202,7 +202,6 @@ export class CreateFormComponent implements OnInit {
     if (this.fieldValidationTypes.find((item: any) => item.value === res.result.validation)) {
       validationType = res.result.validation
     }
-    res.result.validation
     const questionGroup = this.formBuilder.group({
       name: [res.result.name, [Validators.required, this.forbiddenCharacterValidator, preventHtmlAndJs()]],
       attributeName: [res.result.attributeName, [Validators.required]],

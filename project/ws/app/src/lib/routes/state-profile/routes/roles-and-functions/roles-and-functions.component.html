@@ -8,15 +8,15 @@
             <div class="input-wrapper margin-top-l flex flex-col flex-1">
                 <div class="flex flex-col">
                     <div class="flex flex-col">
-                        <label class=" margin-remove-bottom form-label flex mat-subheading-2 required"
+                        <span id="roles-and-functions-training-label" class=" margin-remove-bottom form-label flex mat-subheading-2 required"
                             aria-label="Full address label">
                             Select the roles and functions of the training institute (you can select more than one
                             option)
-                        </label>
+                        </span>
                     </div>
                     <div class="flex flex-row margin-top-m inline_box">
                         <div class="flex">
-                            <mat-checkbox #training formControlName="training" aria-label="Training input"
+                            <mat-checkbox aria-labelledby="roles-and-functions-training-label" #training formControlName="training" aria-label="Training input"
                                 class="checkbox_btn">
                                 Training
                             </mat-checkbox>

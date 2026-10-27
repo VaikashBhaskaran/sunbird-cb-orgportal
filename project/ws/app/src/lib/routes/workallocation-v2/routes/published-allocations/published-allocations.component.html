@@ -91,7 +91,7 @@
           </tr>
           <!-- | paginate: { itemsPerPage: 5, currentPage: p, totalItems: data.length } -->
           <tr *ngFor="let d of data | filter: term" class="data-row">
-            <td aria-rowspan="d.roles.length+1">
+            <td [attr.aria-rowspan]="d.roles.length + 1">
               <div class="initials">
                 <ws-app-initial-avatar [name]="d.userName">
                 </ws-app-initial-avatar>

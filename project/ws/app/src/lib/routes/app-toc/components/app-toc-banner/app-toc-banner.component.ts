@@ -861,6 +861,7 @@ export class AppTocBannerComponent implements OnInit, OnChanges, OnDestroy {
       const msg = this.WFSTATUS_MSG_MAPPING[status]
       return this.tocConfig[msg]
     }
+    return undefined
   }
 
   get showIcon() {

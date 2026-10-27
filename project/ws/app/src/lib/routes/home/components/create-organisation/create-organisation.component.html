@@ -19,7 +19,7 @@
                 <ng-container *ngIf="!selectedLogo">
                   <div class="">Logo</div>
                 </ng-container>
-                <div class="edit-logo" onclick="document.getElementById('edit-orgLogo').click()">
+                <div class="edit-logo" role="button" tabindex="0" aria-label="Edit logo" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }" onclick="document.getElementById('edit-orgLogo').click()">
                   <mat-icon>edit</mat-icon>
                 </div>
               </div>
@@ -152,7 +152,7 @@
                         <img src="/assets/icons/upload-upward-arrow.svg" alt="upload" width="32" height="32">
                       </div>
                       <div class="flex flex-column justify-center gap-2">
-                        <div class="file-upload-header hover:underline cursor-pointer"
+                        <div class="file-upload-header hover:underline cursor-pointer" role="button" tabindex="0" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.click(); }"
                           onclick="document.getElementById('upload-logo').click()">
                           Click here to upload file
                         </div>

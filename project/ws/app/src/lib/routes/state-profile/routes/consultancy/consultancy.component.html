@@ -14,14 +14,14 @@
                 </div>
                 <div class="input-wrapper margin-top-s flex flex-col flex-1">
                     <div class="flex flex-1">
-                        <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                        <label for="consultancy-project-name" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                             aria-label="Consultancy project label">
                             Add project name
                         </label>
                     </div>
 
                     <mat-form-field appearance="outline" class="margin-top-xs form_field flex flex-1 full-width">
-                        <input matInput autocomplete="off" #projectName formControlName="projectName"
+                        <input id="consultancy-project-name" matInput autocomplete="off" #projectName formControlName="projectName"
                             placeholder="Enter project name" class="flex flex-1" aria-label="institute Name input" />
                         <mat-error [hidden]="false" aria-label="Project Name Error|Explains Project name is required "
                             *ngIf="consultancyForm?.controls['projectName'].errors?.required">
@@ -33,13 +33,13 @@
                 <div class="input-wrapper margin-top-s flex flex-row flex-1 radio_btn_main">
                     <div class="flex flex-2 flex-col">
                         <div class="flex flex-1">
-                            <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                            <span id="consultancy-programe-status-label" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                                 aria-label="Programe status label">
                                 Status
-                            </label>
+                            </span>
                         </div>
                         <div class="flex flex-1 margin-top-m">
-                            <mat-radio-group #programeStatus formControlName="programeStatus"
+                            <mat-radio-group aria-labelledby="consultancy-programe-status-label" #programeStatus formControlName="programeStatus"
                                 aria-label="Programe status input" class="flex button_box flex-row">
                                 <mat-radio-button class="mat-radio-button radio-unselect" [value]="'Ongoing'">
                                     Ongoing
@@ -58,14 +58,14 @@
 
                     <div class="flex flex-2 flex-col margin-left-l radio_right">
                         <div class="flex">
-                            <label class=" margin-remove-bottom form-label required flex mat-subheading-2"
+                            <span id="consultancy-industry-sponsored-label" class=" margin-remove-bottom form-label required flex mat-subheading-2"
                                 aria-label="Type of sponsorship label">
                                 Type of sponsorship
-                            </label>
+                            </span>
                         </div>
                         <div class="flex flex-row margin-top-m justify-start radio_left">
                             <div class="flex flex-1">
-                                <mat-checkbox #industrySponsored formControlName="industrySponsored"
+                                <mat-checkbox aria-labelledby="consultancy-industry-sponsored-label" #industrySponsored formControlName="industrySponsored"
                                     aria-label=" Industry sponsored input" class="checkbox_btn">
                                     Industry sponsored
                                 </mat-checkbox>

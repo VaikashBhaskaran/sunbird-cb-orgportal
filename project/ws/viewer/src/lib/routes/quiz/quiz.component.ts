@@ -63,17 +63,17 @@ export class QuizComponent implements OnInit, OnDestroy {
     )
   }
 
-  async ngOnDestroy() {
+  ngOnDestroy() {
     if (this.activatedRoute.snapshot.queryParams.collectionId &&
       this.activatedRoute.snapshot.queryParams.collectionType
       && this.quizData) {
-      await this.contentSvc.continueLearning(
+      this.contentSvc.continueLearning(
         this.quizData.identifier,
         this.activatedRoute.snapshot.queryParams.collectionId,
         this.activatedRoute.snapshot.queryParams.collectionType,
       )
     } else if (this.quizData) {
-      await this.contentSvc.continueLearning(this.quizData.identifier)
+      this.contentSvc.continueLearning(this.quizData.identifier)
     }
     if (this.quizData) {
       this.raiseEvent(WsEvents.EnumTelemetrySubType.Unloaded, this.quizData)

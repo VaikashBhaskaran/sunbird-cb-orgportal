@@ -70,16 +70,16 @@ export class ResourceCollectionComponent implements OnInit, OnDestroy {
     )
   }
 
-  async ngOnDestroy() {
+  ngOnDestroy() {
     if (this.activatedRoute.snapshot.queryParams.collectionId &&
       this.activatedRoute.snapshot.queryParams.collectionType
       && this.resourceCollectionData) {
-      await this.contentSvc.continueLearning(this.resourceCollectionData.identifier,
+      this.contentSvc.continueLearning(this.resourceCollectionData.identifier,
         this.activatedRoute.snapshot.queryParams.collectionId,
         this.activatedRoute.snapshot.queryParams.collectionType,
       )
     } else if (this.resourceCollectionData) {
-      await this.contentSvc.continueLearning(this.resourceCollectionData.identifier)
+      this.contentSvc.continueLearning(this.resourceCollectionData.identifier)
     }
     if (this.resourceCollectionData) {
       this.raiseEvent(WsEvents.EnumTelemetrySubType.Unloaded, this.resourceCollectionData)

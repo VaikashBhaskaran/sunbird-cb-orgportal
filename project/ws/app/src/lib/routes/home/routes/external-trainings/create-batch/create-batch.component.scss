@@ -16,9 +16,8 @@
 
   .header-content {
     .title {
-      font-weight: 500;
       margin: 0 0 5px 0;
-      font: 600 20px 'Montserrat';
+      font: 600 20px 'Montserrat', sans-serif;
     }
 
     .subtitle {
@@ -40,7 +39,7 @@
 .section-title {
   margin: 0 0 24px 0;
   font-size: 18px;
-  font-family: "Montserrat";
+  font-family: "Montserrat", sans-serif;
 }
 
 .form-row {
@@ -99,7 +98,7 @@
   padding: 8px 16px;
   border: 1px solid #1b4ca1;
   color: #1b4ca1;
-  font: 600 14px 'Lato';
+  font: 600 14px 'Lato', sans-serif;
   border-radius: 4px;
   background: white;
   cursor: pointer;

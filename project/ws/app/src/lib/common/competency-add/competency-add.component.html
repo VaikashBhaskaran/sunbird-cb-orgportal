@@ -22,10 +22,10 @@
         <ng-container *ngIf="filteredThemes?.length; else noCompetencies">
           <ng-container *ngFor="let theme of filteredThemes; let i = index">
             <div [ngClass]="{'disableChip': theme?.preSelected}" class="chip-themes" (click)="selectTheme(i)">
-              <label class="theme-name mr-2">
+              <span id="{{ 'competency-add-field-label-' + i }}" class="theme-name mr-2">
                 {{ theme.name }}
-              </label>
-              <mat-checkbox [ngClass]="theme?.selected ? 'check-box-selected':''" [checked]="theme?.selected"
+              </span>
+              <mat-checkbox aria-labelledby="{{ 'competency-add-field-label-' + i }}" [ngClass]="theme?.selected ? 'check-box-selected':''" [checked]="theme?.selected"
                 [checked]="theme?.selected" (click)="$event.stopPropagation();selectTheme(i)"
                 [disabled]="theme?.preSelected"></mat-checkbox>
             </div>
@@ -51,16 +51,16 @@
     <ng-container *ngIf="selectedThemesList?.length">
       <div class="mt-8 px-5">
         <div class="themes-header">Add Sub Themes</div>
-        <ng-container *ngFor="let selectedTheme of selectedThemesList ">
+        <ng-container *ngFor="let selectedTheme of selectedThemesList ; let lblIdx0 = index">
           <div class="themes-header mt-5">{{selectedTheme.name}}</div>
           <div class="themes-container mt-2">
             <ng-container *ngFor="let subTheme of selectedTheme.associations; let i = index">
               <div [ngClass]="{'disableChip': subTheme?.preSelected}" class="chip-themes"
                 (click)="selectSubTheme(subTheme, selectedTheme)">
-                <label class="theme-name">
+                <span id="{{ 'competency-add-field-2-label-' + lblIdx0 + '-' + i }}" class="theme-name">
                   {{ subTheme.name }}
-                </label>
-                <mat-checkbox [ngClass]="subTheme?.selected ? 'check-box-selected':''" [checked]="subTheme?.selected"
+                </span>
+                <mat-checkbox aria-labelledby="{{ 'competency-add-field-2-label-' + lblIdx0 + '-' + i }}" [ngClass]="subTheme?.selected ? 'check-box-selected':''" [checked]="subTheme?.selected"
                   [checked]="subTheme?.selected"
                   (click)="$event.stopPropagation();selectSubTheme(subTheme, selectedTheme)"
                   [disabled]="subTheme?.preSelected"></mat-checkbox>

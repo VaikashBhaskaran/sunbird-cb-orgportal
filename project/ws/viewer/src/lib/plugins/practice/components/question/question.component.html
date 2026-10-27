@@ -61,9 +61,7 @@
       <div class="respo flex flex-column padding-top-m">
         <div class="flex flex-column respo_inner">
           <div class="flex flex-1">
-            <h2 *ngIf="question.questionType !== 'ftb'" class="mat-h2"
-              [innerHTML]="question?.question | replaceNbsp | QuestionSafeUrl" class="quiz-question ques-padding-top">
-            </h2>
+            <h2 *ngIf="question.questionType !== 'ftb'" class="mat-h2" class="quiz-question ques-padding-top"><span [innerHTML]="question?.question | replaceNbsp | QuestionSafeUrl"></span></h2>
             <ng-container *ngIf="question.questionType === 'ftb'">
               <viewer-fitb-question [selectedAssessmentCompatibilityLevel]="selectedAssessmentCompatibilityLevel"
                 [primaryCategory]="primaryCategory" class="flex-1" [question]="question"
@@ -187,9 +185,8 @@
         <div class="flex flex-column respo_inner">
           <div class="flex flex-1 flex-column">
             <ng-container *ngIf="question.questionType !== 'ftb'">
-              <h2 [innerHTML]="question?.question | replaceNbsp | QuestionSafeUrl"
-                class="m-auto quiz-question ques-padding-top mat-h2">
-              </h2>
+              <h2
+                class="m-auto quiz-question ques-padding-top mat-h2"><span [innerHTML]="question?.question | replaceNbsp | QuestionSafeUrl"></span></h2>
               <span *ngIf="question?.instructions" class="mat-subheading-2">
                 {{ question?.instructions}}
               </span>
@@ -258,9 +255,7 @@
           <p *ngIf="questionParagraph"><strong>Read the paragraph and answer the question below</strong></p>
           <p *ngIf="questionParagraph" [innerHtml]="questionParagraph"></p>
           <div class="flex flex-1">
-            <h2 *ngIf="question.questionType !== 'ftb'" class="mat-h2"
-              [innerHTML]="question?.question | replaceNbsp | QuestionSafeUrl" class="quiz-question ques-padding-top">
-            </h2>
+            <h2 *ngIf="question.questionType !== 'ftb'" class="mat-h2" class="quiz-question ques-padding-top"><span [innerHTML]="question?.question | replaceNbsp | QuestionSafeUrl"></span></h2>
             <ng-container *ngIf="question.questionType === 'ftb'">
               <viewer-fitb-question [selectedAssessmentCompatibilityLevel]="selectedAssessmentCompatibilityLevel"
                 [primaryCategory]="primaryCategory" class="flex-1" [question]="question"
@@ -349,9 +344,8 @@
         <div class="flex flex-1 flex-column respo_inner">
           <div class="flex flex-1 flex-column">
             <ng-container *ngIf="question.questionType !== 'ftb'">
-              <h2 [innerHTML]="question?.question | replaceNbsp | QuestionSafeUrl"
-                class="m-auto quiz-question ques-padding-top mat-h2">
-              </h2>
+              <h2
+                class="m-auto quiz-question ques-padding-top mat-h2"><span [innerHTML]="question?.question | replaceNbsp | QuestionSafeUrl"></span></h2>
               <span *ngIf="question?.instructions" class="mat-subheading-2">
                 {{ question?.instructions}}
               </span>

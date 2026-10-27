@@ -34,7 +34,7 @@
         </div>
         <div class="flex flex-row margin-top-m">
           <div class="md:w-1/3">
-            <label class="view-text-label">Group</label>
+            <span class="view-text-label">Group</span>
             <p>
               {{(userData?.profileDetails && userData?.profileDetails?.professionalDetails &&
               userData?.profileDetails?.professionalDetails[0]?.group) ?
@@ -52,7 +52,7 @@
             </p>
           </div>
           <div class="md:w-1/2">
-            <label class="view-text-label">Designation</label>
+            <span class="view-text-label">Designation</span>
             <p>
               {{(userData?.profileDetails && userData?.profileDetails?.professionalDetails &&
               userData?.profileDetails?.professionalDetails[0]?.designation) ?
@@ -80,7 +80,7 @@
 
         <div class="flex flex-row margin-top-m">
           <div class="md:w-1/4">
-            <label class="view-text-label">Email</label>
+            <span class="view-text-label">Email</span>
             <p class="word-wrap">
               {{(userData?.profileDetails && userData?.profileDetails?.personalDetails) ?
               userData?.profileDetails?.personalDetails?.primaryEmail : '-'}}
@@ -88,14 +88,14 @@
           </div>
 
           <div class="md:w-1/4">
-            <label class="view-text-label">Mobile Number</label>
+            <span class="view-text-label">Mobile Number</span>
             <p>
               +91 {{(userData?.profileDetails && userData?.profileDetails?.personalDetails) ?
               userData?.profileDetails?.personalDetails?.mobile : '-'}}
             </p>
           </div>
           <div class="md:w-1/4">
-            <label class="view-text-label">Date of Birth</label>
+            <span class="view-text-label">Date of Birth</span>
             <p>
               {{(userData?.profileDetails && userData?.profileDetails?.personalDetails &&
               userData?.profileDetails?.personalDetails?.dob)
@@ -104,7 +104,7 @@
             </p>
           </div>
           <div class="md:w-1/4">
-            <label class="view-text-label">Gender</label>
+            <span class="view-text-label">Gender</span>
             <p>
               {{(userData?.profileDetails && userData?.profileDetails?.personalDetails &&
               userData?.profileDetails?.personalDetails?.gender)
@@ -116,7 +116,7 @@
         </div>
         <div class="flex flex-row margin-top-m">
           <div class="md:w-1/4">
-            <label class="view-text-label">Employee ID</label>
+            <span class="view-text-label">Employee ID</span>
             <p>
               {{(userData?.profileDetails && userData?.profileDetails?.employmentDetails &&
               userData?.profileDetails?.employmentDetails?.employeeCode)
@@ -125,7 +125,7 @@
             </p>
           </div>
           <div class="md:w-1/4">
-            <label class="view-text-label">Mother Tongue</label>
+            <span class="view-text-label">Mother Tongue</span>
             <p>
               {{(userData?.profileDetails && userData?.profileDetails?.personalDetails &&
               userData?.profileDetails?.personalDetails?.domicileMedium)
@@ -134,7 +134,7 @@
             </p>
           </div>
           <div class="md:w-1/4">
-            <label class="view-text-label">Category</label>
+            <span class="view-text-label">Category</span>
             <p>
               {{(userData?.profileDetails && userData?.profileDetails?.personalDetails &&
               userData?.profileDetails?.personalDetails?.category)
@@ -143,7 +143,7 @@
             </p>
           </div>
           <div class="md:w-1/4">
-            <label class="view-text-label">Office Pin Code</label>
+            <span class="view-text-label">Office Pin Code</span>
             <p>
               {{(userData?.profileDetails && userData?.profileDetails?.employmentDetails &&
               userData?.profileDetails?.employmentDetails?.pinCode)
@@ -155,7 +155,7 @@
 
         <div class="flex flex-row margin-top-m">
           <div class="md:w-1/4">
-            <label class="view-text-label">eHRMS ID/External System ID</label>
+            <span class="view-text-label">eHRMS ID/External System ID</span>
             <p>
               {{(userData?.profileDetails && userData?.profileDetails?.additionalProperties &&
               userData?.profileDetails?.additionalProperties?.externalSystemId)
@@ -164,7 +164,7 @@
             </p>
           </div>
           <div class="md:w-1/4">
-            <label class="view-text-label">Date of Retirement</label>
+            <span class="view-text-label">Date of Retirement</span>
             <p>
               {{(userData?.profileDetails && userData?.profileDetails?.additionalProperties &&
               userData?.profileDetails?.additionalProperties?.externalSystemDor)
@@ -173,7 +173,7 @@
             </p>
           </div>
           <div class="md:w-1/4">
-            <label class="view-text-label">Tags</label>
+            <span class="view-text-label">Tags</span>
             <p>
               {{(userData?.profileDetails && userData?.profileDetails?.additionalProperties &&
               userData?.profileDetails?.additionalProperties?.tag?.length)
@@ -186,21 +186,21 @@
         <!-- Cader Related Code-->
         <div class="flex flex-row margin-top-m">
           <div class="md:w-1/4">
-            <label class="view-text-label">Are you a Cadre Employee?</label>
+            <span class="view-text-label">Are you a Cadre Employee?</span>
             <p *ngIf="userData?.profileDetails?.hasOwnProperty('cadreDetails')">
               {{userData?.profileDetails?.cadreDetails?.civilServiceType ? 'Yes': 'No'}}</p>
             <p *ngIf="!(userData?.profileDetails?.hasOwnProperty('cadreDetails'))">-</p>
           </div>
 
           <div class="md:w-1/4" *ngIf="userData?.profileDetails?.cadreDetails?.civilServiceType">
-            <label class="view-text-label">Type of Civil Service</label>
+            <span class="view-text-label">Type of Civil Service</span>
             <p>{{userData?.profileDetails?.cadreDetails?.civilServiceType ?
               userData?.profileDetails?.cadreDetails?.civilServiceType: '-'}}</p>
 
           </div>
 
           <div class="md:w-1/4" *ngIf="userData?.profileDetails?.cadreDetails?.civilServiceType">
-            <label class="view-text-label">Service</label>
+            <span class="view-text-label">Service</span>
             <p>{{userData?.profileDetails?.cadreDetails?.civilServiceName ?
               userData?.profileDetails?.cadreDetails?.civilServiceName: '-'}}</p>
 
@@ -210,7 +210,7 @@
                           userData?.profileDetails?.cadreDetails?.civilServiceName.trim() === 'Indian Police Service (IPS)' ||
                           userData?.profileDetails?.cadreDetails?.civilServiceName.trim() === 'Indian Forest Service (IFoS)')
                           ">
-            <label class="view-text-label">Cadre</label>
+            <span class="view-text-label">Cadre</span>
             <p>{{userData?.profileDetails?.cadreDetails?.cadreName ? userData?.profileDetails?.cadreDetails?.cadreName:
               '-'}}
             </p>
@@ -219,7 +219,7 @@
         </div>
         <div class="flex flex-row margin-top-m">
           <div class="md:w-1/4" *ngIf="userData?.profileDetails?.cadreDetails?.civilServiceType">
-            <label class="view-text-label">Batch</label>
+            <span class="view-text-label">Batch</span>
             <p>{{userData?.profileDetails?.cadreDetails?.cadreBatch ?
               userData?.profileDetails?.cadreDetails?.cadreBatch:
               '-'}}
@@ -228,7 +228,7 @@
           </div>
 
           <div class="md:w-1/2" *ngIf="userData?.profileDetails?.cadreDetails?.civilServiceType">
-            <label class="view-text-label">Cadre Controlling Authority</label>
+            <span class="view-text-label">Cadre Controlling Authority</span>
             <p>{{userData?.profileDetails?.cadreDetails?.cadreControllingAuthorityName ?
               userData?.profileDetails?.cadreDetails?.cadreControllingAuthorityName: '-'}}</p>
 
@@ -240,11 +240,11 @@
 
     <div class="flex flex-row margin-top-m repsonse-pannel" *ngIf="surveyGroup || surevyDesignation">
       <div class="md:w-1/3" *ngIf="surveyGroup">
-        <label class="view-text-label">Group (filled during enrollment)</label>
+        <span class="view-text-label">Group (filled during enrollment)</span>
         <p>{{surveyGroup}}</p>
       </div>
       <div class="md:w-1/3" *ngIf="surevyDesignation">
-        <label class="view-text-label">Designation (filled during enrollment)</label>
+        <span class="view-text-label">Designation (filled during enrollment)</span>
         <p>{{surevyDesignation}}</p>
       </div>
     </div>

@@ -97,8 +97,11 @@ export class BatchDetailsComponent implements OnInit {
     })
   }
 
-  async ngOnInit() {
-    this.userDetails = await this.bpService.getUserById('').toPromise().catch(_error => { })
+  ngOnInit() {
+    this.bpService.getUserById('').subscribe({
+      next: (res: any) => { this.userDetails = res },
+      error: _error => { this.userDetails = undefined },
+    })
   }
 
   filter(key: 'pending' | 'approved' | 'rejected' | 'sessions' | 'approvalStatus' | 'reportStatus' | 'nominate-learner') {
@@ -594,9 +597,10 @@ export class BatchDetailsComponent implements OnInit {
     if (validReports.length === 0) {
       return ''
     }
-    const latest = validReports.reduce((prev: any, curr: any) => {
-      return new Date(curr.lastReportGeneratedOn) > new Date(prev.lastReportGeneratedOn) ? curr : prev
-    })
+    const latest = validReports.reduce(
+      (prev: any, curr: any) => (new Date(curr.lastReportGeneratedOn) > new Date(prev.lastReportGeneratedOn) ? curr : prev),
+      validReports[0]
+    )
     return latest.lastReportGeneratedOn
   }
 

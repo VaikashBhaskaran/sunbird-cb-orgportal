@@ -76,13 +76,13 @@
                 <span class="h-400-r-14-l color-87 textclass w-full" *ngIf="col.key === 'preview'">
                   <div *ngIf="element.isEnabled">
                     <div class="filedTextbox py-2 w-full" *ngIf="element?.type === 'text'">
-                      <label>
+                      <label for="{{ 'forms-list-field-' + element?.attributeName }}">
                         <div class="flex flex-middle pb-1">
                           <span i18n class="margin-remove flex">{{element?.fieldName}}</span>
                         </div>
                       </label>
                       <mat-form-field appearance="outline" class="w-full">
-                        <input type="text" class="input-text" matInput [placeholder]="element.fieldName"
+                        <input id="{{ 'forms-list-field-' + element?.attributeName }}" type="text" class="input-text" matInput [placeholder]="element.fieldName"
                           [name]="element.attributeName" [pattern]="element.validation" [required]="element.isMandatory"
                           [formControl]="getFormControl(element)" />
                         <mat-error class="mt-2"

@@ -13,15 +13,15 @@
             <div class="input-wrapper margin-top-s flex flex-col flex-1 margin-bottom-m">
                 <div class="flex flex-col">
                     <div class="flex flex-col">
-                        <label class="margin-remove-bottom form-label flex mat-subheading-2 "
+                        <span id="training-rograms-add-the-subjects-on-which-the-label" class="margin-remove-bottom form-label flex mat-subheading-2 "
                             aria-label="Subjects label" [ngClass]="{'required': hasRequiredField('subjectName')}">
                             Add the subjects on which the institute imparts training
-                        </label>
+                        </span>
                     </div>
                     <div class="flex flex-row">
                         <div class="flex flex-col flex-1">
                             <mat-form-field appearance="outline" class="margin-top-m flex flex-1 full-width">
-                                <mat-chip-list #chipListHobies>
+                                <mat-chip-list aria-labelledby="training-rograms-add-the-subjects-on-which-the-label" #chipListHobies>
                                     <mat-chip *ngFor="let sub of selectedSubjects" [selectable]="true"
                                         [removable]="true" (removed)="removeSubject(sub)" class="margin-top-m">
                                         {{sub}}
@@ -49,12 +49,12 @@
             </div>
 
             <div class="input-wrapper flex flex-col flex-1 margin-bottom-xl">
-                <label class=" form-label flex mat-subheading-2  margin-remove-bottom" aria-label=""
+                <span id="training-rograms-conduct-digital-programs-label" class=" form-label flex mat-subheading-2  margin-remove-bottom"
                     [ngClass]="{'required': hasRequiredField('conductDigitalPrograms')}">
                     Does the institute conduct Digital Programs?
-                </label>
+                </span>
                 <div class="flex button_box flex-row margin-top-m">
-                    <mat-radio-group #conductDigitalPrograms formControlName="conductDigitalPrograms"
+                    <mat-radio-group aria-labelledby="training-rograms-conduct-digital-programs-label" #conductDigitalPrograms formControlName="conductDigitalPrograms"
                         aria-label="digitalPrograms input" class="flex button_box flex-row">
                         <mat-radio-button class="mat-radio-button radio-unselect" [value]="'Yes'">
                             Yes
@@ -71,12 +71,12 @@
             </div>
 
             <div class="input-wrapper flex flex-col flex-1 margin-bottom-xl ">
-                <label class="margin-remove-bottom form-label flex mat-subheading-2 required" aria-label=""
+                <span id="training-rograms-prepare-digital-content-label" class="margin-remove-bottom form-label flex mat-subheading-2 required"
                     [ngClass]="{'required': hasRequiredField('prepareDigitalContent')}">
                     Does the institute prepare digital content?
-                </label>
+                </span>
                 <div class="flex button_box flex-row margin-top-m">
-                    <mat-radio-group #prepareDigitalContent formControlName="prepareDigitalContent"
+                    <mat-radio-group aria-labelledby="training-rograms-prepare-digital-content-label" #prepareDigitalContent formControlName="prepareDigitalContent"
                         aria-label="digitalPrograms input" class="flex button_box flex-row">
                         <mat-radio-button class="mat-radio-button radio-unselect" [value]="'Yes'">
                             Yes
@@ -97,14 +97,14 @@
                 <div class="flex flex-col">
                     <div class="flex flex-col">
                         <div class="flex flex-1">
-                            <label class=" margin-remove-bottom form-label flex mat-subheading-2"
+                            <label for="training-rograms-video-count" class=" margin-remove-bottom form-label flex mat-subheading-2"
                                 aria-label="Number of videos label"
                                 [ngClass]="{'required': hasRequiredField('videoCount')}">
                                 Number of videos
                             </label>
                         </div>
                         <mat-form-field appearance="outline" class="margin-top-m form_field flex flex-1 full-width">
-                            <input matInput autocomplete="off" type="number" step="1" min="0" #videoCount
+                            <input id="training-rograms-video-count" matInput autocomplete="off" type="number" step="1" min="0" #videoCount
                                 placeholder="Enter approximate number" formControlName="videoCount"
                                 class="flex flex-1" />
                             <mat-error [hidden]="false" aria-label="Number of videos is required "
@@ -116,14 +116,14 @@
 
                     <div class="flex flex-col">
                         <div class="flex flex-1">
-                            <label class=" margin-remove-bottom form-label flex mat-subheading-2"
+                            <label for="training-rograms-ppt-count" class=" margin-remove-bottom form-label flex mat-subheading-2"
                                 aria-label="Number of slide decks label"
                                 [ngClass]="{'required': hasRequiredField('pptCount')}">
                                 Number of slide decks (like Powerpoints or ppts)
                             </label>
                         </div>
                         <mat-form-field appearance="outline" class="margin-top-m form_field flex flex-1 full-width">
-                            <input matInput autocomplete="off" type="number" step="1" min="0" #pptCount
+                            <input id="training-rograms-ppt-count" matInput autocomplete="off" type="number" step="1" min="0" #pptCount
                                 placeholder="Enter approximate number" formControlName="pptCount" class="flex flex-1" />
                             <mat-error [hidden]="false" aria-label="Number of slide decks is required "
                                 *ngIf="trainingProgramForm?.controls['pptCount'].errors?.required">
@@ -135,14 +135,14 @@
 
                     <div class="flex flex-col">
                         <div class="flex flex-1">
-                            <label class=" margin-remove-bottom form-label flex mat-subheading-2"
+                            <label for="training-rograms-other-material-count" class=" margin-remove-bottom form-label flex mat-subheading-2"
                                 aria-label="Number of online reading materials label"
                                 [ngClass]="{'required': hasRequiredField('otherMaterialCount')}">
                                 Number of online reading materials (like case studies, pdfs etc.)
                             </label>
                         </div>
                         <mat-form-field appearance="outline" class="margin-top-m form_field flex flex-1 full-width">
-                            <input matInput autocomplete="off" type="number" step="1" min="0" #otherMaterialCount
+                            <input id="training-rograms-other-material-count" matInput autocomplete="off" type="number" step="1" min="0" #otherMaterialCount
                                 placeholder="Enter approximate number" formControlName="otherMaterialCount"
                                 class="flex flex-1" />
                             <mat-error [hidden]="false" aria-label="Number of online reading materials is required "
@@ -155,7 +155,7 @@
 
                     <div class="flex flex-col">
                         <div class="flex flex-1">
-                            <label class=" margin-remove-bottom form-label flex mat-subheading-2"
+                            <label for="training-rograms-other-info" class=" margin-remove-bottom form-label flex mat-subheading-2"
                                 aria-label="Other information label"
                                 [ngClass]="{'required': hasRequiredField('otherInfo')}">
                                 Others (Add information on any other types of digital content that the institute
@@ -163,7 +163,7 @@
                             </label>
                         </div>
                         <mat-form-field appearance="outline" class="margin-top-m flex flex-1 full-width">
-                            <textarea matInput autocomplete="off" #otherInfo placeholder="Type here" class="flex flex-1"
+                            <textarea id="training-rograms-other-info" matInput autocomplete="off" #otherInfo placeholder="Type here" class="flex flex-1"
                                 formControlName="otherInfo" aria-label="Other information input"
                                 [cdkTextareaAutosize]="true" [cdkAutosizeMaxRows]="10" [cdkAutosizeMinRows]="5"
                                 maxlength="200"></textarea>
